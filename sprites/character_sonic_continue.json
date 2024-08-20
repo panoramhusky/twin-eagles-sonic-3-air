@@ -1,0 +1,6 @@
+{
+	"character_sonic_continue_0x00":  { "File": "character_sonic.bmp", "Rect": "8,688,40,32", "Center": "30,12" },
+	"character_sonic_continue_0x01":  { "File": "character_sonic.bmp", "Rect": "64,688,40,32", "Center": "30,12" },
+	"character_sonic_s3c_continue_0x00":  { "File": "character_sonic_s3c.bmp", "Rect": "8,688,40,32", "Center": "30,12" },
+	"character_sonic_s3c_continue_0x01":  { "File": "character_sonic_s3c.bmp", "Rect": "64,688,40,32", "Center": "30,12" }
+}
