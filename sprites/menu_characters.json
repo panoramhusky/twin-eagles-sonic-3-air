@@ -1,6 +1,4 @@
 {
-
-	"menu_characters_sonic":	  	  { "File": "menu_characters_sonic.png",		  "Rect": "0,0,40,48", "Center": "20,20" },
-	"menu_characters_sonic_tails":	  { "File": "menu_characters_sonic_tails.png",	  "Rect": "0,0,56,40", "Center": "28,20" },
-
+	"menu_characters_sonic":  { "File": "menu_characters_sonic.png", "Rect": "0,0,40,41", "Center": "20,21" },
+	"menu_characters_sonic_tails":  { "File": "menu_characters_sonic_tails.png", "Rect": "0,0,56,41", "Center": "28,21" }
 }

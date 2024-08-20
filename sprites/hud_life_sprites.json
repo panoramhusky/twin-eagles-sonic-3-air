@@ -1,0 +1,4 @@
+{
+	// Character icon for lives
+	"hud_lives_icon_sonic":    { "File": "hud_life_sprites.png", "Rect": "0,16,48,16" }
+}
