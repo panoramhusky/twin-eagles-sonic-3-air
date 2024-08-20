@@ -1,0 +1,251 @@
+//# translated(0x0117da) end(0x0118ba)
+//# translated(0x015002) end(0x0150d8)
+//# translated(0x017710) end(0x0177e8)
+function bool Character.CheckStartJump()
+{
+	if (char.character == CHARACTER_SONIC)
+	{
+		u8 input_pressed = control.player1.pressed
+		if ((input_pressed & CONTROL_ABC) == 0)
+			return false
+
+		D0 = char.rotation
+		if (global.inv_gravity)
+		{
+			D0.s8 = -D0.s8
+		}
+		else
+		{
+			D0.s8 += 0x80
+		}
+
+		pushA456()
+		fn00f72e()
+		popA456()
+
+		if (D1.s16 < 6)
+			return false
+
+		// Get jump acceleration depending on character
+		u16 acceleration
+		if (char.character != CHARACTER_KNUCKLES || competition_mode.active)
+		{
+			if (char.flags & char.flag.UNDERWATER)
+			{
+				acceleration = 0x380
+			}
+			else if (super.active && char.character == CHARACTER_SONIC)
+			{
+				acceleration = 0x800
+			}
+			else
+			{
+				acceleration = 0x680
+			}
+		}
+		else
+		{
+			if (char.flags & char.flag.UNDERWATER)
+			{
+				acceleration = 0x300
+			}
+			else
+			{
+				acceleration = 0x600
+			}
+		}
+
+		u8 angle = char.rotation - 0x40
+		s32 accel_x = (s32(lookupCos(angle)) * acceleration) >> 8
+		s32 accel_y = (s32(lookupSin(angle)) * acceleration) >> 8
+
+		char.velocity.x += accel_x
+		char.velocity.y += accel_y
+
+		char.flags |= char.flag.IN_AIR
+		char.flags &= ~char.flag.PUSHING
+
+		char.jumping = 1
+		char.on_convex_surface = 0
+
+		playSound(SFX_JUMP)
+
+		char.hitbox_extends.x = char.hitbox.default.x
+		char.hitbox_extends.y = char.hitbox.default.y
+		char.flags &= ~char.flag.ROLLING
+		char.state = char.state.STRAIGHTJUMP
+
+		s8 dy = s8(char.hitbox_extends.y) - s8(char.hitbox.default.y)
+		char.position.y.u16 += global.inv_gravity ? dy : -dy
+
+	#if STANDALONE
+		// Glitch fix for Knuckles being unable to jump off underwater objects
+		//  -> Move him up a single pixel up so he won't stick to objects
+		// TODO: Does not work for the HCZ snake platforms
+		if (acceleration <= 0x300 && (char.flags & char.flag.ON_OBJECT))
+		{
+			--char.position.y.u16
+		}
+	#endif
+		return true
+	}
+	else
+	{
+		return base.Character.CheckStartJump()
+	}
+}
+
+function void setSpeedCapProperties(u32 address, bool isSuperActive)
+{
+	if (char.character == CHARACTER_SONIC)
+	{
+		// Set new max speed cap etc.:
+		//  - u16[address]     = maximum speed			-> e.g. global.move.speedcap
+		//  - u16[address + 2] = maximum acceleration	-> e.g. global.move.acceleration
+		//  - u16[address + 4] = maximum deceleration	-> e.g. global.move.deceleration
+
+		if (char.flags & char.flag.UNDERWATER)
+		{
+			// In water
+		#if STANDALONE
+			if (char.bonus_effect & char.bonus.SPEED_UP)
+			{
+				u16[address] = max(u16[address], 0x600)
+				u16[address + 2] = max(u16[address + 2], 0x0c)
+				u16[address + 4] = max(u16[address + 4], 0x40)
+			}
+			else
+		#endif
+			if (isSuperActive)
+			{
+				u16[address] = 0x500
+				u16[address + 2] = 0x18
+				u16[address + 4] = 0x80
+			}
+			else
+			{
+				u16[address] = 0x300
+				u16[address + 2] = 0x06
+				u16[address + 4] = 0x40
+			}
+		}
+		else
+		{
+			// Out of water
+		#if STANDALONE
+			if (char.bonus_effect & char.bonus.SPEED_UP)
+			{
+				u16[address] = max(u16[address], 0xf00)
+				u16[address + 2] = max(u16[address + 2], 0x18)
+				u16[address + 4] = max(u16[address + 4], 0x80)
+			}
+			else
+		#endif
+			if (isSuperActive)
+			{
+				u16[address] = 0xa00
+				u16[address + 2] = 0x30
+				u16[address + 4] = 0x100
+			}
+			else
+			{
+				u16[address] = 0x600
+				u16[address + 2] = 0x0c
+				u16[address + 4] = 0x80
+			}
+		}
+	}
+	else
+	{
+		base.setSpeedCapProperties(address, isSuperActive)
+	}
+}
+
+//# translated(0x011bde) end(0x011cf0)
+//# translated(0x011d16) end(0x011da4)
+//# translated(0x0151fc) end(0x01530c)
+//# translated(0x015332) end(0x0153c0)
+function bool Character.UpdateSpindash()
+{
+	if (char.character == CHARACTER_SONIC)
+		return false
+	else
+		return base.Character.UpdateSpindash()
+}
+
+function void Character.updateUprightOnGround()
+{
+	if (char.character == CHARACTER_TAILS)
+		Tails.CheckDropSonic()
+
+	if (Character.UpdateSpindash())
+		return
+
+#if STANDALONE
+	if (char.character == CHARACTER_SONIC && Game.getSetting(SETTING_SUPER_PEELOUT))
+	{
+		if (Character.updateSuperPeelout())
+			return
+	}
+#endif
+
+	if (Character.CheckStartJump())
+		return
+
+	Character.UpdateUprightSlopeEffect()
+	Character.updateUprightOnGroundInner()
+
+	Character.sharedUpdateOnGround()
+}
+
+
+
+//# address-hook(0x018cb6) end(0x018d68)
+function void fn018cb6()
+{
+	A2 = 0xffff0000 + objA0.dustcloud.character_address
+	D1 = 0x10
+	
+	bool isRunning = (u8[A2 + 0x20] == char.state.RUNNING) && (abs(s16[A2 + 0x1c]) >= 0x600) && ((u8[A2 + 0x26] < 0x40) || (u8[A2 + 0x26] > 0xc0)) && ((u8[A2 + 0x2a] & char.flag.IN_AIR) == 0)
+	if (u8[A2 + 0x20] != char.state.BRAKING && !isRunning)
+	{
+			objA0.base_state = 0x02
+			u8[A0 + 0x36] = 0
+			return
+	}
+
+	--u8[A0 + 0x36]
+	if (s8[A0 + 0x36] < 0)
+	{
+		u8[A0 + 0x36] = 3
+		if ((u8[A2 + 0x2a] & char.flag.UNDERWATER) == 0)
+		{
+			if (allocDynamicObjectStd())
+			{
+				// Spawn skidding dust
+				objA1.update_address = objA0.update_address
+				objA1.position.x.u16 = u16[A2 + 0x10]
+				objA1.position.y.u16 = u16[A2 + 0x14]
+				if (objA0.flags38 != 0)
+				{
+					D1.u16 -= 4
+				}
+				if (global.inv_gravity)
+					D1.s16 = -D1.s16
+
+				objA1.position.y.u16 += D1.u16
+				objA1.render_flags = objA0.render_flags
+				u8[A1 + 0x05] += 2
+				objA1.box_size.x = 4
+				objA1.sprite_priority = 0x80
+				objA1.sprite_attributes = (objA0.sprite_attributes & ~sprite_attribute.PRIORITY) | (u16[A2 + 0x0a] & sprite_attribute.PRIORITY)
+				objA1.mapping_offset = objA0.mapping_offset
+				u8[A1 + 0x20] = 3
+				u8[A1 + 0x2a] = 0
+				objA1.dustcloud.character_address = objA0.dustcloud.character_address
+			}
+		}
+	}
+
+	fn018d6a()
+}

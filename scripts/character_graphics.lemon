@@ -1,0 +1,13 @@
+//# address-hook(0x012600) end(0x01286c)
+//# translated(0x012a2a) end(0x012a6e)
+function void UpdateSonicAnimation()
+{
+	A1 = 0xffffb000
+	A6 = 0xffffcc54
+	if (objA0.state == char.state.RUNNING)
+	{
+		u8[A6 + 0x05] = 0x06		// Base update for braking dust
+		u8[A6 + 0x22] = 0x15		// First frame of dust animation
+	}
+	base.UpdateSonicAnimation()
+}
