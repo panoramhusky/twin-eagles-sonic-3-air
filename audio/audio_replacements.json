@@ -8,6 +8,7 @@
 	"62": { "File": "jump.ogg", "Type": "Sound" },
 	"63": { "File": "mario.ogg", "Type": "Sound" },
 	"get_hurt":	{ "File": "hurt.ogg", "Type": "Sound" },
-	"speed_up":	{ "File": "speedshoes.ogg", "Type": "Sound" }
-
+	"speed_up":	{ "File": "speedshoes.ogg", "Type": "Sound" },
+	"health_restore":	{ "File": "health_restore.ogg", "Type": "Sound" },
+	"health_newheart":	{ "File": "health_newheart.ogg", "Type": "Sound" }
 }
