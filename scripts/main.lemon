@@ -1,2 +1,3 @@
 include character
 include character_graphics
+include render_character

@@ -249,8 +249,8 @@
 	"character_sonic_0xf8":  { "File": "character_sonic.bmp", "Rect": "408,848,24,40", "Center": "12,20" },
 	"character_sonic_0xf9":  { "File": "character_sonic.bmp", "Rect": "464,848,24,40", "Center": "12,20" },
 	"character_sonic_0xfa":  { "File": "character_sonic.bmp", "Rect": "516,848,32,40", "Center": "16,20" },
-	"character_sonic_kick1":  { "File": "character_sonic.bmp", "Rect": "569,849,39,38", "Center": "20,19" },
-	"character_sonic_kick2":  { "File": "character_sonic.bmp", "Rect": "633,849,26,39", "Center": "14,19" },
-	"character_sonic_kick3":  { "File": "character_sonic.bmp", "Rect": "682,848,34,40", "Center": "13,20" },
-	"character_sonic_kick4":  { "File": "character_sonic.bmp", "Rect": "736,847,36,41", "Center": "15,21" }
+	"character_sonic_kick_1":  { "File": "character_sonic.bmp", "Rect": "569,849,39,38", "Center": "20,19" },
+	"character_sonic_kick_2":  { "File": "character_sonic.bmp", "Rect": "633,849,26,39", "Center": "14,19" },
+	"character_sonic_kick_3":  { "File": "character_sonic.bmp", "Rect": "682,848,34,40", "Center": "13,20" },
+	"character_sonic_kick_4":  { "File": "character_sonic.bmp", "Rect": "736,847,36,41", "Center": "15,21" }
 }
