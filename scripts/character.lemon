@@ -803,6 +803,18 @@ function void Character.LandingOnGround()
 	}
 }
 
+function void Character.LandingOnGroundStandUp()
+{
+	if (char.character == CHARACTER_SONIC && char.state == char.state.TEKICK && (char.flags & char.flag.ROLLING) == 0)
+	{
+		// sorry nothing
+	}
+	else
+	{
+		base.Character.LandingOnGroundStandUp()
+	}
+}
+
 function void setSpeedCapProperties(u32 address, bool isSuperActive)
 {
 	if (char.character == CHARACTER_SONIC)
@@ -888,13 +900,8 @@ function void Character.updateUprightOnGround()
 		if (Character.UpdateSpindash())
 			return
 
-	#if STANDALONE
-		if (Game.getSetting(SETTING_SUPER_PEELOUT))
-		{
-			if (Character.updateSuperPeelout())
-				return
-		}
-	#endif
+		if (Character.updateSuperPeelout())
+			return
 
 		if (Character.CheckStartJump())
 			return

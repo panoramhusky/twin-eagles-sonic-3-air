@@ -99,3 +99,15 @@ function void updateSonicAnimationRunning()
 	}
 	base.updateSonicAnimationRunning()
 }
+
+function void updateSonicAnimationRolling()
+{
+	if (char.character == CHARACTER_SONIC && char.jumping == 1 && char.control_flags == 0)
+	{
+		char.state = char.state.TEJUMP
+	}
+	else
+	{
+		base.updateSonicAnimationRolling()
+	}
+}
