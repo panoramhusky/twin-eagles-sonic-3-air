@@ -31,16 +31,21 @@ function void UpdateSonicAnimation()
 		
 		if (char.state == char.state.TEJUMP)
 		{
+			D1.u8 = char.flags & char.flag.FACING_LEFT
+			char.render_flags = (char.render_flags & ~(render_flag.FLIP_X | render_flag.FLIP_Y)) | D1.u8
+		
 			char.animation.sprite = 0x8e
-			
-			if (char.flags & char.flag.FACING_LEFT)
-				char.render_flags |= render_flag.FLIP_X
 				
 			if ((char.flags & char.flag.IN_AIR) == 0)
 				char.state = char.state.RUNNING
+			
+			return
 		}
 		else if (char.state == char.state.TEKICK)
 		{
+			D1.u8 = char.flags & char.flag.FACING_LEFT
+			char.render_flags = (char.render_flags & ~(render_flag.FLIP_X | render_flag.FLIP_Y)) | D1.u8
+		
 			constant array<u8> KICK =
 			{
 				1, 1, 1, 1, 1,
@@ -75,7 +80,7 @@ function void UpdateSonicAnimation()
 	}
 	else
 	{
-		UpdateSonicAnimation()
+		base.UpdateSonicAnimation()
 	}
 }
 

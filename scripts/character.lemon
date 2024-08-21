@@ -6,7 +6,7 @@ function bool Character.CheckStartJump()
 	if (char.character == CHARACTER_SONIC)
 	{
 		u8 input_pressed = control.player1.pressed
-		if ((input_pressed & CONTROL_B) == 0 && (input_pressed & CONTROL_C) == 0)
+		if ((input_pressed & CONTROL_A) == 0 && (input_pressed & CONTROL_C) == 0)
 			return false
 
 		D0 = char.rotation
@@ -130,7 +130,7 @@ function void Character.updateJumpMoves()
 					}
 
 					// Check if pressed jump again in mid-air
-					if (input_pressed & CONTROL_A)
+					if (input_pressed & CONTROL_B)
 					{
 						// Check for other things to do instead of the usual reaction to jump button pressed
 						if (onCharacterPressedJumpInMidAir(input_state, input_pressed))
@@ -280,7 +280,7 @@ function void Character.updateUprightOnGroundInner()
 	if (char.character == CHARACTER_SONIC)
 	{
 		u8 input_pressed   = control.player1.pressed
-		if (input_pressed & CONTROL_A)
+		if (input_pressed & CONTROL_B)
 		{
 			Character.DoTEKick()
 		}
@@ -301,7 +301,7 @@ function void Character.UpdateControlInAir()
 		s16 acceleration = s16[A4 + 2] * 2
 		
 		u8 input_pressed   = control.player1.pressed
-		if (input_pressed & CONTROL_A)
+		if (input_pressed & CONTROL_B)
 		{
 			Character.DoTEKick()
 		}
@@ -358,7 +358,30 @@ function void Character.UpdateControlInAir()
 
 function void Character.DoTEKick()
 {
-	if (char.state != char.state.TEKICK && char.control_flags == 0 && char.state != char.state.ROLLING)
+	constant array<u8> STATES =
+	{
+		0x00, // char.state.RUNNING
+		0x01, // char.state.RUNNING2
+		0x04, // char.state.PUSHING
+		0x05, // char.state.STANDING
+		0x07, // char.state.LOOKING_UP
+		0x08, // char.state.COWERING
+		0x0d, // char.state.BRAKING
+		0x10, // char.state.STRAIGHTJUMP
+		0x40, // char.state.TEJUMP
+	}
+
+	bool validState
+	
+	for (u8 i = 0; i < 9; ++i)
+	{
+		if (char.state == STATES[i])
+		{
+			validState = true
+		}
+	}
+	
+	if (char.state != char.state.TEKICK && char.control_flags == 0 && validState)
 	{
 		char.state = char.state.former
 		char.double_jump_state = 1
@@ -770,7 +793,7 @@ function void Character.OnKickCollisionWithDynamicObject()
 //# address-hook(0x01560c) end(0x01569a)
 function void Character.LandingOnGround()
 {
-	if (char.character == CHARACTER_SONIC && char.state == char.state.TEKICK)
+	if (char.character == CHARACTER_SONIC && char.state == char.state.TEKICK && (char.flags & char.flag.ROLLING) == 0)
 	{
 		// sorry nothing
 	}

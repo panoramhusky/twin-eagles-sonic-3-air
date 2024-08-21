@@ -1,0 +1,14 @@
+// some code related to hcz blastoid
+//# address-hook(0x0857c2) end(0x0857e6)
+function void fn0857c2()
+{
+	if (u8[A1 + 0x38] == CHARACTER_SONIC && u8[A1 + 0x20] == char.state.TEKICK)
+	{
+		fn085822()
+		return
+	}
+	else
+	{
+		base.fn0857c2()
+	}
+}

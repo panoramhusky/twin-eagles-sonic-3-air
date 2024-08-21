@@ -207,6 +207,21 @@ function void fn021568()
 	}
 }
 
+// aiz rock thats breakable from the top
+//# address-hook(0x01faf2) end(0x01fb4a)
+function void Rocks.Update()
+{
+	A1 = 0xffffb000
+	if (u8[A1 + 0x38] == CHARACTER_SONIC && objA0.subtype2c & 0x01)
+	{
+		objA0.update_address = 0x01fd08
+	}
+	else
+	{
+		base.Rocks.Update()
+	}
+}
+
 // flying capsule
 //# address-hook(0x086770) end(0x0867be)
 function void fn086770()

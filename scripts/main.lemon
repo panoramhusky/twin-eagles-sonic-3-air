@@ -2,3 +2,4 @@ include character
 include character_graphics
 include render_character
 include object_interactions
+include badniks
