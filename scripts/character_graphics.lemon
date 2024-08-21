@@ -5,129 +5,92 @@ constant u8 char.state.TEKICK = 0x41
 //# translated(0x012a2a) end(0x012a6e)
 function void UpdateSonicAnimation()
 {
-	if (char.state != char.state.former)
+	if (char.character == CHARACTER_SONIC)
 	{
-		char.state.former = char.state
-		char.animation.frame = 0
-		char.animation.timer = 0
-		char.flags &= ~char.flag.PUSHING
-	}
-
-	A1 = 0xffffb000
-	A6 = 0xffffcc54
-	if (objA0.state == char.state.RUNNING)
-	{
-		u8[A6 + 0x05] = 0x06		// Base update for braking dust
-		u8[A6 + 0x22] = 0x15		// First frame of dust animation
-	}
-	else if (objA0.state == char.state.TEJUMP)
-	{
-		objA0.animation.sprite = 0x8e
-		return
-	}
-	else if (objA0.state == char.state.TEKICK)
-	{
-		if (objA0.animation.sprite > 4 || objA0.animation.sprite == 0)
+		if (char.state != char.state.former)
 		{
-			objA0.animation.sprite = 1
+			char.state.former = char.state
+			char.animation.frame = 0
+			char.animation.timer = 0
+			char.flags &= ~char.flag.PUSHING
 		}
-		++objA0.animation.frame
-		if (objA0.animation.frame > 3)
-		{
-			objA0.animation.frame = 0
-			if (objA0.animation.sprite < 4)
-			{
-				++objA0.animation.sprite
-			}
-			else
-			{
-				objA0.state = char.state.RUNNING
-			}
-			
-		}
-		return
-	}
 
-	base.UpdateSonicAnimation()
-}
+	#if STANDALONE
+		A1 = (super.active && char.state <= char.state.TRANSFORMING) ? 0x012c3a : 0x012aa6		// Fixed Super Sonic missing some animation states
+	#else
+		A1 = (super.active) ? 0x012c3a : 0x012aa6
+	#endif
+		A1 = tableLookupAddress(A1, char.state * 2)
+		D0.u8 = u8[A1]
 
+		// D0.u8 is either:
+		//  - 0xff when running
+		//  - 0xfe when rolling (on ground or in air)
+		//  - between 0x00 and 0x7f in other cases (like standing, balancing, spring-jumping, getting hurt, etc.)
 
-//# address-hook(0x012600) end(0x01286c)
-//# translated(0x012a2a) end(0x012a6e)
-function void UpdateSonicAnimation()
-{
-	if (char.state != char.state.former)
-	{
-		char.state.former = char.state
-		char.animation.frame = 0
-		char.animation.timer = 0
-		char.flags &= ~char.flag.PUSHING
-	}
-
-#if STANDALONE
-	A1 = (super.active && char.state <= char.state.TRANSFORMING) ? 0x012c3a : 0x012aa6		// Fixed Super Sonic missing some animation states
-#else
-	A1 = (super.active) ? 0x012c3a : 0x012aa6
-#endif
-	A1 = tableLookupAddress(A1, char.state * 2)
-	D0.u8 = u8[A1]
-
-	// D0.u8 is either:
-	//  - 0xff when running
-	//  - 0xfe when rolling (on ground or in air)
-	//  - between 0x00 and 0x7f in other cases (like standing, balancing, spring-jumping, getting hurt, etc.)
-
-	
-	if (objA0.state == char.state.TEJUMP)
-	{
-		objA0.animation.sprite = 0x8e
 		
-		if (char.flags & char.flag.FACING_LEFT)
-			char.render_flags |= render_flag.FLIP_X
-	}
-	else if (objA0.state == char.state.TEKICK)
-	{
-		if (objA0.animation.sprite > 4 || objA0.animation.sprite == 0)
+		if (char.state == char.state.TEJUMP)
 		{
-			objA0.animation.sprite = 1
+			char.animation.sprite = 0x8e
+			
+			if (char.flags & char.flag.FACING_LEFT)
+				char.render_flags |= render_flag.FLIP_X
+				
+			if ((char.flags & char.flag.IN_AIR) == 0)
+				char.state = char.state.RUNNING
 		}
-		++objA0.animation.frame
-		if (objA0.animation.frame > 3)
+		else if (char.state == char.state.TEKICK)
 		{
-			objA0.animation.frame = 0
-			if (objA0.animation.sprite < 4)
+			constant array<u8> KICK =
 			{
-				++objA0.animation.sprite
+				1, 1, 1, 1, 1,
+				2, 2, 2, 2, 2,
+				3, 3, 3, 3, 3,
+				4, 4, 4, 4, 4,
+				0,
 			}
-			else
+			++char.animation.timer
+		
+			if (char.animation.timer > 19)
 			{
 				char.state = char.state.RUNNING
-			}	
+				char.animation.timer = 0
+			}
+			else
+				char.animation.sprite = KICK[char.animation.timer]
+			return
+		}
+		else if (D0.u8 < 0x80)
+		{
+			updateSonicAnimationStanding()
+		}
+		else if (D0.u8 == 0xff)
+		{
+			updateSonicAnimationRunning()
+		}
+		else // if (D0.u8 == 0xfe)
+		{
+			updateSonicAnimationRolling()
 		}
 	}
-	else if (D0.u8 < 0x80)
+	else
 	{
-		updateSonicAnimationStanding()
-	}
-	else if (D0.u8 == 0xff)
-	{
-		updateSonicAnimationRunning()
-	}
-	else // if (D0.u8 == 0xfe)
-	{
-		updateSonicAnimationRolling()
+		UpdateSonicAnimation()
 	}
 }
 
 
 function void updateSonicAnimationRunning()
 {
-	A1 = 0xffffb000
-	A6 = 0xffffcc54
-	if (objA0.state == char.state.RUNNING)
+	if (char.character == CHARACTER_SONIC)
 	{
-		u8[A6 + 0x05] = 0x06		// Base update for braking dust
-		u8[A6 + 0x22] = 0x15		// First frame of dust animation
+		A1 = 0xffffb000
+		A6 = 0xffffcc54
+		if (objA0.state == char.state.RUNNING && (char.flags & char.flag.UNDERWATER) == 0)
+		{
+			u8[A6 + 0x05] = 0x06		// Base update for braking dust
+			u8[A6 + 0x22] = 0x15		// First frame of dust animation
+		}
 	}
 	base.updateSonicAnimationRunning()
 }
