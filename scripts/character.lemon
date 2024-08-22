@@ -276,7 +276,11 @@ function void SonicPressedJumpInMidAir()
 
 function void Character.updateUprightOnGroundInner()
 {
-	base.Character.updateUprightOnGroundInner()
+	if (char.state != char.state.TEKICK)
+	{
+		base.Character.updateUprightOnGroundInner()
+	}
+	
 	if (char.character == CHARACTER_SONIC)
 	{
 		u8 input_pressed   = control.player1.pressed
@@ -383,19 +387,26 @@ function void Character.DoTEKick()
 	
 	if (char.state != char.state.TEKICK && char.control_flags == 0 && validState)
 	{
-		char.state = char.state.former
-		char.double_jump_state = 1
-		char.state = char.state.TEKICK
-		char.animation.sprite = 1
-		playSound(SFX_INSTASHIELD)
-		
 		char.flags2d = 0
 		
 		if ((char.flags & char.flag.IN_AIR) == 0)
 		{
 			char.flags |= char.flag.IN_AIR
+			
+			if (char.flags & char.flag.ON_OBJECT)
+			{
+				char.flags &= ~char.flag.ON_OBJECT
+				objA0.position.y.u16 -= 1
+			}
+			
 			char.velocity.y -= 0x200
 		}
+	
+		char.state = char.state.former
+		char.double_jump_state = 1
+		char.state = char.state.TEKICK
+		char.animation.sprite = 1
+		playSound(SFX_INSTASHIELD)
 	}
 }
 
@@ -795,7 +806,11 @@ function void Character.LandingOnGround()
 {
 	if (char.character == CHARACTER_SONIC && char.state == char.state.TEKICK && (char.flags & char.flag.ROLLING) == 0)
 	{
-		// sorry nothing
+		char.flags &= ~(char.flag.IN_AIR | char.flag.PUSHING | char.flag.CONTROL_LOCK)
+		if (char.rotation > 0x20 && char.rotation < 0xe0)
+		{
+			char.state = char.state.RUNNING
+		}
 	}
 	else
 	{
@@ -803,17 +818,6 @@ function void Character.LandingOnGround()
 	}
 }
 
-function void Character.LandingOnGroundStandUp()
-{
-	if (char.character == CHARACTER_SONIC && char.state == char.state.TEKICK && (char.flags & char.flag.ROLLING) == 0)
-	{
-		// sorry nothing
-	}
-	else
-	{
-		base.Character.LandingOnGroundStandUp()
-	}
-}
 
 function void setSpeedCapProperties(u32 address, bool isSuperActive)
 {
