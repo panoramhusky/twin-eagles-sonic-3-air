@@ -280,6 +280,10 @@ function void Character.updateUprightOnGroundInner()
 	{
 		base.Character.updateUprightOnGroundInner()
 	}
+	else
+	{
+		Character.CheckCollision()
+	}
 	
 	if (char.character == CHARACTER_SONIC)
 	{
@@ -806,6 +810,7 @@ function void Character.LandingOnGround()
 {
 	if (char.character == CHARACTER_SONIC && char.state == char.state.TEKICK && (char.flags & char.flag.ROLLING) == 0)
 	{
+		
 		char.flags &= ~(char.flag.IN_AIR | char.flag.PUSHING | char.flag.CONTROL_LOCK)
 		if (char.rotation > 0x20 && char.rotation < 0xe0)
 		{

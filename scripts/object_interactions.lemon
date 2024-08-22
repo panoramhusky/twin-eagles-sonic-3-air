@@ -753,6 +753,301 @@ function void fn027424()
 	}
 }
 
+// fbz transition door
+//# address-hook(0x070c3c) end(0x070c60)
+function void fn070c3c()
+{
+	base.fn070c3c()
+
+	A1 = 0xffffb000
+	if (u8[A1 + 0x38] == CHARACTER_SONIC)
+	{
+		if (objA0.update_address != 0x070c66)
+		{
+			Enemy.DrawDynamicObject()
+			return
+		}
+
+		A2 = A0
+		A0 = A1
+		Character.DoTEKick()
+		char.velocity.x = -0x500
+		A0 = A2
+	}
+}
+
+// zis game is obsessed with ROCK
+//# address-hook(0x04172e) end(0x0417a4)
+function void fn04172e()
+{
+	A1 = 0xffffb000
+	if (u8[A1 + 0x38] == CHARACTER_SONIC && objA1.state == char.state.TEKICK)
+	{
+		u8[A0 + 0x30] = u8[0xffffb000 + 0x20]
+		u8[A0 + 0x31] = u8[0xffffb04a + 0x20]
+		D1.u16 = 0x23
+		D2.u16 = 0x10
+		D3.u16 = 0x11
+		D4.u16 = objA0.position.x.u16
+		fn01dc56()
+
+		A1 = 0xffffb000
+		u16 charpos_x = objA1.position.x.u16
+		u16 charpos_y = objA1.position.y.u16
+		
+		u16 blockpos_x = objA0.position.x.u16
+		u16 blockpos_y = objA0.position.y.u16
+		
+		u16 offset_x = objA0.box_size.x
+		u16 offset_y = objA0.box_size.y
+		
+		bool inBoundLeft = (charpos_x > blockpos_x - offset_x - 20)
+		bool inBoundRight = (charpos_x < blockpos_x + offset_x + 20)
+		bool inBoundTop = (charpos_y > blockpos_y - offset_y)
+		bool inBoundBottom = (charpos_y > blockpos_y - offset_y)
+
+		if ((inBoundLeft && inBoundRight && inBoundTop && inBoundBottom))
+		{
+			if (u8[A0 + 0x30] != char.state.TEKICK && u8[A0 + 0x31] != char.state.TEKICK)
+			{
+				DrawOrUnloadObject()
+				return
+			}
+
+			A1 = 0xffffb000
+			D0.u8 = u8[A0 + 0x30]
+			fn0417a6()
+
+			fn0417f6()
+		}
+		else
+		{
+			D1.u8 = D0.u8 & 0x08
+			if (D1.u8 == 0)
+			{
+				fn0417de()
+				return
+			}
+
+			if (u8[A0 + 0x30] != 0x02)
+			{
+				DrawOrUnloadObject()
+				return
+			}
+
+			A1 = 0xffffb000
+			D0.u8 = 2
+			fn0417a6()
+
+			fn0417f6()
+		}
+	}
+	else
+	{
+		base.fn04172e()
+	}
+}
+
+//# address-hook(0x0417a6) end(0x0417dc)
+function void fn0417a6()
+{
+	A1 = 0xffffb000
+	if (u8[A1 + 0x38] == CHARACTER_SONIC)
+	{
+		if (D0.u8 == char.state.TEKICK)
+		{
+			bool onLeft = (objA1.position.x.u16 < objA0.position.x.u16)
+			u8[A1 + 0x05] = base_state.NORMAL
+			objA1.velocity.x = (onLeft ? -0x200 : 0x200)
+			objA1.velocity.y = -0x300
+			objA1.flags2a |= (char.flag.IN_AIR)
+			objA1.flags2a &= ~char.flag.ON_OBJECT
+		}
+	}
+	else
+	{
+		base.fn0417a6()
+	}
+}
+
+// sandwall:tm:
+//# address-hook(0x040c2a) end(0x040ce6)
+function void fn040c2a()
+{
+	base.fn040c2a()
+
+	A1 = 0xffffb000
+	if (u8[A1 + 0x38] == CHARACTER_SONIC)
+	{
+		D1.u16 = 0x17
+		D2.u16 = 0x34
+		D3.u16 = 0x35
+		D4.u16 = objA0.position.x.u16
+		fn01dc56()
+
+		D6 = (D6 << 16) + (D6 >> 16)
+		bool crumble = false
+
+		if (D6 & 0x01)
+		{
+			A1 = 0xffffb000
+			crumble = (u8[A1 + 0x20] == char.state.TEKICK)
+		}
+
+		if (D6 & 0x02 && !crumble)
+		{
+			A1 = 0xffffb04a
+			crumble = (u8[A1 + 0x20] == char.state.TEKICK)
+		}
+
+		if (crumble)
+		{
+			objA1.velocity.x >>= 1
+			objA1.groundspeed >>= 1
+
+			playSound(0x82)
+
+			objA0.update_address = 0x040cec
+			objA0.animation.timer = 5
+			objA0.animation.sprite = 1
+
+			A1 = 0xffffb000
+			if (objA0.flags2a & object.flag.P1_ON_OBJECT)
+			{
+				objA0.flags2a &= ~object.flag.P1_ON_OBJECT
+				u8[A1 + 0x2a] &= ~char.flag.ON_OBJECT
+				u8[A1 + 0x2a] |= char.flag.IN_AIR
+			}
+			else
+			{
+				bool onLeft = (objA1.position.x.u16 < objA0.position.x.u16)
+				objA1.velocity.x = (onLeft ? -0x200 : 0x200)
+			}
+
+
+			if (objA0.flags2a & object.flag.P1_PUSHING)
+			{
+				objA0.flags2a &= ~object.flag.P1_PUSHING
+				u8[A1 + 0x2a] &= ~char.flag.PUSHING
+			}
+		}
+	}
+}
+
+// sand cork
+//# address-hook(0x041d5c) end(0x041df2)
+function void fn041d5c()
+{
+	base.fn041d5c()
+	if (u8[A1 + 0x38] == CHARACTER_SONIC)
+	{
+		if (u8[A1 + 0x20] != char.state.TEKICK)
+			return
+
+		objA1.velocity.x = -objA1.velocity.x
+		objA1.velocity.y = -objA1.velocity.y
+		D4.u16 = (objA0.subtype2c & 0x7f) << 4
+		D5.u16 = D4.u16
+		D3.u16 = objA0.position.y.u16 - 0x90
+
+		while (D5.s16 >= 0)
+		{
+			fn041e1a()
+			D3.u16 -= 0x0100
+			D5.u16 -= 0x0100
+		}
+
+		u16[A1 + 0x48] = objA0.respawn_entry
+		A4 = 0x041e96
+		objA0.update_address = 0x041df4
+
+		++objA0.animation.sprite
+		objA0.sprite_priority = 0
+		playSound(SFX_COLLAPSE)
+
+		fn0216b8()
+		UpdateMovementStraightSimple()
+		objA0.velocity.y += 0x18
+
+		if (objA0.respawn_entry)
+		{
+			A2 = 0xffff0000 + objA0.respawn_entry
+			u8[A2] |= 0x01
+		}
+
+		if (s8[A0 + 0x2c] < 0)
+		{
+			u16[0xffffeec4] = 0xffff
+		}
+		else
+		{
+			u16[0xffffeec6] = 0xffff
+		}
+		u8[A0 + 0x28] = 0
+		u8[A0 + 0x29] = 0
+	}
+}
+
+// lrz falling spike
+//# address-hook(0x042904) end(0x04291a)
+function void fn042904()
+{
+	base.fn042904()
+	
+	if (u8[A1 + 0x38] == CHARACTER_SONIC)
+	{
+		A1 = 0xffffb000
+		u16 charpos_x = objA1.position.x.u16
+		u16 charpos_y = objA1.position.y.u16
+		
+		u16 blockpos_x = objA0.position.x.u16
+		u16 blockpos_y = objA0.position.y.u16
+		
+		u16 offset_x = objA0.box_size.x
+		u16 offset_y = objA0.box_size.y
+		
+		bool inBoundLeft = (charpos_x > blockpos_x - offset_x - 20)
+		bool inBoundRight = (charpos_x < blockpos_x + offset_x + 20)
+		bool inBoundTop = (charpos_y > blockpos_y - offset_y)
+		bool inBoundBottom = (charpos_y > blockpos_y - offset_y)
+
+		if ((inBoundLeft && inBoundRight && inBoundTop && inBoundBottom) && objA1.state == char.state.TEKICK)
+		{
+			objA0.update_address = 0x085102
+			objA0.sprite_priority = 0
+			objA0.sprite_attributes |= sprite_attribute.PRIORITY
+			playSound(0x5d)
+			
+			bool onLeft = (objA1.position.x.u16 < objA0.position.x.u16)
+			objA0.velocity.x = (onLeft ? 0x400 : -0x400)
+			objA0.velocity.y = -0x100
+			
+			u8[A1 + 0x05] = base_state.NORMAL
+			objA1.velocity.x = (onLeft ? -0x200 : 0x200)
+			objA1.velocity.y = -0x300
+			objA1.flags2a |= (char.flag.IN_AIR)
+			objA1.flags2a &= ~char.flag.ON_OBJECT
+		}
+	}
+}
+
+// amogus (impostor)
+//# address-hook(0x042ec0) end(0x042ee6)
+function void fn042ec0()
+{
+	base.fn042ec0()
+	if (u8[A1 + 0x38] == CHARACTER_SONIC && objA1.state == char.state.TEKICK)
+	{
+		objA1.velocity.x = -objA1.velocity.x
+		objA1.velocity.y = -objA1.velocity.y
+		u8[A3] |= (1 << D3.u8)
+		objA0.update_address = addressof(SmallExplosion.BaseUpdate)
+		objA0.base_state = 0x02
+		u8[A0 + 0x28] = 0
+		u8[A0 + 0x29] = 0
+	}
+}
+
 // flying capsule
 //# address-hook(0x086770) end(0x0867be)
 function void fn086770()
@@ -799,4 +1094,27 @@ function void fn086770()
 	{
 		base.fn086770()
 	}
+}
+
+
+
+// stone compat? maybe!
+function bool Stone.canFightStoneGapsule()
+{
+	A1 = 0xffffb000
+	// check for base game knux
+	if (u8[A0 + 0x38] == CHARACTER_SONIC && u8[0xffffe654] == 0)
+		return true
+		
+	return base.Stone.canFightStoneGapsule()
+}
+
+function bool Stone.canFightStoneBuggy()
+{
+	A1 = 0xffffb000
+	// check for base game knux
+	if (u8[A0 + 0x38] == CHARACTER_SONIC && u8[0xffffe654] == 0)
+		return true
+		
+	return base.Stone.canFightStoneBuggy()
 }

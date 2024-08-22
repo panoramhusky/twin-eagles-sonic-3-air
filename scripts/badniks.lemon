@@ -12,3 +12,36 @@ function void fn0857c2()
 		base.fn0857c2()
 	}
 }
+
+// soz rockn
+//# address-hook(0x08ee3a) end(0x08ef12)
+function void fn08ee3a()
+{
+	base.fn08ee3a()
+
+	A1 = 0xffffb000
+	if (u8[A1 + 0x38] == CHARACTER_SONIC)
+	{
+		A1 = 0x08ef14
+		fn0858f8()
+		if (D0.u16 == 0)
+		{
+			D0 = (D0 << 16) + (D0 >> 16)
+		}
+
+		if (D0.u16 != 0)
+		{
+			A1 = 0xffff0000 + D0.u16
+			fn0857c2()
+			if (!_equal())
+			{
+				if (objA1.state == char.state.TEKICK)
+				{
+					u16[A0 + 0x44] = A1.u16
+					fn085732()
+					signalMultiReturn()
+				}
+			}
+		}
+	}
+}
