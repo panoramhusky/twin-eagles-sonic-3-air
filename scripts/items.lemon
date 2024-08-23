@@ -47,6 +47,7 @@ function void MonitorIntact.UpdateDefault()
 	A1 = 0xffffb000
 	if (u8[A1 + 0x38] == CHARACTER_SONIC)
 	{
+		fn01d63a()
 		AddAsDynamicObject()
 
 		Object.animationUpdate(0x01db3a)
@@ -84,16 +85,7 @@ function void MonitorIntact.Opening()
 			}
 		}
 	#endif
-
-		objA0.flags2a &= 0x03
-		u8[A0 + 0x28] = 0
-
-		if (objA0.respawn_entry)
-		{
-			A2 = 0xffff0000 + objA0.respawn_entry
-			u8[A2] |= 0x01
-		}
-
+	
 		A1 = 0xffff0000 + objA0.monitor.character_address
 		A2 = (A1 == 0xffffb000) ? 0xfffffecc : 0xfffffece		// Address to keep count of broken monitors in. having different ones for each player is a leftover from Sonic 2
 	#if STANDALONE
@@ -182,5 +174,59 @@ function void ItemEffect.ApplyInvincibility()
 	else
 	{
 		base.ItemEffect.ApplyInvincibility()
+	}
+}
+
+//# address-hook(0x01da60) end(0x01db26)
+function void ItemEffect.ApplySuperTransformation()
+{
+	A1 = 0xffffb000
+	if (u8[A1 + 0x38] == CHARACTER_SONIC)
+	{
+		++u16[A2]
+		ring_counter += 50		// Without a check for 999 rings...
+		super.palettefx.state = 1
+		super.palettefx.timer = 0x0f
+		super.active = 1
+		super.ring_dec.frames = 60
+	#if STANDALONE
+		setSpeedCapProperties(addressof(global.move.speedcap), true)		// Address: 0xfffff760
+	#else
+		global.move.speedcap = 0x800
+		global.move.acceleration = 0x18
+		global.move.deceleration = 0xc0
+	#endif
+		u8[0xffffb000 + 0x20] = char.state.TRANSFORMING
+
+		if (isMainCharacter(CHARACTER_SONIC))
+		{
+			// Sonic
+			u32[0xffffb000 + 0x0c] = 0x146816		// "char.mapping_offset"
+			super.active = 0xff
+		#if STANDALONE
+			setSpeedCapProperties(addressof(global.move.speedcap), true)	// Address: 0xfffff760
+		#else
+			global.move.speedcap = 0xa00
+			global.move.acceleration = 0x30
+			global.move.deceleration = 0x100
+		#endif
+			u32[0xffffcd7c] = 0x019348		// Hyper Sonic stars
+			u32[0xffffcbc0] = addressof(AfterImages.Init)		// After-images effect
+		}
+
+		u8[0xffffb000 + 0x2e] = (control_flag.DISABLE_INTERACTION | control_flag.DISABLE_UPDATE)
+		u8[0xffffb000 + 0x35] = 0
+		u8[A1 + 0x2b] |= char.bonus.INVINCIBLE
+
+		playSound(SFX_SUPERTRANSFORM)
+	#if STANDALONE
+		chooseFittingMusic()	// Usually switches to super theme
+	#else
+		playMusic(MUSIC_INVINCIBLE)
+	#endif
+	}
+	else
+	{
+		base.ItemEffect.ApplySuperTransformation()
 	}
 }

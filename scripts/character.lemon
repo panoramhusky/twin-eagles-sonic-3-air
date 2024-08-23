@@ -1148,10 +1148,34 @@ function void Character.Die()
 	}
 }
 
+function bool debugModeRescue()
+{
+	A1 = 0xffffb000
+	// Get character out of damage state and into object placement mode
+	if (debug_mode.enabled && (control.pad1.pressed & CONTROL_B) && (u8[A1 + 0x38] == CHARACTER_SONIC))
+	{
+		debug_mode.state = 1
+		player1.control_override = 0
+		char.invuln.countdown = 120
+		
+		TESonic.health = TESonic.maxhealth
+		
+		return true
+	}
+	
+	return base.debugModeRescue()
+
+}
+
+function void Init()
+{
+	TESonic.maxhealth = 3
+	base.Init()
+}
+
 function void Standalone.onLevelStart()
 {
 	TESonic.health = 3
-
 	base.Standalone.onLevelStart()
 }
 
@@ -1160,6 +1184,13 @@ function void Standalone.onRestartLevel()
 	TESonic.health = 3
 	TESonic.maxhealth = 3
 	base.Standalone.onRestartLevel()
+}
+
+function void Standalone.onRestartAtCheckpoint()
+{
+	TESonic.health = 3
+	TESonic.maxhealth = 3
+	base.Standalone.onRestartAtCheckpoint()
 }
 
 function void Standalone.onLevelFinished()

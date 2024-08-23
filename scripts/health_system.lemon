@@ -1,5 +1,5 @@
-global u8 TESonic.health = 3
-global u8 TESonic.maxhealth = 3
+global u8 TESonic.health
+global u8 TESonic.maxhealth
 
 //# address-hook(0x010294) end(0x010364)
 function void Character.GettingHurt()
@@ -84,6 +84,9 @@ function void RenderHUD()
 	
 	if (!debug_mode.state)
 	{
+		if (TESonic.health > TESonic.maxhealth)
+			TESonic.health = TESonic.maxhealth
+	
 		baseY += 174
 		for (u8 i == 0; i < TESonic.maxhealth; ++i)
 		{		
