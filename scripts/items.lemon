@@ -149,7 +149,7 @@ function void ItemEffect.ApplyExtraRings()
 	A1 = 0xffffb000
 	if (u8[A1 + 0x38] == CHARACTER_SONIC)
 	{
-		playSound(0x76)
+		Audio.playAudio("te_restore")
 		if (TESonic.health < TESonic.maxhealth)
 		{
 			++TESonic.health
@@ -171,7 +171,7 @@ function void ItemEffect.ApplyInvincibility()
 	A1 = 0xffffb000
 	if (u8[A1 + 0x38] == CHARACTER_SONIC)
 	{
-		playSound(0x77)
+		Audio.playAudio("te_newheart")
 		if (TESonic.maxhealth < 5)
 		{
 			++TESonic.maxhealth
