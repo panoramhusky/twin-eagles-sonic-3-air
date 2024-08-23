@@ -60,8 +60,8 @@ function bool TESonic.checkIfBombCollidingWithBoss()
 	u16 bx2 = 32
 	u16 by2 = 32
 	
-	Debug.drawRect(px1, py1, bx1, by1, 0x0000ff88)
-	Debug.drawRect(px2, py2, bx2, by2, 0xff000088)
+	//Debug.drawRect(px1, py1, bx1, by1, 0x0000ff88)
+	//Debug.drawRect(px2, py2, bx2, by2, 0xff000088)
 	
 	bool colliding = checkBoxOverlap(px1, py1, bx1, by1, px2, py2, bx2, by2)
 	return colliding

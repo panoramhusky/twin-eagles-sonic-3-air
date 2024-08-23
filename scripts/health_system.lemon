@@ -38,27 +38,10 @@ function void Character.GettingHurt()
 		}
 
 		playSound(0x35)
-		char.base_state = base_state.HURT
-		Character.LandingOnGroundNoSpindash()
-		char.flags |= char.flag.IN_AIR
-		if (char.flags & char.flag.UNDERWATER)
-		{
-			char.velocity.x = -0x100
-			char.velocity.y = -0x200
-		}
-		else
-		{
-			char.velocity.x = -0x200
-			char.velocity.y = -0x400
-		}
-		if (char.position.x.u16 >= u16[A2 + 0x10])
-		{
-			char.velocity.x = -char.velocity.x
-		}
-
-		char.groundspeed = 0
-		char.state = char.state.GOT_HURT
 		char.invuln.countdown = 120
+		
+		char.control_flags &= ~(control_flag.DISABLE_UPDATE | control_flag.DISABLE_INTERACTION)
+		
 		D0 = 0xffffffff
 	}
 	else

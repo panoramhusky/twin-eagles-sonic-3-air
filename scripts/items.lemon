@@ -13,7 +13,7 @@ function void MonitorIntact.Init()
 		objA0.box_size.x = 8
 		objA0.box_size.y = 8
 		
-		objA0.position.y.u16 -= 8
+		objA0.position.y.u16 -= 4
 
 		objA0.subtype2c = Monitor.getRandomizedType(objA0.subtype2c, false)
 

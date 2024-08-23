@@ -1113,6 +1113,28 @@ function void SonicLandingBubbleBounce()
 	}
 }
 
+function void gainExtraLife()
+{
+	// we need to back up and restore the A1 here otherwise the game shits itself
+	u32 A1backup = A1
+	A1 = 0xffffb000
+	if (u8[A1 + 0x38] == CHARACTER_SONIC)
+	{
+		if (!Game.getSetting(SETTING_INFINITE_LIVES))
+		{
+			Audio.playAudio("te_1up")
+			lives_counter = min(lives_counter + 1, 99)
+			++hud.dirty.lives
+		}
+	}
+	else
+	{
+		base.gainExtraLife()
+	}
+	
+	A1 = A1backup
+}
+
 //# address-hook(0x01036e) end(0x0103b8)
 function void Character.Die_internal()
 {
@@ -1148,6 +1170,13 @@ function void Character.Die()
 	}
 }
 
+//# address-hook(0x0125ac) end(0x0125da)
+function void Character.UpdateDrownedState.Sonic()
+{
+	TESonic.health = 0
+	base.Character.UpdateDrownedState.Sonic()
+}
+
 function bool debugModeRescue()
 {
 	A1 = 0xffffb000
@@ -1158,7 +1187,8 @@ function bool debugModeRescue()
 		player1.control_override = 0
 		char.invuln.countdown = 120
 		
-		TESonic.health = TESonic.maxhealth
+		if (TESonic.health < 1)
+			TESonic.health = 1
 		
 		return true
 	}

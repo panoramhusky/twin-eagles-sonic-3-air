@@ -29,23 +29,23 @@ function u64 Monitor.getIconSpriteKey(u8 type)
 	else if (type == 0x01)
 		return "1up_head_pickup"
 	else if (type == 0x02)
-		return "monitor_icon_robotnik"
+		return "eggman_pickup"
 	else if (type == 0x03)
 		return "health_pickup1"
 	else if (type == 0x04)
 		return "speedshoes_pickup"
 	else if (type == 0x05)
-		return "monitor_icon_fireshield"
+		return "flameshield_pickup"
 	else if (type == 0x06)
-		return "monitor_icon_lightningshield"
+		return "lightningshield_pickup"
 	else if (type == 0x07)
-		return "monitor_icon_bubbleshield"
+		return "aquashield_pickup"
 	else if (type == 0x08)
 		return "health_pickup_newheart"
 	else if (type == 0x09)
-		return "monitor_icon_super"
+		return "s_pickup"
 	else if (type == 0x0b)
-		return "monitor_icon_classicshield"
+		return "classicshield_pickup"
 
 	return 0
 }
