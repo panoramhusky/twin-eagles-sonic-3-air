@@ -1,3 +1,67 @@
+// signpost
+function void fn083a70()
+{
+	A1 = 0xffffb000
+	if (u8[A1 + 0x38] == CHARACTER_SONIC)
+	{
+		A1 = 0xffff0000 + D0.u16
+		if (u8[A1 + 0x20] != char.state.TEKICK)
+			return
+		if (objA1.velocity.y >= 0)
+			return
+
+		// Touched by character
+		objA0.state = 0x20
+		D0.u16 = objA0.position.x.u16 - objA1.position.x.u16
+		if (D0.u16 == 0)
+			D0 = 8
+
+		D0.u16 <<= 4
+		objA0.velocity.x = D0.u16
+		objA0.velocity.y = -0x200
+
+		playSound(0xb8)
+
+		// "spawnSimpleChildObjects(0x083b3c)" replaced by:
+		spawnSimpleChildObjects(addressof(FloatingPoints.Init), 1)
+
+		A3 = A1
+		addScore(10)
+	}
+	else
+	{
+		base.fn083a70()
+	}
+}
+
+// spikes
+//# address-hook(0x024280) end(0x0242b4)
+function void DamageCharacter()
+{
+	if (u8[A1 + 0x38] == CHARACTER_SONIC)
+	{
+		if ((u8[A1 + 0x2b] & char.bonus.INVINCIBLE) == 0)
+		{
+			if (u8[A1 + 0x34] == 0 && u8[A1 + 0x05] < base_state.HURT)
+			{
+				D0 = s32(objA1.velocity.y) << 8
+				D3 = objA1.position.y - D0
+				objA1.position.y = D3
+				A2 = A0
+				A0 = A1
+
+				// Hurt character
+				Character.Die_internal()
+				A0 = A2
+			}
+		}
+	}
+	else
+	{
+		base.DamageCharacter()
+	}
+}
+
 // rocks
 //# address-hook(0x01fd08) end(0x01ff1a)
 function void fn01fd08()
@@ -386,6 +450,80 @@ function void fn02a502()
 	else
 	{
 		base.fn02a502()
+	}
+}
+
+//hcz 2 boss bomb
+//# address-hook(0x06b734) end(0x06b734)
+function void fn06b734()
+{
+	if (objA0.value3b == 0)
+	{
+		base.fn06b734()
+		A1 = 0xffffb000
+		if (u8[A1 + 0x38] == CHARACTER_SONIC)
+		{
+			u16 charpos_x = objA1.position.x.u16
+			u16 charpos_y = objA1.position.y.u16
+			
+			u16 blockpos_x = objA0.position.x.u16
+			u16 blockpos_y = objA0.position.y.u16
+			
+			u16 offset_x = objA0.box_size.x
+			u16 offset_y = objA0.box_size.y
+			
+			bool inBoundLeft = (charpos_x > blockpos_x - offset_x - 8)
+			bool inBoundRight = (charpos_x < blockpos_x + offset_x + 8)
+			bool inBoundTop = (charpos_y > blockpos_y - offset_y) + 8
+			bool inBoundBottom = (charpos_y > blockpos_y - offset_y) + 8
+
+			if ((inBoundLeft && inBoundRight && inBoundTop && inBoundBottom) && objA1.state == char.state.TEKICK)
+			{
+				objA0.value3b = 1
+				playSound(0x5d)
+				
+				bool onLeft = (objA1.position.x.u16 < objA0.position.x.u16)
+				objA0.velocity.x = (onLeft ? 0x100 : -0x100) + objA1.velocity.x
+				objA0.velocity.y = -0x680
+				objA0.countdown_callback = 0x06b73a
+				
+				u8[A1 + 0x05] = base_state.NORMAL
+				objA1.velocity.x = (onLeft ? -0x200 : 0x200)
+				objA1.velocity.y = -0x300
+				objA1.flags2a |= (char.flag.IN_AIR)
+				objA1.flags2a &= ~char.flag.ON_OBJECT
+			}
+		}
+	}
+	else
+	{
+		MoveWithGravity20()
+		
+		objA0.animation.sprite = ((level.framecounter & 0x01) ? 6 : 7)
+		
+		objA0.box_size.x = 8
+		
+		Object.TriggerOnGroundHit()
+		
+		A1 = TESonic.ScanandReturnAddressInRAM(0x06af0c)
+		
+		if (!TESonic.checkIfBombCollidingWithBoss())
+			return
+			
+		u8[A1 + 0x1c] = A0.u8
+		u8[A1 + 0x25] = u8[A1 + 0x28]
+		u8[A1 + 0x28] = 0
+		--u8[A1 + 0x29]
+		if (u8[A1 + 0x29] == 0)
+		{
+			u8[A1 + 0x2a] |= 0x80
+		}
+		
+		playSound(0x4e)
+		// "spawnChildObjects(0x06bdb2)" replaced by:
+		spawnChildObject(0x06b77c, 0x00, 0, 0)
+		
+		Object.TriggerUnloading()
 	}
 }
 
@@ -1046,6 +1184,38 @@ function void fn042ec0()
 		u8[A0 + 0x28] = 0
 		u8[A0 + 0x29] = 0
 	}
+}
+
+// little spike bot thing in death egg 2 boss
+//# address-hook(0x07f900) end(0x07f9a6)
+function void fn07f900()
+{
+	fn085870()
+	if (_equal())
+		return
+
+	if (u8[A1 + 0x20] != char.state.ROLLING && u8[A1 + 0x20] != char.state.TEKICK)
+	{
+		if (u8[A1 + 0x34] == 0 && (u8[A1 + 0x2b] & char.bonus.INVINCIBLE) == 0)
+		{
+			Enemy.DamageCharacter()
+		}
+		return
+	}
+
+	objA0.base_state = 0x06
+	objA0.collision_attributes = (collision.flag.SPECIAL | collision.size.16x16)
+	objA0.value42 = 0x07
+	objA0.value39 = 0x08
+
+	objA0.velocity.x = objA1.velocity.x
+
+	D4.u16 = 0x800
+	if (objA0.render_flags & render_flag.FLIP_Y)
+		D4.s16 = -D4.s16
+	objA0.velocity.y = D4.u16
+
+	signalMultiReturn()
 }
 
 // flying capsule

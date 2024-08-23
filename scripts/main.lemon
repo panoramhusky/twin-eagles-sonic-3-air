@@ -1,5 +1,68 @@
+include renderhooks
 include character
 include character_graphics
 include render_character
+include health_system
+include items
 include object_interactions
 include badniks
+
+include outro
+
+function u64 Standalone.getModdedSoundKey(u64 soundKey, u8 sfxId, u8 soundRegType)
+{
+	if ((objA0.update_address == 0x010a94 && char.character == CHARACTER_SONIC))
+	{
+		if (sfxId == SFX_BRAKE)
+			return "te_skid"
+		else if (sfxId == 0x35)
+			return "te_hurt"
+		else if (sfxId == SFX_JUMP)
+			return "te_jump"
+		else
+			return base.Standalone.getModdedSoundKey(soundKey, sfxId, soundRegType)
+	}
+	
+	return base.Standalone.getModdedSoundKey(soundKey, sfxId, soundRegType)
+}
+
+function u32 TESonic.ScanandReturnAddressInRAM(u32 update_address)
+{
+	u32 ram_address = 0xffffb000
+	for (u32 position = 0; position <= 0xffffffff; position += 0x4a)
+	{
+		A3 = ram_address + position
+		if (u32[A3] == update_address)
+		{
+			break
+		}
+		else if (ram_address == 0xffffcf82)
+		{
+			// quick hack to stop for loop, probably a better way to do this
+			A3 = 0
+			string message = stringformat("Couldn't find update address %02x in any object slot", update_address)
+			assert(false, message)
+			break
+		}
+	}
+	return A3
+}
+
+function bool TESonic.checkIfBombCollidingWithBoss()
+{
+	u16 px1 = objA0.position.x.u16 - 8
+	u16 py1 = objA0.position.y.u16 - 4
+	u16 bx1 = 16
+	u16 by1 = 10
+	
+	u16 px2 = objA1.position.x.u16 - 16
+	u16 py2 = objA1.position.y.u16 - 8
+	u16 bx2 = 32
+	u16 by2 = 32
+	
+	Debug.drawRect(px1, py1, bx1, by1, 0x0000ff88)
+	Debug.drawRect(px2, py2, bx2, by2, 0xff000088)
+	
+	bool colliding = checkBoxOverlap(px1, py1, bx1, by1, px2, py2, bx2, by2)
+	return colliding
+}

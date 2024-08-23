@@ -1,14 +1,14 @@
 {
 	// It would be so funny if he had his own sfx and not shared with other players (if possible)
 	
-	"35": { "File": "death.ogg", "Type": "Sound" },
-	"36": { "File": "skid.ogg", "Type": "Sound" },
-	"42": { "File": "kick.ogg", "Type": "Sound" },
-	"4C": { "File": "landing.ogg", "Type": "Sound" },
-	"62": { "File": "jump.ogg", "Type": "Sound" },
-	"63": { "File": "mario.ogg", "Type": "Sound" },
-	"get_hurt":	{ "File": "hurt.ogg", "Type": "Sound" },
-	"speed_up":	{ "File": "speedshoes.ogg", "Type": "Sound" },
-	"health_restore":	{ "File": "health_restore.ogg", "Type": "Sound" },
-	"health_newheart":	{ "File": "health_newheart.ogg", "Type": "Sound" }
+	"te_death": { "File": "death.ogg", "Type": "Sound", "Channel": "35" },
+	"te_skid": { "File": "skid.ogg", "Type": "Sound", "Channel": "84" },
+	"te_kick": { "File": "kick.ogg", "Type": "Sound", "Channel": "68" },
+	"te_land": { "File": "landing.ogg", "Type": "Sound", "Channel": "02" },
+	"te_jump": { "File": "jump.ogg", "Type": "Sound", "Channel": "01" },
+	"te_mario": { "File": "mario.ogg", "Type": "Sound", "Channel": "63" },
+	"te_hurt":	{ "File": "hurt.ogg", "Type": "Sound", "Channel": "35" },
+	"te_sonic":	{ "File": "speedshoes.ogg", "Type": "Sound", "Channel": "03" },
+	"te_restore":	{ "File": "health_restore.ogg", "Type": "Sound", "Channel": "04" },
+	"te_newheart":	{ "File": "health_newheart.ogg", "Type": "Sound", "Channel": "05" }
 }

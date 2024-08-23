@@ -1,0 +1,102 @@
+global u8 TESonic.health = 3
+global u8 TESonic.maxhealth = 3
+
+//# address-hook(0x010294) end(0x010364)
+function void Character.GettingHurt()
+{
+	if (char.character == CHARACTER_SONIC)
+	{
+		bool canLoseShield = true	// Usually true, gets false e.g. for 2nd player Tails
+		bool isProtectedByObject = ((char.protection_flag & 0x80) != 0)
+
+		if (canLoseShield && (char.bonus_effect & char.bonus.ANY_SHIELD) == 0)
+		{
+			if (!isProtectedByObject)
+			{
+				--TESonic.health
+				// No more health?
+				if (TESonic.health == 0)
+				{
+					Character.Die_internal()
+					return
+				}
+
+				// Should be unnecessary, but make sure all shield flags are cleared
+				char.bonus_effect &= ~char.bonus.ALL_SHIELDS
+			}
+		}
+		else
+		{
+		#if STANDALONE
+			// When using e.g. the MGZ spinning top, do not lose your shield
+			if (!isProtectedByObject)
+		#endif
+			{
+				// Lose shield
+				char.bonus_effect &= ~char.bonus.ALL_SHIELDS
+			}
+		}
+
+		playSound(0x35)
+		char.base_state = base_state.HURT
+		Character.LandingOnGroundNoSpindash()
+		char.flags |= char.flag.IN_AIR
+		if (char.flags & char.flag.UNDERWATER)
+		{
+			char.velocity.x = -0x100
+			char.velocity.y = -0x200
+		}
+		else
+		{
+			char.velocity.x = -0x200
+			char.velocity.y = -0x400
+		}
+		if (char.position.x.u16 >= u16[A2 + 0x10])
+		{
+			char.velocity.x = -char.velocity.x
+		}
+
+		char.groundspeed = 0
+		char.state = char.state.GOT_HURT
+		char.invuln.countdown = 120
+		D0 = 0xffffffff
+	}
+	else
+	{
+		base.Character.GettingHurt()
+	}
+}
+
+//# address-hook(0x00db44) end(0x00dbb2)
+function void RenderHUD()
+{
+	base.RenderHUD()
+
+#if STANDALONE
+	if (DEBUG_DISABLE_HUD)
+		return
+#endif
+
+	s16 baseX = global.level_started
+	baseX += 0x0f
+	s16 baseY = 0x08
+	u16 renderQueue = 0xe000
+	
+	if (!debug_mode.state)
+	{
+		baseY += 174
+		for (u8 i == 0; i < TESonic.maxhealth; ++i)
+		{		
+			u16 offset = (i * 16)
+		
+			string key
+			
+			if (i < TESonic.health)
+				key = "hud_health_icon_full"
+			else
+				key = "hud_health_icon_empty"
+			
+			HUD.drawSprite(key, baseX + offset, baseY, renderQueue)
+		}
+	}
+}

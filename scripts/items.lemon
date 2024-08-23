@@ -1,0 +1,186 @@
+//# address-hook(0x01d57e) end(0x01d5d6)
+function void MonitorIntact.Init()
+{
+	A1 = 0xffffb000
+	if (u8[A1 + 0x38] == CHARACTER_SONIC)
+	{
+		objA0.base_state += 2
+		objA0.hitbox_extends.x = 8
+		objA0.hitbox_extends.y = 8
+		objA0.sprite_attributes = 0x04c4
+		objA0.render_flags |= render_flag.WORLD
+		objA0.sprite_priority = 0x180
+		objA0.box_size.x = 8
+		objA0.box_size.y = 8
+		
+		objA0.position.y.u16 -= 8
+
+		objA0.subtype2c = Monitor.getRandomizedType(objA0.subtype2c, false)
+
+		if (objA0.respawn_entry)
+		{
+			A2 = 0xffff0000 + objA0.respawn_entry
+			if (u8[A2] & 0x01)
+			{
+				objA0.animation.sprite = 0x0b
+				objA0.update_address = addressof(MonitorIntact.Render)		// Needed for render hook, simply calls "DrawOrUnloadObject"
+				return
+			}
+		}
+
+		objA0.collision_attributes = (collision.flag.ITEM | collision.size.16x16)
+		objA0.state = objA0.subtype2c
+	#if STANDALONE
+		if (objA0.state == 0x0b)	// Classic Shield's state is not completely supported
+			objA0.state = 0x05
+	#endif
+	}
+	else
+	{
+		base.MonitorIntact.Init()
+	}
+}
+
+//# address-hook(0x01d5dc) end(0x01d616)
+function void MonitorIntact.UpdateDefault()
+{
+	A1 = 0xffffb000
+	if (u8[A1 + 0x38] == CHARACTER_SONIC)
+	{
+		AddAsDynamicObject()
+
+		Object.animationUpdate(0x01db3a)
+		MonitorIntact.Render()
+	}
+	else
+	{
+		base.MonitorIntact.UpdateDefault()
+	}
+}
+
+//# address-hook(0x01d716) end(0x01d7b6)
+function void MonitorIntact.Opening()
+{
+	A1 = 0xffffb000
+	if (u8[A1 + 0x38] == CHARACTER_SONIC)
+	{
+	#if STANDALONE
+		u8[A0 + 0x49] = objA0.state		// Backup original
+		if (objA0.state >= 0x05 && objA0.state <= 0x07)
+		{
+			if (Monitor.enforceClassicShield())
+			{
+				objA0.state = 0x0b
+			}
+		}
+
+		if (u8[A0 + 0x49] != objA0.state)
+		{
+			// Go back from Classic Shield to original if player acquired a shield meanwhile
+			//  -> E.g. when opening two shield monitor quickly one after another
+			if (!Monitor.enforceClassicShield())
+			{
+				objA0.state = u8[A0 + 0x49]
+			}
+		}
+	#endif
+
+		objA0.flags2a &= 0x03
+		u8[A0 + 0x28] = 0
+
+		if (objA0.respawn_entry)
+		{
+			A2 = 0xffff0000 + objA0.respawn_entry
+			u8[A2] |= 0x01
+		}
+
+		A1 = 0xffff0000 + objA0.monitor.character_address
+		A2 = (A1 == 0xffffb000) ? 0xfffffecc : 0xfffffece		// Address to keep count of broken monitors in. having different ones for each player is a leftover from Sonic 2
+	#if STANDALONE
+		if (objA0.state == 0x0b)	// Classic Shield
+		{
+			ItemEffect.applyShield(0, addressof(InstaShield.Init), SFX_CLASSICSHIELD)
+		}
+		else
+	#endif
+		{
+			// Targets:
+			//  - 0x01d890	-> objA0.state = 0x00	-> Static, works like Robotnik
+			//  - 0x01d898	-> objA0.state = 0x01	-> Extra Life
+			//  - 0x01d890	-> objA0.state = 0x02	-> Robotnik
+			//  - 0x01d8ac	-> objA0.state = 0x03	-> Rings
+			//  - 0x01d90a	-> objA0.state = 0x04	-> Speed Shoes
+			//  - 0x01d954	-> objA0.state = 0x05	-> Fire Shield
+			//  - 0x01d992	-> objA0.state = 0x06	-> Lightning Shield
+			//  - 0x01d9d0	-> objA0.state = 0x07	-> Water Shield
+			//  - 0x01da0e	-> objA0.state = 0x08	-> Invincibility
+			//  - 0x01da60	-> objA0.state = 0x09	-> "Super" monitor (debug only)
+			call tableLookupAddress(0x01d87c, objA0.state * 2)
+		}
+
+		DrawObject()
+
+	#if STANDALONE
+		Standalone.onMonitorOpened()
+	#endif
+
+		UnloadObject()
+		return
+	}
+	else
+	{
+		base.MonitorIntact.Opening()
+	}
+}
+
+//# address-hook(0x01d90a) end(0x01d94e)
+function void ItemEffect.ApplySpeedUp()
+{
+	A1 = 0xffffb000
+	if (u8[A1 + 0x38] == CHARACTER_SONIC)
+		Audio.playAudio("te_sonic")
+	
+	base.ItemEffect.ApplySpeedUp()
+}
+
+//# address-hook(0x01d8ac) end(0x01d906)
+function void ItemEffect.ApplyExtraRings()
+{
+	A1 = 0xffffb000
+	if (u8[A1 + 0x38] == CHARACTER_SONIC)
+	{
+		playSound(0x76)
+		if (TESonic.health < TESonic.maxhealth)
+		{
+			++TESonic.health
+		}
+		else
+		{
+			TESonic.health = TESonic.maxhealth
+		}
+	}
+	else
+	{
+		base.ItemEffect.ApplyExtraRings()
+	}
+}
+
+//# address-hook(0x01da0e) end(0x01da5e)
+function void ItemEffect.ApplyInvincibility()
+{
+	A1 = 0xffffb000
+	if (u8[A1 + 0x38] == CHARACTER_SONIC)
+	{
+		playSound(0x77)
+		if (TESonic.maxhealth < 5)
+		{
+			++TESonic.maxhealth
+		}
+		
+		TESonic.health = TESonic.maxhealth
+	}
+	else
+	{
+		base.ItemEffect.ApplyInvincibility()
+	}
+}

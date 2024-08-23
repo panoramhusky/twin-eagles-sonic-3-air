@@ -1,0 +1,141 @@
+constant string TESonic.CREDITS_FONT = "oxyfont_regular:gradient:outline(0x000000ff,1,true)"
+
+//# address-hook(0x05b1a2) end(0x05b1e6)
+function void fn05b1a2()
+{
+	base.fn05b1a2()
+	
+	A1 = 0xffffb000
+	if (u8[A1 + 0x38] == CHARACTER_SONIC)
+	{
+		outro.wait_time = 0
+	}
+}
+
+//# address-hook(0x05b204) end(0x05b282)
+function void fn05b204()
+{
+	A1 = 0xffffb000
+	if (u8[A1 + 0x38] == CHARACTER_SONIC)
+	{
+		outro.scroll_speed = 0x00008000
+		u16 oldCamPos = camera.position.y.player2 >> 16
+		camera.position.y.player2 -= outro.scroll_speed
+		
+		u16 px = camera.position.x.u16 + (getScreenWidth() / 2)
+		u16 py = camera.position.y.u16.player2
+		
+		if (py <= 0xe985 && py > 0x1000)
+		{
+			fn05b29e()
+		}
+		
+		u32 hue = camera.position.y.u16.player2
+		
+		u32 color = Color.fromHSV(hue, 1.0, 1)
+		
+		py += 32 // additional 32 needed here to prevent cutting in
+		
+		Renderer.drawText(TESonic.CREDITS_FONT, px, py, "! WHOW !", color, 5, 0, 0xffff, true)
+		py += 24
+		Renderer.drawText(TESonic.CREDITS_FONT, px, py, "You MADE IT, Awesome!", color, 5, 0, 0xffff, true)
+		
+		py += getScreenHeight() + 16
+		
+		Renderer.drawText(TESonic.CREDITS_FONT, px, py, "Now SONIC and MARIO are", color, 5, 0, 0xffff, true)
+		py += 24
+		Renderer.drawText(TESonic.CREDITS_FONT, px, py, "good friends forever...", color, 5, 0, 0xffff, true)
+		py += getScreenHeight() + 16
+		
+		Renderer.drawText(TESonic.CREDITS_FONT, px, py, "And NOBODY can separate", color, 5, 0, 0xffff, true)
+		py += 24
+		Renderer.drawText(TESonic.CREDITS_FONT, px, py, "them.", color, 5, 0, 0xffff, true)
+		py += getScreenHeight() + 16
+		
+		Renderer.drawText(TESonic.CREDITS_FONT, px, py, "SONIC loves NINTENDO", color, 5, 0, 0xffff, true)
+		py += 24
+		Renderer.drawText(TESonic.CREDITS_FONT, px, py, "MARIO loves SEGA", color, 5, 0, 0xffff, true)
+		py += getScreenHeight() + 16
+		
+		Renderer.drawText(TESonic.CREDITS_FONT, px, py, "CREDITS", color, 5, 0, 0xffff, true)
+		py += getScreenHeight() + 16
+		
+		Renderer.drawText(TESonic.CREDITS_FONT, px, py, "Programmers", color, 5, 0, 0xffff, true)
+		py += getScreenHeight() + 16
+		
+		Renderer.drawText(TESonic.CREDITS_FONT, px, py, "SHAGUI, UFO MAN", color, 5, 0, 0xffff, true)
+		py += 24
+		Renderer.drawText(TESonic.CREDITS_FONT, px, py, "TEACH MAN, BAYGON", color, 5, 0, 0xffff, true)
+		py += getScreenHeight() + 16
+		
+		Renderer.drawText(TESonic.CREDITS_FONT, px, py, "Animation", color, 5, 0, 0xffff, true)
+		py += getScreenHeight() + 16
+		
+		Renderer.drawText(TESonic.CREDITS_FONT, px, py, "SHAGUI, UFO MAN", color, 5, 0, 0xffff, true)
+		py += 24
+		Renderer.drawText(TESonic.CREDITS_FONT, px, py, "TEACH MAN, BAYGON", color, 5, 0, 0xffff, true)
+		py += getScreenHeight() + 16
+		
+		Renderer.drawText(TESonic.CREDITS_FONT, px, py, "Voice", color, 5, 0, 0xffff, true)
+		py += getScreenHeight() + 16
+		
+		Renderer.drawText(TESonic.CREDITS_FONT, px, py, "PSICOSIS", color, 5, 0, 0xffff, true)
+		py += getScreenHeight() + 16
+		
+		Renderer.drawText(TESonic.CREDITS_FONT, px, py, "Graphics", color, 5, 0, 0xffff, true)
+		py += getScreenHeight() + 16
+		
+		Renderer.drawText(TESonic.CREDITS_FONT, px, py, "AMIGA MAN, TEACH MAN", color, 5, 0, 0xffff, true)
+		py += getScreenHeight() + 16
+		
+		Renderer.drawText(TESonic.CREDITS_FONT, px, py, "Planning", color, 5, 0, 0xffff, true)
+		py += getScreenHeight() + 16
+		
+		Renderer.drawText(TESonic.CREDITS_FONT, px, py, "SHAGUI, TEACH MAN", color, 5, 0, 0xffff, true)
+		py += getScreenHeight() + 16
+		
+		Renderer.drawText(TESonic.CREDITS_FONT, px, py, "Developed by:", color, 5, 0, 0xffff, true)
+		py += getScreenHeight() + 16
+		
+		Renderer.drawText(TESonic.CREDITS_FONT, px, py, "ANTHROX, MR. KNIGHT", color, 5, 0, 0xffff, true)
+		py += 24
+		Renderer.drawText(TESonic.CREDITS_FONT, px, py, "COPYRIGHT 1997", color, 5, 0, 0xffff, true)
+		py += getScreenHeight() + 16
+		
+		Renderer.drawText(TESonic.CREDITS_FONT, px, py, "A.I.R. Mod Credits", color, 5, 0, 0xffff, true)
+		py += getScreenHeight() + 16
+		
+		Renderer.drawText(TESonic.CREDITS_FONT, px, py, "Programming", color, 5, 0, 0xffff, true)
+		py += getScreenHeight() + 16
+		
+		Renderer.drawText(TESonic.CREDITS_FONT, px, py, "HAZELSPOODER", color, 5, 0, 0xffff, true)
+		py += getScreenHeight() + 16
+		
+		Renderer.drawText(TESonic.CREDITS_FONT, px, py, "Graphics", color, 5, 0, 0xffff, true)
+		py += getScreenHeight() + 16
+		
+		Renderer.drawText(TESonic.CREDITS_FONT, px, py, "PANORAMHUSKY", color, 5, 0, 0xffff, true)
+		py += getScreenHeight() + 16
+		
+		Renderer.drawText(TESonic.CREDITS_FONT, px, py, "The end", color, 5, 0, 0xffff, true)
+		py += getScreenHeight() + 16
+		
+		Renderer.drawText(TESonic.CREDITS_FONT, px, py, "April fools!", color, 5, 0, 0xffff, true)
+		py += getScreenHeight() + 16
+	}
+	else
+	{
+		base.fn05b204()
+	}
+}
+
+//# address-hook(0x05e1c2) end(0x05e282)
+function void fn05e1c2()
+{
+	base.fn05e1c2()
+	A1 = 0xffffb000
+	if (u8[A1 + 0x38] == CHARACTER_SONIC)
+	{
+		playMusic(MUSIC_CTRL_STOP)
+	}
+}
