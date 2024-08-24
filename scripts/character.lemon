@@ -1197,12 +1197,13 @@ function bool debugModeRescue()
 
 }
 
-function void Init()
+function void EntryFunctions.sharedInit()
 {
 	if (TESonic.health < 3)
 		TESonic.health = 3
-	
-	base.Init()
+		
+	TESonic.maxhealth = 3	
+	base.EntryFunctions.sharedInit()
 }
 
 function void Standalone.onLevelStart()

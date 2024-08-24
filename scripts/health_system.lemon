@@ -1,5 +1,5 @@
-global u8 TESonic.health
-global u8 TESonic.maxhealth
+global u8 TESonic.health = 3
+global u8 TESonic.maxhealth = 3
 
 //# address-hook(0x010294) end(0x010364)
 function void Character.GettingHurt()
