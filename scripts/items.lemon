@@ -169,7 +169,14 @@ function void ItemEffect.ApplyInvincibility()
 			++TESonic.maxhealth
 		}
 		
-		TESonic.health = TESonic.maxhealth
+		if (TESonic.health < TESonic.maxhealth)
+		{
+			++TESonic.health
+		}
+		else
+		{
+			TESonic.health = TESonic.maxhealth
+		}
 	}
 	else
 	{

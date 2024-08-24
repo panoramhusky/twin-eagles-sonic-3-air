@@ -55,34 +55,38 @@ function void RenderHUD()
 {
 	base.RenderHUD()
 
-#if STANDALONE
-	if (DEBUG_DISABLE_HUD)
-		return
-#endif
-
-	s16 baseX = global.level_started
-	baseX += 0x0f
-	s16 baseY = 0x08
-	u16 renderQueue = 0xe000
-	
-	if (!debug_mode.state)
+	A1 = 0xffffb000
+	if (u8[A1 + 0x38] == CHARACTER_SONIC)
 	{
-		if (TESonic.health > TESonic.maxhealth)
-			TESonic.health = TESonic.maxhealth
-	
-		baseY += 174
-		for (u8 i == 0; i < TESonic.maxhealth; ++i)
-		{		
-			u16 offset = (i * 16)
+	#if STANDALONE
+		if (DEBUG_DISABLE_HUD)
+			return
+	#endif
+
+		s16 baseX = global.level_started
+		baseX += 0x0f
+		s16 baseY = 0x08
+		u16 renderQueue = 0xe000
 		
-			string key
+		if (!debug_mode.state)
+		{
+			if (TESonic.health > TESonic.maxhealth)
+				TESonic.health = TESonic.maxhealth
+		
+			baseY += 174
+			for (u8 i == 0; i < TESonic.maxhealth; ++i)
+			{		
+				u16 offset = (i * 16)
 			
-			if (i < TESonic.health)
-				key = "hud_health_icon_full"
-			else
-				key = "hud_health_icon_empty"
-			
-			HUD.drawSprite(key, baseX + offset, baseY, renderQueue)
+				string key
+				
+				if (i < TESonic.health)
+					key = "hud_health_icon_full"
+				else
+					key = "hud_health_icon_empty"
+				
+				HUD.drawSprite(key, baseX + offset, baseY, renderQueue)
+			}
 		}
 	}
 }

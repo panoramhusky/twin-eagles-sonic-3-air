@@ -290,6 +290,8 @@ function void Rocks.Update()
 //# address-hook(0x025d9c) end(0x025ea0)
 function void fn025d9c()
 {
+	// TO-DO: fix collision
+
 	A1 = 0xffffb000
 	if (u8[A1 + 0x38] == CHARACTER_SONIC)
 	{
