@@ -60,6 +60,7 @@ function void UpdateSonicAnimation()
 			{
 				char.state = char.state.RUNNING
 				char.animation.timer = 0
+				char.rotation.x = 0
 			}
 			else
 				char.animation.sprite = KICK[char.animation.timer]
