@@ -546,8 +546,31 @@ function void fn02a58e()
 }
 
 // cnz button
+//# address-hook(0x065d8c) end(0x065dd0)
+function void fn065d8c()
+{
+	base.fn065d8c()
+
+	A1 = 0xffffb000
+	if (u8[A1 + 0x38] == CHARACTER_SONIC)
+	{
+		if (objA0.flags2a & (object.flag.P1_ON_OBJECT | object.flag.P2_ON_OBJECT))
+		{
+			objA0.update_address = addressof(SmallExplosion.BaseUpdate)
+			objA0.base_state = 0x02
+			u8[A0 + 0x28] = 0
+			u8[A0 + 0x29] = 0
+			
+			objA1.flags2a &= ~char.flag.ON_OBJECT
+		}
+	}
+}
+
+// cnz button (real)
 function void Button.checkIfPressed()
 {
+	// mod compat by accident? cnz button mod uses a different object for the button to turn the lights back on
+
 	base.Button.checkIfPressed()
 	A1 = 0xffffb000
 	if (u8[A1 + 0x38] == CHARACTER_SONIC)
