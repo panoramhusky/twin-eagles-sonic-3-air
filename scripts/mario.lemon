@@ -7,8 +7,8 @@ function void Checkpoint.Init()
 	A1 = 0xffffb000
 	if (u8[A1 + 0x38] == CHARACTER_SONIC)
 	{
-		objA0.box_size.x = 16
-		objA0.box_size.y = 23
+		objA0.box_size.x = 24
+		objA0.box_size.y = 24
 		
 		objA0.hitbox_extends.x = 16
 		objA0.hitbox_extends.y = 19
@@ -123,6 +123,8 @@ function void fn02d10a()
 			objA0.position.y.u16 = objA1.position.y.u16
 			objA0.velocity.y = -0x580
 			objA0.countdown_value = 30
+			objA0.box_size.x = 24
+			objA0.box_size.y = 24
 			
 			DrawOrUnloadObject()
 		}
