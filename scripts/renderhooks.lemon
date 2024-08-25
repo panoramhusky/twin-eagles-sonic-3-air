@@ -1,22 +1,63 @@
 function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 {
-	bool prioFlag = (objA0.sprite_attributes & sprite_attribute.PRIORITY) != 0
-	if (objA0.update_address == 0x01d566)
+	A1 = 0xffffb000
+	if (u8[A1 + 0x38] == CHARACTER_SONIC)
 	{
-		u8 flags = ((objA0.render_flags & render_flag.FLIP_Y) ? SPRITE_FLAG_FLIP_Y : 0) | (prioFlag ? SPRITE_FLAG_PRIO : 0)
-		
-		u64 key = Monitor.getIconSpriteKey(objA0.subtype2c)
-		
-		if (objA0.subtype2c >= 0x05 && objA0.subtype2c <= 0x07)
+		bool prioFlag = (objA0.sprite_attributes & sprite_attribute.PRIORITY) != 0
+		if (objA0.update_address == 0x01d566)
 		{
-			if (Monitor.enforceClassicShield())
+			u8 flags = ((objA0.render_flags & render_flag.FLIP_Y) ? SPRITE_FLAG_FLIP_Y : 0) | (prioFlag ? SPRITE_FLAG_PRIO : 0)
+			
+			u64 key = Monitor.getIconSpriteKey(objA0.subtype2c)
+			
+			if (objA0.subtype2c >= 0x05 && objA0.subtype2c <= 0x07)
 			{
-				key = Monitor.getIconSpriteKey(0x0b)		// Get classic shield monitor icon key
+				if (Monitor.enforceClassicShield())
+				{
+					key = Monitor.getIconSpriteKey(0x0b)		// Get classic shield monitor icon key
+				}
 			}
+			
+			Renderer.drawCustomSprite(key, px, py, 0x00, flags, renderQueue)
+			return true
 		}
 		
-		Renderer.drawCustomSprite(key, px, py, 0x00, flags, renderQueue + 1)
-		return true
+		if (objA0.update_address == 0x02cfa8)
+		{
+			if (objA0.base_state <= 0x04)
+			{
+				if (objA0.state == 0)
+				{
+					// imprisoned mario
+					u8 flags = ((objA0.render_flags & render_flag.FLIP_Y) ? SPRITE_FLAG_FLIP_Y : 0) | (prioFlag ? SPRITE_FLAG_PRIO : 0)
+					
+					string key = stringformat("mario_trapped_%01x", objA0.animation.sprite)
+					
+					Renderer.drawCustomSprite(key, px, py, 0x00, flags, renderQueue)
+					return true
+				}
+				else
+				{
+					// freed mario
+					u8 flags = ((objA0.render_flags & render_flag.FLIP_Y) ? SPRITE_FLAG_FLIP_Y : 0) | (prioFlag ? SPRITE_FLAG_PRIO : 0)
+					
+					string key = stringformat("mario_freed_%01x", objA0.animation.sprite)
+					
+					Renderer.drawCustomSprite(key, px, py, 0x00, flags, renderQueue)
+					return true
+				}
+			}
+			else if (objA0.base_state == 0x06)
+			{
+				// cage
+				u8 flags = ((objA0.render_flags & render_flag.FLIP_Y) ? SPRITE_FLAG_FLIP_Y : 0) | (prioFlag ? SPRITE_FLAG_PRIO : 0)
+				
+				string key = "mario_freed_cage"
+				
+				Renderer.drawCustomSprite(key, px, py, 0x00, flags, renderQueue)
+				return true
+			}
+		}
 	}
 	
 	return base.Standalone.onWriteToSpriteTable(px, py, renderQueue)
@@ -31,7 +72,7 @@ function u64 Monitor.getIconSpriteKey(u8 type)
 	else if (type == 0x02)
 		return "eggman_pickup"
 	else if (type == 0x03)
-		return "health_pickup1"
+		return "health_pickup_1"
 	else if (type == 0x04)
 		return "speedshoes_pickup"
 	else if (type == 0x05)

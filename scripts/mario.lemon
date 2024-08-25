@@ -1,0 +1,159 @@
+//# address-hook(0x02cfc0) end(0x02d00c)
+//# alias(fn02cfc0) deprecated
+function void Checkpoint.Init()
+{
+	base.Checkpoint.Init()
+	
+	A1 = 0xffffb000
+	if (u8[A1 + 0x38] == CHARACTER_SONIC)
+	{
+		objA0.box_size.x = 16
+		objA0.box_size.y = 23
+		
+		objA0.hitbox_extends.x = 16
+		objA0.hitbox_extends.y = 19
+		
+		objA0.position.y.u16 += 4
+	}
+}
+
+//# address-hook(0x02d012) end(0x02d024)
+function void fn02d012()
+{
+	base.fn02d012()
+	
+	A1 = 0xffffb000
+	if (u8[A1 + 0x38] == CHARACTER_SONIC)
+	{
+		++objA0.animation.timer
+		if (objA0.animation.timer > 8)
+		{
+			objA0.animation.sprite ^= 1
+			objA0.animation.timer = 0
+		}
+	}
+}
+
+//# address-hook(0x02d0f8) end(0x02d104)
+function void fn02d0f8()
+{
+	A1 = 0xffffb000
+	if (u8[A1 + 0x38] == CHARACTER_SONIC)
+	{
+		DrawOrUnloadObject()
+		
+		if (objA0.state == 0x02)
+			objA0.base_state = 0x04
+		
+		if (objA0.base_state == 0x04)
+		{
+			if (objA0.value3a == 0)
+			{
+				// make mario jump
+				objA0.value3a = 1
+				objA0.velocity.y = -0x300
+				objA0.countdown_value = 0
+			}
+			else if (objA0.value3a == 1)
+			{	
+				// jumping
+
+				if (objA0.velocity.y <= 0)
+				{
+					objA0.animation.sprite = 0
+					UpdateMovementSimple()
+				}
+				else
+				{
+					++objA0.countdown_value
+					
+					if (objA0.countdown_value > 0x08)
+					{
+						objA0.value3a = 2
+						objA0.animation.sprite = 1
+						objA0.countdown_value = 0
+					}
+				}
+				
+			}
+			else if (objA0.value3a == 2)
+			{
+				UpdateMovementSimple()
+				CheckGroundCollision()
+				if (D1.s16 < 0)
+				{
+					objA0.velocity.y = 0
+					objA0.position.y.u16 += D1.u16
+					objA0.value3a = 3
+				}
+			}
+			else if (objA0.value3a == 3)
+			{
+				// waiting
+				objA0.animation.sprite = 1
+				
+				++objA0.countdown_value
+				if (objA0.countdown_value > 30)
+				{
+					objA0.value3a = 1
+					objA0.velocity.y = -0x300
+					objA0.countdown_value = 0
+				}
+			}
+		}
+		
+	}
+	else
+	{
+		base.fn02d0f8()
+	}
+}
+
+//# address-hook(0x02d10a) end(0x02d15e)
+function void fn02d10a()
+{
+	A1 = 0xffffb000
+	if (u8[A1 + 0x38] == CHARACTER_SONIC)
+	{
+		A1 = 0xffff0000 + u16[A0 + 0x3e]
+	
+		if (objA0.countdown_value == 0)
+		{
+			objA0.position.x.u16 = objA1.position.x.u16
+			objA0.position.y.u16 = objA1.position.y.u16
+			objA0.velocity.y = -0x580
+			objA0.countdown_value = 30
+			
+			DrawOrUnloadObject()
+		}
+		else
+		{
+			if (objA0.velocity.y >= 0)
+			{
+				objA0.velocity.y = 0
+				--objA0.countdown_value
+				
+				if (objA0.countdown_value & 1)
+				{
+					DrawOrUnloadObject()
+				}
+				
+				if (objA0.countdown_value <= 0)
+				{
+					UnloadObject()
+					return
+				}
+			}
+			else
+			{
+				UpdateMovementStraightSimple()
+				objA0.velocity.y += 0x30
+				DrawOrUnloadObject()
+			}
+		}
+	}
+	else
+	{
+		base.fn02d10a()
+	}
+}

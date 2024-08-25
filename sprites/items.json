@@ -1,8 +1,8 @@
 {
 	"1up_head_pickup":  { "File": "items.bmp", "Rect": "0,0,16,16", "Center": "8,8" },
 	"speedshoes_pickup":  { "File": "items.bmp", "Rect": "19,0,16,16", "Center": "8,8" },
-	"health_pickup1":  { "File": "items.bmp", "Rect": "38,0,16,16", "Center": "8,8" },
-	"health_pickup2":  { "File": "items.bmp", "Rect": "57,0,16,16", "Center": "8,8" },
+	"health_pickup_0":  { "File": "items.bmp", "Rect": "38,0,16,16", "Center": "8,8" },
+	"health_pickup_1":  { "File": "items.bmp", "Rect": "57,0,16,16", "Center": "8,8" },
 	"health_pickup_newheart":  { "File": "items.bmp", "Rect": "76,0,16,16", "Center": "8,8" },
 	"s_pickup":  { "File": "items.bmp", "Rect": "95,0,16,16", "Center": "8,8" },
 	"flameshield_pickup":  { "File": "items.bmp", "Rect": "114,0,16,16", "Center": "8,8" },
@@ -10,9 +10,9 @@
 	"aquashield_pickup":  { "File": "items.bmp", "Rect": "152,0,16,16", "Center": "8,8" },
 	"classicshield_pickup":  { "File": "items.bmp", "Rect": "171,0,16,16", "Center": "8,8" },
 	"eggman_pickup":  { "File": "items.bmp", "Rect": "190,0,16,16", "Center": "8,8" },
-	"mario_trapped1":  { "File": "items.bmp", "Rect": "34,18,32,46", "Center": "16,24" },
-	"mario_trapped2":  { "File": "items.bmp", "Rect": "0,18,32,46", "Center": "16,24" },
-	"mario_freed1":  { "File": "items.bmp", "Rect": "68,25,31,39", "Center": "16,17" },
-	"mario_freed2":  { "File": "items.bmp", "Rect": "101,25,31,39", "Center": "16,17" },
+	"mario_trapped_0":  { "File": "items.bmp", "Rect": "34,18,32,46", "Center": "17,24" },
+	"mario_trapped_1":  { "File": "items.bmp", "Rect": "0,18,32,46", "Center": "17,24" },
+	"mario_freed_0":  { "File": "items.bmp", "Rect": "68,25,31,39", "Center": "16,19" },
+	"mario_freed_1":  { "File": "items.bmp", "Rect": "101,25,32,39", "Center": "16,19" },
 	"mario_freed_cage":  { "File": "items.bmp", "Rect": "135,18,32,46", "Center": "16,24" }
 }

@@ -5,6 +5,7 @@ include render_character
 include health_system
 include items
 include object_interactions
+include mario
 include badniks
 
 include outro
@@ -19,6 +20,13 @@ function u64 Standalone.getModdedSoundKey(u64 soundKey, u8 sfxId, u8 soundRegTyp
 			return "te_hurt"
 		else if (sfxId == SFX_JUMP)
 			return "te_jump"
+		else
+			return base.Standalone.getModdedSoundKey(soundKey, sfxId, soundRegType)
+	}
+	else if (objA0.update_address == 0x02cfa8)
+	{
+		if (sfxId == 0x63)
+			return "te_mario"
 		else
 			return base.Standalone.getModdedSoundKey(soundKey, sfxId, soundRegType)
 	}
