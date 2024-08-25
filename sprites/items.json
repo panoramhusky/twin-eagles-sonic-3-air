@@ -10,8 +10,8 @@
 	"aquashield_pickup":  { "File": "items.bmp", "Rect": "152,0,16,16", "Center": "8,8" },
 	"classicshield_pickup":  { "File": "items.bmp", "Rect": "171,0,16,16", "Center": "8,8" },
 	"eggman_pickup":  { "File": "items.bmp", "Rect": "190,0,16,16", "Center": "8,8" },
-	"mario_trapped_0":  { "File": "items.bmp", "Rect": "34,18,32,46", "Center": "17,24" },
-	"mario_trapped_1":  { "File": "items.bmp", "Rect": "0,18,32,46", "Center": "17,24" },
+	"mario_trapped_0":  { "File": "items.bmp", "Rect": "34,18,32,46", "Center": "16,24" },
+	"mario_trapped_1":  { "File": "items.bmp", "Rect": "0,18,32,46", "Center": "16,24" },
 	"mario_freed_0":  { "File": "items.bmp", "Rect": "68,25,31,39", "Center": "16,19" },
 	"mario_freed_1":  { "File": "items.bmp", "Rect": "101,25,32,39", "Center": "16,19" },
 	"mario_freed_cage":  { "File": "items.bmp", "Rect": "135,18,32,46", "Center": "16,24" }
