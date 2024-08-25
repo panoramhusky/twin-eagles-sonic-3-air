@@ -17,6 +17,76 @@ function void Checkpoint.Init()
 	}
 }
 
+//# address-hook(0x02d028) end(0x02d0f6)
+function void fn02d028()
+{
+	A1 = 0xffffb000
+	if (u8[A1 + 0x38] == CHARACTER_SONIC)
+	{
+	#if STANDALONE
+		// Skip this when restart was triggered
+		//  -> Otherwise the "Restart Level" function won't work correctly when directly in front of a checkpoint
+		if (level.restart == 1)
+			return
+	#endif
+
+		D1.u8 &= 0x7f
+		D2.u8 = objA0.subtype2c & 0x7f
+		if (D1.u8 < D2.u8)
+		{
+			u16 dx = u16[A3 + 0x10] - objA0.position.x.u16 + 16
+			u16 dy = u16[A3 + 0x14] - objA0.position.y.u16 + 0x24
+			if (dx < 0x20 && dy < 0x48)
+			{
+				// Activate checkpoint now
+				playSound(0x63)
+				if (allocDynamicObjectStd())
+				{
+					// Spawn the checkpoint's spinning head
+					objA1.update_address = addressof(Checkpoint.BaseUpdate)
+					objA1.render_flags = render_flag.WORLD
+					objA1.base_state = 0x06
+					objA1.box_size.x = 24
+					objA1.box_size.y = 24
+					objA1.sprite_priority = 0x200
+					objA1.sprite_attributes = objA0.sprite_attributes
+					objA1.mapping_offset = objA0.mapping_offset
+					objA1.animation.sprite = 2
+					u16[A1 + 0x30] = objA0.position.x.u16
+					u16[A1 + 0x32] = objA0.position.y.u16 - 0x14
+					u16[A1 + 0x36] = 0x20
+					u16[A1 + 0x3e] = A0.u16
+
+				#if STANDALONE
+					if (!Game.isTimeAttack())
+				#endif
+					{
+						if (ring_counter >= 20)
+						{
+							fn02d3c8()
+						}
+					}
+				}
+
+				objA0.state = 0x01
+				fn02d164()
+
+				objA0.base_state = 0x04
+				A2.s32 = s16[A0 + 0x48]
+				u8[A2] |= 0x01
+			}
+		}
+		else if (objA0.state == 0)
+		{
+			objA0.state = 0x02
+		}
+	}
+	else
+	{
+		base.fn02d028()
+	}
+}
+
 //# address-hook(0x02d012) end(0x02d024)
 function void fn02d012()
 {
@@ -31,6 +101,10 @@ function void fn02d012()
 			objA0.animation.sprite ^= 1
 			objA0.animation.timer = 0
 		}
+		
+		CheckGroundCollision()
+		if (D1.s16 < 0)
+			objA0.position.y.u16 += D1.u16
 	}
 }
 
@@ -45,13 +119,49 @@ function void fn02d0f8()
 		if (objA0.state == 0x02)
 			objA0.base_state = 0x04
 		
+		
 		if (objA0.base_state == 0x04)
 		{
+			if (objA0.value3a <= 3)
+			{
+				// make mario get yeeted away if he touches a wall
+				bool leftWall
+				bool rightWall
+				
+				D3 = -0x04
+				CheckLeftWallCollision()
+				if (D1.s16 < 0)
+					leftWall = true
+				
+				D3 = 0x04
+				CheckRightWallCollision()
+				if (D1.s16 < 0)
+					rightWall = true
+					
+				if (leftWall || rightWall)
+				{
+					objA0.value3a = 4
+					Audio.playAudio("te_death")
+					
+					if (leftWall)
+						objA0.velocity.x = 0x400
+					else if (rightWall)
+						objA0.velocity.x = -0x400
+						
+					objA0.velocity.y = ((objA0.position.y.u16 > water.height.current) ? -0x300 : -0x400)
+					objA0.animation.sprite = 0
+					
+					objA0.sprite_priority = 0
+					objA0.sprite_attributes |= sprite_attribute.PRIORITY
+				}
+			}
+		
+		
 			if (objA0.value3a == 0)
 			{
 				// make mario jump
 				objA0.value3a = 1
-				objA0.velocity.y = -0x300
+				objA0.velocity.y = ((objA0.position.y.u16 > water.height.current) ? -0x200 : -0x300)
 				objA0.countdown_value = 0
 			}
 			else if (objA0.value3a == 1)
@@ -62,6 +172,9 @@ function void fn02d0f8()
 				{
 					objA0.animation.sprite = 0
 					UpdateMovementSimple()
+					
+					if (objA0.position.y.u16 > water.height.current)
+						char.velocity.y -= 0x28
 				}
 				else
 				{
@@ -79,6 +192,10 @@ function void fn02d0f8()
 			else if (objA0.value3a == 2)
 			{
 				UpdateMovementSimple()
+				
+				if (objA0.position.y.u16 > water.height.current)
+					char.velocity.y -= 0x28
+				
 				CheckGroundCollision()
 				if (D1.s16 < 0)
 				{
@@ -95,10 +212,14 @@ function void fn02d0f8()
 				++objA0.countdown_value
 				if (objA0.countdown_value > 30)
 				{
-					objA0.value3a = 1
-					objA0.velocity.y = -0x300
+					objA0.value3a = 0
 					objA0.countdown_value = 0
 				}
+			}
+			else if (objA0.value3a == 4)
+			{
+				// yeeted away
+				UpdateMovementSimple()
 			}
 		}
 		
@@ -123,8 +244,6 @@ function void fn02d10a()
 			objA0.position.y.u16 = objA1.position.y.u16
 			objA0.velocity.y = -0x580
 			objA0.countdown_value = 30
-			objA0.box_size.x = 24
-			objA0.box_size.y = 24
 			
 			DrawOrUnloadObject()
 		}
