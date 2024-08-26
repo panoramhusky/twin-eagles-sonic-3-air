@@ -9,5 +9,6 @@
 	"te_sonic":	{ "File": "speedshoes.ogg", "Type": "Sound", "Channel": "03" },
 	"te_restore":	{ "File": "health_restore.ogg", "Type": "Sound", "Channel": "04" },
 	"te_newheart":	{ "File": "health_newheart.ogg", "Type": "Sound", "Channel": "05" },
+	"te_lostheart":	{ "File": "health_lostheart.ogg", "Type": "Sound", "Channel": "05" },
 	"te_1up":	{ "File": "1up.ogg", "Type": "Sound" }
 }

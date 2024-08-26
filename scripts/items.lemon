@@ -137,6 +137,31 @@ function void MonitorIntact.Opening()
 	}
 }
 
+//# address-hook(0x01d890) end(0x01d892)
+//# alias(fn01d890) deprecated
+function void ItemEffect.ApplyRobotnik()
+{
+	A1 = 0xffffb000
+	if (u8[A1 + 0x38] == CHARACTER_SONIC)
+	{
+		++u16[A2]
+		if (TESonic.maxhealth > 1)
+		{
+			--TESonic.maxhealth
+			Audio.playAudio("te_lostheart")
+		}
+		else
+		{
+			TESonic.maxhealth = 0
+			DamageCharacter()
+		}
+	}
+	else
+	{
+		base.ItemEffect.ApplyRobotnik()
+	}
+}
+
 //# address-hook(0x01d90a) end(0x01d94e)
 function void ItemEffect.ApplySpeedUp()
 {

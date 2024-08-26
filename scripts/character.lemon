@@ -1210,6 +1210,8 @@ function void EntryFunctions.sharedInit()
 function void Standalone.onLevelStart()
 {
 	TESonic.health = 3
+	if (TESonic.maxhealth < 3)
+		TESonic.maxhealth = 3
 	
 	base.Standalone.onLevelStart()
 }
@@ -1224,7 +1226,10 @@ function void Standalone.onRestartLevel()
 function void Standalone.onRestartAtCheckpoint()
 {
 	TESonic.health = 3
-	TESonic.maxhealth = 3
+	
+	if (TESonic.maxhealth > 3 || TESonic.maxhealth == 0)
+		TESonic.maxhealth = 3
+	
 	base.Standalone.onRestartAtCheckpoint()
 }
 
