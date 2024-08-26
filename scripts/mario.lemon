@@ -14,6 +14,11 @@ function void Checkpoint.Init()
 		objA0.hitbox_extends.y = 19
 		
 		objA0.position.y.u16 += 4
+		
+		if (global.zone_act.apparent == 0x0601 && objA0.subtype2c == 0x06)
+		{
+			objA0.value3b = 1 // luigi time
+		}
 	}
 }
 
@@ -39,7 +44,10 @@ function void fn02d028()
 			if (dx < 0x20 && dy < 0x48)
 			{
 				// Activate checkpoint now
-				playSound(0x63)
+				
+				string audio = ((objA0.value3b == 0) ? "te_mario" : "te_luigi")
+				
+				Audio.playAudio(audio)
 				if (allocDynamicObjectStd())
 				{
 					// Spawn the checkpoint's spinning head

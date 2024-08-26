@@ -31,7 +31,7 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 					// imprisoned mario
 					u8 flags = ((objA0.render_flags & render_flag.FLIP_Y) ? SPRITE_FLAG_FLIP_Y : 0) | (prioFlag ? SPRITE_FLAG_PRIO : 0)
 					
-					string key = stringformat("mario_trapped_%01x", objA0.animation.sprite)
+					string key = stringformat("%s_trapped_%01x", TESonic.getBrother(objA0.value3b), objA0.animation.sprite)
 					
 					Renderer.drawCustomSprite(key, px, py, 0x00, flags, renderQueue)
 					return true
@@ -41,7 +41,7 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 					// freed mario
 					u8 flags = ((objA0.render_flags & render_flag.FLIP_Y) ? SPRITE_FLAG_FLIP_Y : 0) | (prioFlag ? SPRITE_FLAG_PRIO : 0)
 					
-					string key = stringformat("mario_freed_%01x", objA0.animation.sprite)
+					string key = stringformat("%s_freed_%01x", TESonic.getBrother(objA0.value3b), objA0.animation.sprite)
 					
 					Renderer.drawCustomSprite(key, px, py, 0x00, flags, renderQueue)
 					return true
@@ -61,6 +61,14 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 	}
 	
 	return base.Standalone.onWriteToSpriteTable(px, py, renderQueue)
+}
+
+function string TESonic.getBrother(u8 type)
+{
+	if (type == 0)
+		return "mario"
+	else
+		return "luigi"
 }
 
 function u64 Monitor.getIconSpriteKey(u8 type)

@@ -5,6 +5,7 @@
 	"te_land": { "File": "landing.ogg", "Type": "Sound", "Channel": "02" },
 	"te_jump": { "File": "jump.ogg", "Type": "Sound", "Channel": "01" },
 	"te_mario": { "File": "mario.ogg", "Type": "Sound", "Channel": "63" },
+	"te_luigi": { "File": "luigi.ogg", "Type": "Sound", "Channel": "63" },
 	"te_hurt":	{ "File": "hurt.ogg", "Type": "Sound", "Channel": "35" },
 	"te_sonic":	{ "File": "speedshoes.ogg", "Type": "Sound", "Channel": "03" },
 	"te_restore":	{ "File": "health_restore.ogg", "Type": "Sound", "Channel": "04" },
