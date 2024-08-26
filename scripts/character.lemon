@@ -307,12 +307,6 @@ function void Character.UpdateControlInAir()
 
 		s16 maxSpeed = s16[A4]
 		s16 acceleration = s16[A4 + 2] * 2
-		
-		u8 input_pressed   = control.player1.pressed
-		if (input_pressed & CONTROL_B)
-		{
-			Character.DoTEKick()
-		}
 
 		if (input_state & CONTROL_LEFT)
 		{
@@ -357,6 +351,12 @@ function void Character.UpdateControlInAir()
 		}
 
 		char.velocity.x = vx
+		
+		u8 input_pressed   = control.player1.pressed
+		if (input_pressed & CONTROL_B)
+		{
+			Character.DoTEKick()
+		}
 	}
 	else
 	{
@@ -830,10 +830,12 @@ function void Character.LandingOnGround()
 	if (char.character == CHARACTER_SONIC && char.state == char.state.TEKICK && (char.flags & char.flag.ROLLING) == 0)
 	{
 		
-		char.flags &= ~(char.flag.IN_AIR | char.flag.PUSHING | char.flag.CONTROL_LOCK)
 		if (char.rotation > 0x20 && char.rotation < 0xe0)
 		{
+			char.flags &= ~(char.flag.IN_AIR | char.flag.PUSHING | char.flag.CONTROL_LOCK)
 			char.state = char.state.RUNNING
+			char.animation.timer = 0
+			char.rotation.x = 0
 		}
 	}
 	else

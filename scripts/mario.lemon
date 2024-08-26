@@ -122,7 +122,7 @@ function void fn02d0f8()
 		
 		if (objA0.base_state == 0x04)
 		{
-			if (objA0.value3a <= 3)
+			if (objA0.value3a <= 3 && objA0.render_flags & render_flag.VISIBLE)
 			{
 				// make mario get yeeted away if he touches a wall
 				bool leftWall

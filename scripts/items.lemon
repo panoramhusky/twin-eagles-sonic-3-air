@@ -50,8 +50,20 @@ function void MonitorIntact.UpdateDefault()
 		fn01d63a()
 		AddAsDynamicObject()
 
-		Object.animationUpdate(0x01db3a)
 		MonitorIntact.Render()
+		
+		if (objA0.state == 3)
+		{
+			if (objA0.animation.sprite != 0 && objA0.animation.sprite != 1)
+				objA0.animation.sprite = 0
+			
+			++objA0.animation.timer
+			if (objA0.animation.timer > 8)
+			{
+				objA0.animation.sprite ^= 1
+				objA0.animation.timer = 0
+			}
+		}
 	}
 	else
 	{

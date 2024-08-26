@@ -72,7 +72,12 @@ function u64 Monitor.getIconSpriteKey(u8 type)
 	else if (type == 0x02)
 		return "eggman_pickup"
 	else if (type == 0x03)
-		return "health_pickup_1"
+	{
+		if (objA0.animation.sprite == 0)
+			return "health_pickup_0"
+		else
+			return "health_pickup_1"
+	}
 	else if (type == 0x04)
 		return "speedshoes_pickup"
 	else if (type == 0x05)
