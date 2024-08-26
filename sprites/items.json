@@ -14,5 +14,9 @@
 	"mario_trapped_1":  { "File": "items.bmp", "Rect": "0,18,32,46", "Center": "16,24" },
 	"mario_freed_0":  { "File": "items.bmp", "Rect": "68,25,31,39", "Center": "16,19" },
 	"mario_freed_1":  { "File": "items.bmp", "Rect": "101,25,32,39", "Center": "16,19" },
-	"mario_freed_cage":  { "File": "items.bmp", "Rect": "135,18,32,46", "Center": "16,24" }
+	"mario_freed_cage":  { "File": "items.bmp", "Rect": "135,18,32,46", "Center": "16,24" },
+	"luigi_trapped_0":  { "File": "items.bmp", "Rect": "257,18,32,46", "Center": "16,24" },
+	"luigi_trapped_1":  { "File": "items.bmp", "Rect": "223,18,32,46", "Center": "16,24" },
+	"luigi_freed_0":  { "File": "items.bmp", "Rect": "291,23,31,41", "Center": "16,21" },
+	"luigi_freed_1":  { "File": "items.bmp", "Rect": "324,23,32,41", "Center": "16,21" }
 }
