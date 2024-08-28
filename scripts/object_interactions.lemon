@@ -389,7 +389,7 @@ function void fn06b734()
 function void fn025d9c()
 {
 	A1 = 0xffffb000
-	if (u8[A1 + 0x38] == CHARACTER_SONIC && objA0.subtype2c & 0x01)
+	if (u8[A1 + 0x38] == CHARACTER_SONIC)
 	{
 		D1.u16 = 0x1b
 		D2.u16 = 0x10
