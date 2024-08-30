@@ -1052,11 +1052,14 @@ function void fn0417a6()
 	A1 = 0xffffb000
 	if (u8[A1 + 0x38] == CHARACTER_SONIC)
 	{
-		if (D0.u8 == char.state.TEKICK && TESonic.checkIfKickFacingObject())
+		if ((D0.u8 == char.state.TEKICK && TESonic.checkIfKickFacingObject()) || D0.u8 == char.state.ROLLING)
 		{
 			bool onLeft = (objA1.position.x.u16 < objA0.position.x.u16)
 			u8[A1 + 0x05] = base_state.NORMAL
-			objA1.velocity.x = (onLeft ? -0x200 : 0x200)
+			
+			if (D0.u8 != char.state.ROLLING)
+				objA1.velocity.x = (onLeft ? -0x200 : 0x200)
+			
 			objA1.velocity.y = -0x300
 			objA1.flags2a |= (char.flag.IN_AIR)
 			objA1.flags2a &= ~char.flag.ON_OBJECT

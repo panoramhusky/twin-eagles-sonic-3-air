@@ -15,7 +15,7 @@ function void Checkpoint.Init()
 		
 		objA0.position.y.u16 += 4
 		
-		if (global.zone_act.apparent == 0x0601 && objA0.subtype2c == 0x06)
+		if (TESonic.checkForLuigiCheckpoint(objA0.subtype2c))
 		{
 			objA0.value3b = 1 // luigi time
 		}
@@ -285,4 +285,24 @@ function void fn02d10a()
 	{
 		base.fn02d10a()
 	}
+}
+
+function bool TESonic.checkForLuigiCheckpoint(u8 id)
+{
+	bool isLuigi = false
+
+	if (global.zone_act.apparent == 0x0100 && id == 3) // hcz1, id 3
+		isLuigi = true
+	else if (global.zone_act.apparent == 0x0200 && id == 1) // mgz1, id 1
+		isLuigi = true
+	else if (global.zone_act.apparent == 0x0201 && id == 2) // mgz2, id 3
+		isLuigi = true
+	else if (global.zone_act.apparent == 0x0601 && id == 0x06) // lbz2, knuckles route to fuck around lol
+		isLuigi = true
+	else if (global.zone_act.apparent == 0x0700 && id == 2) // mhz1, id 2
+		isLuigi = true
+	else if (global.zone_act.apparent == 0x0401 && id == 3) // fbz2, id 3
+		isLuigi = true
+	
+	return isLuigi
 }

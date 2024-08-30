@@ -73,33 +73,41 @@ function string TESonic.getBrother(u8 type)
 
 function u64 Monitor.getIconSpriteKey(u8 type)
 {
-	if (type == 0)
-		return "monitor_icon_static"
-	else if (type == 0x01)
-		return "1up_head_pickup"
-	else if (type == 0x02)
-		return "eggman_pickup"
-	else if (type == 0x03)
+	A1 = 0xffffb000
+	if (u8[A1 + 0x38] == CHARACTER_SONIC)
 	{
-		if (objA0.animation.sprite == 0)
-			return "health_pickup_0"
-		else
-			return "health_pickup_1"
-	}
-	else if (type == 0x04)
-		return "speedshoes_pickup"
-	else if (type == 0x05)
-		return "flameshield_pickup"
-	else if (type == 0x06)
-		return "lightningshield_pickup"
-	else if (type == 0x07)
-		return "aquashield_pickup"
-	else if (type == 0x08)
-		return "health_pickup_newheart"
-	else if (type == 0x09)
-		return "s_pickup"
-	else if (type == 0x0b)
-		return "classicshield_pickup"
+		if (type == 0)
+			return "monitor_icon_static"
+		else if (type == 0x01)
+			return "1up_head_pickup"
+		else if (type == 0x02)
+			return "eggman_pickup"
+		else if (type == 0x03)
+		{
+			if (objA0.animation.sprite == 0)
+				return "health_pickup_0"
+			else
+				return "health_pickup_1"
+		}
+		else if (type == 0x04)
+			return "speedshoes_pickup"
+		else if (type == 0x05)
+			return "flameshield_pickup"
+		else if (type == 0x06)
+			return "lightningshield_pickup"
+		else if (type == 0x07)
+			return "aquashield_pickup"
+		else if (type == 0x08)
+			return "health_pickup_newheart"
+		else if (type == 0x09)
+			return "s_pickup"
+		else if (type == 0x0b)
+			return "classicshield_pickup"
 
-	return 0
+		return 0
+	}
+	else
+	{
+		return base.Monitor.getIconSpriteKey(type)
+	}
 }
