@@ -67,3 +67,22 @@ function bool TESonic.checkIfBombCollidingWithBoss()
 	bool colliding = checkBoxOverlap(px1, py1, bx1, by1, px2, py2, bx2, by2)
 	return colliding
 }
+
+function bool TESonic.checkIfBallCollidingWithBoss()
+{
+	u16 px1 = objA0.position.x.u16 - 8
+	u16 py1 = objA0.position.y.u16 - 8
+	u16 bx1 = 16
+	u16 by1 = 16
+	
+	u16 px2 = objA1.position.x.u16 - 16
+	u16 py2 = objA1.position.y.u16 - 16
+	u16 bx2 = 32
+	u16 by2 = 32
+	
+	//Debug.drawRect(px1, py1, bx1, by1, 0x0000ff88)
+	//Debug.drawRect(px2, py2, bx2, by2, 0xff000088)
+	
+	bool colliding = checkBoxOverlap(px1, py1, bx1, by1, px2, py2, bx2, by2)
+	return colliding
+}

@@ -632,6 +632,151 @@ function void Button.checkIfPressed()
 	}
 }
 
+
+// cnz boss ball
+//# address-hook(0x06e8a2) end(0x06e8b0)
+function void fn06e8a2()
+{
+	A1 = 0xffffb000
+	if (u8[A1 + 0x38] == CHARACTER_SONIC)
+	{
+		if (objA1.state == char.state.TEKICK)
+		{
+			if (TESonic.CheckForCNZBallKick() && objA0.value3b != 2 && TESonic.checkIfKickFacingObject())
+			{
+				objA0.base_state = 0x04
+				objA0.countdown_callback = 0x06e8b6
+				u32[A0 + 0x30] = 0x06ee1d
+				
+				bool onLeft = (objA1.position.x.u16 < objA0.position.x.u16)
+				objA0.velocity.x = (onLeft ? 0x400 : -0x400)
+				objA0.velocity.y = -0x700
+				
+				objA0.value3b = 1 // indicate boss can be hit with ball now
+				playSound(0x49)
+				
+				A1 = 0xffffb000
+				objA1.velocity.x = (onLeft ? -0x200 : 0x200)
+				objA1.velocity.y = -0x300
+				objA1.flags2a |= (char.flag.IN_AIR)
+				objA1.flags2a &= ~char.flag.ON_OBJECT
+				
+				A1 = 0xffff0000 + u16[A0 + 0x46]
+				objA1.base_state = 0x06
+				objA1.flags38 |= 0x02
+				objA1.velocity.x = 0
+			}
+		}
+		
+		if (objA0.value3b == 1)
+		{
+			A1 = 0xffff0000 + u16[A0 + 0x46]
+			if (TESonic.checkIfBallCollidingWithBoss())
+			{
+				u8[A1 + 0x1c] = A0.u8
+				u8[A1 + 0x25] = u8[A1 + 0x28]
+				u8[A1 + 0x28] = 0
+				--u8[A1 + 0x29]
+				if (u8[A1 + 0x29] == 0)
+				{
+					u8[A1 + 0x2a] |= 0x80
+				}
+				
+				objA0.velocity.x = -clamp(objA0.velocity.x, -0x200, 0x200)
+				objA0.velocity.y = 0x80
+				objA0.value3b = 2
+			}
+		}
+		else if (objA0.value3b == 2)
+		{
+			A1 = 0xffff0000 + u16[A0 + 0x46]
+			Object.AnimationProgressByLocalA1.DistinctTimer()
+		}
+	}
+
+	base.fn06e8a2()
+}
+
+// another cnz ball
+//# address-hook(0x06e8e8) end(0x06e8fc)
+function void fn06e8e8()
+{
+	A1 = 0xffffb000
+	if (u8[A1 + 0x38] == CHARACTER_SONIC)
+	{
+		if (objA1.state == char.state.TEKICK)
+		{
+			if (TESonic.CheckForCNZBallKick() && objA0.value3b != 2 && TESonic.checkIfKickFacingObject())
+			{
+				objA0.base_state = 0x04
+				objA0.countdown_callback = 0x06e8b6
+				u32[A0 + 0x30] = 0x06ee1d
+				
+				bool onLeft = (objA1.position.x.u16 < objA0.position.x.u16)
+				objA0.velocity.x = (onLeft ? 0x400 : -0x400)
+				objA0.velocity.y = -0x700
+				
+				objA0.value3b = 1 // indicate boss can be hit with ball now
+				playSound(0x49)
+				
+				A1 = 0xffffb000
+				objA1.velocity.x = (onLeft ? -0x200 : 0x200)
+				objA1.velocity.y = -0x300
+				objA1.flags2a |= (char.flag.IN_AIR)
+				objA1.flags2a &= ~char.flag.ON_OBJECT
+				
+				A1 = 0xffff0000 + u16[A0 + 0x46]	
+				objA1.base_state = 0x06
+				objA1.flags38 |= 0x02
+				objA1.velocity.x = 0
+			}
+		}
+		
+		if (objA0.value3b == 2)
+		{
+			A1 = 0xffff0000 + u16[A0 + 0x46]
+			Object.AnimationProgressByLocalA1.DistinctTimer()
+		}
+	}
+
+	base.fn06e8e8()
+}
+
+// more cnz ball
+//# address-hook(0x06e8fe) end(0x06e91c)
+function void fn06e8fe()
+{
+	base.fn06e8fe()
+	A1 = 0xffff0000 + u16[A0 + 0x46]
+	if (u8[A1 + 0x38] & 0x08)
+		return
+
+	objA0.value3b = 0 // reset kicking state
+}
+
+function bool TESonic.CheckForCNZBallKick()
+{
+	A1 = 0xffffb000
+	u16 charpos_x = objA1.position.x.u16
+	u16 charpos_y = objA1.position.y.u16
+	
+	u16 offset_x = objA0.box_size.x
+	u16 offset_y = objA0.box_size.y
+	
+	u16 blockpos_x = objA0.position.x.u16
+	u16 blockpos_y = objA0.position.y.u16
+	
+	bool inBoundLeft = (charpos_x > blockpos_x - offset_x - 8)
+	bool inBoundRight = (charpos_x < blockpos_x + offset_x + 8)
+	bool inBoundTop = (charpos_y > blockpos_y - offset_y - 8)
+	bool inBoundBottom = (charpos_y < blockpos_y + offset_y + 8)
+
+	if ((inBoundLeft && inBoundRight && inBoundTop && inBoundBottom))
+		return true
+	else
+		return false
+}
+
 // icz ice jenga
 //# translated(0x08ac80) end(0x08accc)
 function bool fn08ac80()
@@ -783,6 +928,56 @@ function void fn02a6d4()
 	else
 	{
 		base.fn02a6d4()
+	}
+}
+
+// icz boss platform
+//# address-hook(0x071f30) end(0x071f6e)
+function void fn071f30()
+{
+	base.fn071f30()
+	
+	A1 = 0xffffb000
+	u16 charpos_x = objA1.position.x.u16
+	u16 charpos_y = objA1.position.y.u16
+	
+	u16 offset_x = objA0.box_size.x
+	u16 offset_y = 16
+	
+	u16 blockpos_x = objA0.position.x.u16
+	u16 blockpos_y = objA0.position.y.u16
+	
+	bool inBoundLeft = (charpos_x > blockpos_x - offset_x - 20)
+	bool inBoundRight = (charpos_x < blockpos_x + offset_x + 20)
+	bool inBoundTop = (charpos_y > blockpos_y - offset_y - 10)
+	bool inBoundBottom = (charpos_y < blockpos_y + offset_y + 10)
+
+	
+
+	if ((inBoundLeft && inBoundRight && inBoundTop && inBoundBottom) && objA1.state == char.state.TEKICK && TESonic.checkIfKickFacingObject())
+	{
+		A1 = 0xffff0000 + u16[A0 + 0x46]
+		
+		if (objA1.state == 0)
+		{
+			u8[A1 + 0x1c] = A0.u8
+			u8[A1 + 0x25] = u8[A1 + 0x28]
+			u8[A1 + 0x28] = 0
+			--u8[A1 + 0x29]
+			if (u8[A1 + 0x29] == 0)
+			{
+				u8[A1 + 0x2a] |= 0x80
+			}
+			
+			playSound(0x49)
+				
+			A1 = 0xffffb000
+			bool onLeft = (objA1.position.x.u16 < objA0.position.x.u16)
+			objA1.velocity.x = (onLeft ? -0x200 : 0x200)
+			objA1.velocity.y = -0x300
+			objA1.flags2a |= (char.flag.IN_AIR)
+			objA1.flags2a &= ~char.flag.ON_OBJECT
+		}
 	}
 }
 
