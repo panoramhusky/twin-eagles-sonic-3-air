@@ -69,7 +69,10 @@ function void UpdateSonicAnimation()
 		}
 		else if (char.state == char.state.TEAIRSLASH)
 		{
-			TESonic.UpdateAirSlashAnim()
+			if (super.active)
+				TESonic.UpdateAirSlashAnim()
+			else
+				char.state = char.state.TRANSFORMING
 		}
 		else if (D0.u8 < 0x80)
 		{
