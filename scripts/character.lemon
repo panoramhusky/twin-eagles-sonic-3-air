@@ -162,111 +162,6 @@ function void SonicPressedJumpInMidAir()
 {
 	if (char.character == CHARACTER_SONIC)
 	{
-		// Remove control lock
-		char.flags &= ~char.flag.CONTROL_LOCK
-	#if STANDALONE
-		char.double_jump_state = 1	// Always set this flag; needed for Drop Dash
-	#endif
-
-	#if STANDALONE
-		if ((super.active && Game.getSetting(SETTING_SUPER_SONIC_ABILITY) != 1) || (super.active & 0x80))
-	#else
-		if (super.active)
-	#endif
-		{
-			bool isHyperSonic = (super.active & 0x80)			// Hyper Sonic active
-			bool performHyperDash = isHyperSonic
-			u8 input = control.player1.state & CONTROL_DPAD		// Only directions
-
-		#if STANDALONE
-			if (Game.getSetting(SETTING_SUPER_SONIC_ABILITY) == 2)
-			{
-				performHyperDash = (super.active)				// This allows Super Sonic to use the dash as well
-			}
-
-			if (performHyperDash && Game.getSetting(SETTING_HYPER_DASH_CONTROLS) == 1)
-			{
-				// Hyper Dash requires also pressing D-pad in any direction
-				//  -> To allow for Drop Dashing without activating the Hyper Dash before
-				performHyperDash = (input != 0)
-			}
-		#endif
-
-			if (performHyperDash)
-			{
-			#if STANDALONE
-				if (isHyperSonic)	// Super Sonic's dash does not cause a screen flash
-			#endif
-				{
-					Character.ClearEnemiesOnScreen()
-				}
-
-				camera.locktime.player1 = 0x2000
-				ClearPositionBackup()
-
-				char.double_jump_state = 1
-			#if STANDALONE
-				if (!isHyperSonic)
-					u8[0xffffcbc0 + 0x20] = 1
-				else
-			#endif
-					u8[0xffffcd7c + 0x20] = 1
-
-				playSound(SFX_SPINDASH_RELEASE)
-
-				if (input != 0 && input < 0x0b)		// Not left and right at the same time
-				{
-					// Perform Hyper Dash
-					A1 = 0x011afa + input * 4
-					char.velocity.x = s16[A1]
-					char.velocity.y = s16[A1+2]
-				}
-				else
-				{
-					char.velocity.x = (char.flags & char.flag.FACING_LEFT) ? -0x800 : 0x800
-					char.velocity.y = 0
-				}
-
-			#if STANDALONE
-				if (!isHyperSonic)
-				{
-					// Reduce dash speed for Super Sonic
-					char.velocity.x = (char.velocity.x > 0) ? (char.velocity.x - 0x200) : (char.velocity.x < 0) ? (char.velocity.x + 0x200) : 0
-					char.velocity.y = (char.velocity.y > 0) ? (char.velocity.y - 0x200) : (char.velocity.y < 0) ? (char.velocity.y + 0x200) : 0
-				}
-			#endif
-
-				char.groundspeed = char.velocity.x
-			}
-			else
-			{
-				char.double_jump_state = 1
-			}
-		}
-	#if STANDALONE
-		else if ((char.bonus_effect & char.bonus.INVINCIBLE) && (Game.getSetting(SETTING_SUPER_SONIC_ABILITY) != 1 && !super.active))
-	#else
-		else if (char.bonus_effect & char.bonus.INVINCIBLE)
-	#endif
-		{
-			// No reaction
-		}
-		else if (char.bonus_effect & char.bonus.SHIELD_FIRE)
-		{
-			// sorry nothing
-		}
-		else if (char.bonus_effect & char.bonus.SHIELD_LIGHTNING)
-		{
-			// error! see you later!!
-		}
-		else if (char.bonus_effect & char.bonus.SHIELD_BUBBLE)
-		{
-
-		}
-		else
-		{
-			
-		}
 	}
 	else
 	{
@@ -389,29 +284,121 @@ function void Character.DoTEKick()
 		}
 	}
 	
+	char.double_jump_state = 1
+	
 	if (char.state != char.state.TEKICK && char.control_flags == 0 && validState)
 	{
 		char.flags2d = 0
 		
-		if ((char.flags & char.flag.IN_AIR) == 0)
+		if (!super.active)
 		{
-			char.flags |= char.flag.IN_AIR
-			
-			if (char.flags & char.flag.ON_OBJECT)
+			if ((char.flags & char.flag.IN_AIR) == 0)
 			{
-				char.flags &= ~char.flag.ON_OBJECT
-				objA0.position.y.u16 -= 1
+					// kick
+					char.flags |= char.flag.IN_AIR
+					
+					if (char.flags & char.flag.ON_OBJECT)
+					{
+						char.flags &= ~char.flag.ON_OBJECT
+						objA0.position.y.u16 -= 1
+					}
+					
+					char.velocity.y -= 0x200
 			}
-			
-			char.velocity.y -= 0x200
 		}
-	
+		else
+		{
+			if ((char.flags & char.flag.IN_AIR) == 0)
+			{
+				// sword slash	
+				if (abs(char.velocity.x) < 0x800)
+				{
+					char.groundspeed = ((char.flags & char.flag.FACING_LEFT) ? -0x800 : 0x800)
+					char.velocity.x = char.groundspeed
+				}
+			}
+		}
+		
 		char.state = char.state.former
-		char.double_jump_state = 1
-		char.state = char.state.TEKICK
-		char.animation.sprite = 1
-		Audio.playAudio("te_kick")
+		
+		if (!super.active)
+		{
+			char.state = char.state.TEKICK
+			char.animation.sprite = 1
+			Audio.playAudio("te_kick")
+		}
+		else
+		{
+			if ((char.flags & char.flag.IN_AIR) == 0)
+			{
+				char.state = char.state.TEKICK
+				char.animation.sprite = 1
+				playSound(SFX_SPINDASH_RELEASE)
+				
+				bool isHyperSonic = (super.active & 0x80)			// Hyper Sonic active
+				if (isHyperSonic)	// Super Sonic's dash does not cause a screen flash
+				{
+					Character.ClearEnemiesOnScreen()
+					ClearPositionBackup()
+					u8[0xffffcd7c + 0x20] = 1
+				}
+			}
+			else
+			{
+				TESonic.DoAirSlash()
+			}
+		}
 	}
+}
+
+function void TESonic.DoAirSlash()
+{
+	char.double_jump_state = 1	// Always set this flag; needed for Drop Dash
+	bool isHyperSonic = (super.active & 0x80)			// Hyper Sonic active
+	u8 input = control.player1.state & CONTROL_DPAD		// Only directions
+	
+	char.state = char.state.TEAIRSLASH
+
+	if (isHyperSonic)	// Super Sonic's dash does not cause a screen flash
+	{
+		Character.ClearEnemiesOnScreen()
+	}
+
+	ClearPositionBackup()
+
+	char.double_jump_state = 1
+#if STANDALONE
+	if (!isHyperSonic)
+		u8[0xffffcbc0 + 0x20] = 1
+	else
+#endif
+		u8[0xffffcd7c + 0x20] = 1
+
+	playSound(SFX_SPINDASH_RELEASE)
+
+	if (input != 0 && input < 0x0b)		// Not left and right at the same time
+	{
+		// Perform Hyper Dash
+		A1 = 0x011afa + input * 4
+		char.velocity.x = s16[A1] * 2
+		char.velocity.y = s16[A1+2] * 2
+	}
+	else
+	{
+		char.velocity.x = (char.flags & char.flag.FACING_LEFT) ? -0x800 * 2 : 0x800 * 2
+		char.velocity.y = 0
+	}
+
+#if STANDALONE
+	if (!isHyperSonic)
+	{
+		// Reduce dash speed for Super Sonic
+		char.velocity.x = (char.velocity.x > 0) ? (char.velocity.x - 0x200) : (char.velocity.x < 0) ? (char.velocity.x + 0x200) : 0
+		char.velocity.y = (char.velocity.y > 0) ? (char.velocity.y - 0x200) : (char.velocity.y < 0) ? (char.velocity.y + 0x200) : 0
+	}
+#endif
+
+	char.groundspeed = objA0.velocity.x
 }
 
 function bool Character.CheckTEKickOverLap(u16 px, u16 py, u16 sx, u16 sy)
@@ -420,7 +407,7 @@ function bool Character.CheckTEKickOverLap(u16 px, u16 py, u16 sx, u16 sy)
 
 	u16 kickbox_pos_x = D2.u16 + ((char.render_flags & render_flag.FLIP_X) ? -12 : 12)
 	u16 kickbox_pos_y = objA0.position.y.u16 + y_offset
-	u16 kickbox_size_x = 16
+	u16 kickbox_size_x = ((!super.active) ? 16 : 48)
 	u16 kickbox_size_y = 24
 	
 	//if (char.state == char.state.TEKICK)

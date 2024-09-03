@@ -2,7 +2,12 @@
 function u64 Standalone.getModdedAnimationSpriteKey(u8 character, u16 animationSpriteEx)
 {
 	if (character == CHARACTER_SONIC && objA0.state == char.state.TEKICK)
-		return stringformat("character_sonic_kick_%d", objA0.animation.sprite)
+	{
+		if (!super.active)
+			return stringformat("character_sonic_kick_%d", objA0.animation.sprite)
+		else
+			return stringformat("character_supersonic_kick_%d", objA0.animation.sprite)
+	}
 	else
 		return base.Standalone.getModdedAnimationSpriteKey(character, animationSpriteEx)
 }

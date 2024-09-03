@@ -249,8 +249,8 @@
 	"character_supersonic_0xf8":  { "File": "character_supersonic.bmp", "Rect": "408,848,24,40", "Center": "12,20" },
 	"character_supersonic_0xf9":  { "File": "character_supersonic.bmp", "Rect": "464,848,24,40", "Center": "12,20" },
 	"character_supersonic_0xfa":  { "File": "character_supersonic.bmp", "Rect": "516,848,32,40", "Center": "16,20" },
-	"character_supersonic_kick1":  { "File": "character_supersonic.bmp", "Rect": "582,825,32,63", "Center": "15,43" },
-	"character_supersonic_kick2":  { "File": "character_supersonic.bmp", "Rect": "624,825,32,63", "Center": "15,43" },
-	"character_supersonic_kick3":  { "File": "character_supersonic.bmp", "Rect": "664,852,72,36", "Center": "13,16" },
-	"character_supersonic_kick4":  { "File": "character_supersonic.bmp", "Rect": "743,852,73,36", "Center": "12,16" }
+	"character_supersonic_kick_1":  { "File": "character_supersonic.bmp", "Rect": "582,825,32,63", "Center": "15,43" },
+	"character_supersonic_kick_2":  { "File": "character_supersonic.bmp", "Rect": "624,825,32,63", "Center": "15,43" },
+	"character_supersonic_kick_3":  { "File": "character_supersonic.bmp", "Rect": "664,852,72,36", "Center": "13,16" },
+	"character_supersonic_kick_4":  { "File": "character_supersonic.bmp", "Rect": "743,852,73,36", "Center": "12,16" }
 }
