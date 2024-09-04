@@ -1337,7 +1337,8 @@ function void fn041d5c()
 	base.fn041d5c()
 	if (u8[A1 + 0x38] == CHARACTER_SONIC)
 	{
-		if (u8[A1 + 0x20] != char.state.TEKICK && !TESonic.checkIfKickFacingObject())
+		bool kicking = (u8[A1 + 0x20] == char.state.TEKICK && TESonic.checkIfKickFacingObject())
+		if (!kicking)
 			return
 
 		objA1.velocity.x = -objA1.velocity.x
