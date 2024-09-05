@@ -11,5 +11,7 @@
 	"te_restore":	{ "File": "health_restore.ogg", "Type": "Sound", "Channel": "04" },
 	"te_newheart":	{ "File": "health_newheart.ogg", "Type": "Sound", "Channel": "05" },
 	"te_lostheart":	{ "File": "health_lostheart.ogg", "Type": "Sound", "Channel": "05" },
-	"te_1up":	{ "File": "1up.ogg", "Type": "Sound" }
+	"te_1up":	{ "File": "1up.ogg", "Type": "Sound" },
+	
+	"supertheme_sonic2": { "Name": "Sonic 2 Super Theme", "File": "te_supermusic.ogg", "Type": "Music", "LoopStart": "145676" },
 }
