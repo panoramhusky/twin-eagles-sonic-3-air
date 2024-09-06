@@ -1186,6 +1186,27 @@ function bool debugModeRescue()
 
 }
 
+function bool Character.performSuperTransformation()
+{
+	u8 possibleSuperForm = 0	// 1 for Super, 2 for Hyper
+	// Can go super?
+	if (global.super_emeralds >= 7)
+	{
+		possibleSuperForm = 2
+	}
+	else if (global.chaos_emeralds >= 7 && global.traded_emeralds == 0)
+	{
+		possibleSuperForm = 1
+	}
+
+	if (char.character == CHARACTER_SONIC && !super.active && ring_counter >= 50 && hud.dirty.timer && char.control_flags == 0 && possibleSuperForm != 0)
+	{		
+		Audio.playAudio("te_sonic")
+	}
+	
+	return base.Character.performSuperTransformation()
+}
+
 function void EntryFunctions.sharedInit()
 {
 	TESonic.health = 3
