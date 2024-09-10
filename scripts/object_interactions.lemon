@@ -1537,13 +1537,3 @@ function bool Stone.canFightStoneGapsule()
 		
 	return base.Stone.canFightStoneGapsule()
 }
-
-function bool Stone.canFightStoneBuggy()
-{
-	A1 = 0xffffb000
-	// check for base game knux
-	if (u8[A0 + 0x38] == CHARACTER_SONIC && u8[0xffffe654] == 0)
-		return true
-		
-	return base.Stone.canFightStoneBuggy()
-}
