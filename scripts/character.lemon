@@ -985,7 +985,7 @@ function void Character.updateUprightOnGround()
 	}
 }
 
-
+/*
 //# address-hook(0x018cb6) end(0x018d68)
 function void fn018cb6()
 {
@@ -1043,6 +1043,7 @@ function void fn018cb6()
 		base.fn018cb6()
 	}
 }
+*/
 
 function void updateCharacterControlOnGround()
 {

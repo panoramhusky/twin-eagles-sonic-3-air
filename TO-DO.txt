@@ -1,0 +1,18 @@
+==HAZEL==
+-Rework character checks into a dedicated function
+-Make any other instance of monitor icons use the item icon (i.e. gumballs plus bonus stage)
+
+-Set any objects that make the player go into the roll jump state to use the te jump state instead (i.e. vines)
+-Implement palette toggle
+-Change Super/Hyper requirement so that you need max hearts and health
+	-Also make the hearts glow Gold/Rainbow depending on form when active
+-Make SSZ Boss 2 balloons inflate when kicked
+-Implement custom dust object
+-Add achievements menu over competition menu
+-Fix any issues with Super/Hyper
+-Change title screen?
+
+
+==OWEN==
+-Implement Super/Hyper end pose
+-Fix Mario/Luigi palette using blue for Sonic's fur
