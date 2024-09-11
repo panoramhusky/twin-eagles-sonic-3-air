@@ -177,7 +177,44 @@ function void Character.updateUprightOnGroundInner()
 	}
 	else
 	{
-		Character.CheckCollision()
+		u8 input_state     = (char.character == CHARACTER_TAILS) ? control.tails.state : control.player1.state
+		bool isSuperActive = (char.character == CHARACTER_TAILS) ? super.active.tails  : super.active
+
+		// These are in order:
+		//  - maximum speed
+		//  - maximum acceleration
+		//  - maximum deceleration
+		D6.u16 = u16[A4]
+		D5.u16 = u16[A4 + 2]
+		D4.u16 = u16[A4 + 4]
+
+		if ((char.bonus_effect & char.bonus.INFINITE_INERTIA) == 0)
+		{
+			// Camera move state:
+			//   0 = no input up/down
+			//   1 = up/down pressed, but still in delay
+			//   2 = up/down pressed, actual movement (limit may be reached)
+			u8 cameraMoveState = 0
+
+			if (char.hlock_countdown == 0)
+			{
+				// Standing upright?
+				D0.u8 = (char.rotation + 0x20) & 0xc0
+				if (D0.u8 == 0 && char.groundspeed == 0)
+				{
+					char.flags &= ~char.flag.PUSHING
+
+					checkForBalancing()
+				}
+			}
+
+		}
+
+		char.velocity.x = (s32(lookupCos(char.rotation)) * char.groundspeed) >> 8
+		char.velocity.y = (s32(lookupSin(char.rotation)) * char.groundspeed) >> 8
+
+		Character.UpdateControlOnGroundShared()
+		
 	}
 	
 	if (char.character == CHARACTER_SONIC)
@@ -303,7 +340,14 @@ function void Character.DoTEKick()
 						objA0.position.y.u16 -= 1
 					}
 					
-					char.velocity.y -= 0x200
+					u16 acceleration = ((char.flags & char.flag.UNDERWATER) ? 0x080 : 0x200)
+					
+					u8 angle = char.rotation - 0x40
+					s32 accel_x = (s32(lookupCos(angle)) * acceleration) >> 8
+					s32 accel_y = (s32(lookupSin(angle)) * acceleration) >> 8
+
+					char.velocity.x += accel_x
+					char.velocity.y += accel_y
 			}
 		}
 		else
@@ -814,15 +858,20 @@ function void Character.OnKickCollisionWithDynamicObject()
 //# address-hook(0x01560c) end(0x01569a)
 function void Character.LandingOnGround()
 {
-	if (char.character == CHARACTER_SONIC && char.state == char.state.TEKICK && (char.flags & char.flag.ROLLING) == 0)
+	if (char.character == CHARACTER_SONIC && char.state == char.state.TEKICK)
 	{
 		
-		if (char.rotation > 0x20 && char.rotation < 0xe0)
+		if (char.rotation > 0x20 && char.rotation < 0xe0 && (char.flags & char.flag.ROLLING) == 0)
 		{
 			char.flags &= ~(char.flag.IN_AIR | char.flag.PUSHING | char.flag.CONTROL_LOCK)
 			char.state = char.state.RUNNING
 			char.animation.timer = 0
 			char.rotation.x = 0
+		}
+		else
+		{	
+			Character.LandingOnGroundStandUp()
+			Character.LandingOnGroundResetState()
 		}
 	}
 	else
@@ -910,8 +959,10 @@ function bool Character.UpdateSpindash()
 		return base.Character.UpdateSpindash()
 }
 
+
 function void Character.updateUprightOnGround()
 {
+	// update on solid ground
 	if (char.character == CHARACTER_SONIC)
 	{
 		if (Character.UpdateSpindash())
@@ -933,7 +984,6 @@ function void Character.updateUprightOnGround()
 		base.Character.updateUprightOnGround()
 	}
 }
-
 
 
 //# address-hook(0x018cb6) end(0x018d68)

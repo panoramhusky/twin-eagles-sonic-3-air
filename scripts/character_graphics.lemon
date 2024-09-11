@@ -59,8 +59,11 @@ function void UpdateSonicAnimation()
 		
 			if (char.animation.timer > 19)
 			{
-				char.state = char.state.RUNNING
-				char.animation.timer = 0
+				if ((char.flags & char.flag.IN_AIR) == 0)
+					char.state = char.state.RUNNING
+				else
+					char.state = char.state.TEJUMP
+				
 				char.rotation.x = 0
 			}
 			else
@@ -130,7 +133,7 @@ function void TESonic.UpdateAirSlashAnim()
 	++char.animation.frame
 }
 
-
+/*
 function void updateSonicAnimationRunning()
 {
 	if (char.character == CHARACTER_SONIC)
@@ -145,3 +148,4 @@ function void updateSonicAnimationRunning()
 	}
 	base.updateSonicAnimationRunning()
 }
+*/
