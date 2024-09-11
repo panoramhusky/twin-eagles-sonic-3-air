@@ -5,7 +5,7 @@ function void Checkpoint.Init()
 	base.Checkpoint.Init()
 	
 	A1 = 0xffffb000
-	if (u8[A1 + 0x38] == CHARACTER_SONIC)
+	if (TESonic.isTESonic(A1))
 	{
 		objA0.box_size.x = 24
 		objA0.box_size.y = 24
@@ -26,7 +26,7 @@ function void Checkpoint.Init()
 function void fn02d028()
 {
 	A1 = 0xffffb000
-	if (u8[A1 + 0x38] == CHARACTER_SONIC)
+	if (TESonic.isTESonic(A1))
 	{
 	#if STANDALONE
 		// Skip this when restart was triggered
@@ -101,7 +101,7 @@ function void fn02d012()
 	base.fn02d012()
 	
 	A1 = 0xffffb000
-	if (u8[A1 + 0x38] == CHARACTER_SONIC)
+	if (TESonic.isTESonic(A1))
 	{
 		++objA0.animation.timer
 		if (objA0.animation.timer > 8)
@@ -120,7 +120,7 @@ function void fn02d012()
 function void fn02d0f8()
 {
 	A1 = 0xffffb000
-	if (u8[A1 + 0x38] == CHARACTER_SONIC)
+	if (TESonic.isTESonic(A1))
 	{
 		DrawOrUnloadObject()
 		
@@ -242,7 +242,7 @@ function void fn02d0f8()
 function void fn02d10a()
 {
 	A1 = 0xffffb000
-	if (u8[A1 + 0x38] == CHARACTER_SONIC)
+	if (TESonic.isTESonic(A1))
 	{
 		A1 = 0xffff0000 + u16[A0 + 0x3e]
 	

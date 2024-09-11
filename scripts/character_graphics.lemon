@@ -6,7 +6,7 @@ constant u8 char.state.TEAIRSLASH = 0x42
 //# translated(0x012a2a) end(0x012a6e)
 function void UpdateSonicAnimation()
 {
-	if (char.character == CHARACTER_SONIC)
+	if (TESonic.isTESonic(A0))
 	{
 		if (char.state != char.state.former)
 		{
@@ -136,7 +136,7 @@ function void TESonic.UpdateAirSlashAnim()
 /*
 function void updateSonicAnimationRunning()
 {
-	if (char.character == CHARACTER_SONIC)
+	if (TESonic.isTESonic(A0))
 	{
 		A1 = 0xffffb000
 		A6 = 0xffffcc54

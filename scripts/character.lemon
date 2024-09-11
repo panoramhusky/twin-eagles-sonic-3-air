@@ -3,7 +3,7 @@
 //# translated(0x017710) end(0x0177e8)
 function bool Character.CheckStartJump()
 {
-	if (char.character == CHARACTER_SONIC)
+	if (TESonic.isTESonic(A0))
 	{
 		u8 input_pressed = control.player1.pressed
 		if ((input_pressed & CONTROL_A) == 0 && (input_pressed & CONTROL_C) == 0)
@@ -28,31 +28,17 @@ function bool Character.CheckStartJump()
 
 		// Get jump acceleration depending on character
 		u16 acceleration
-		if (char.character != CHARACTER_KNUCKLES || competition_mode.active)
+		if (char.flags & char.flag.UNDERWATER)
 		{
-			if (char.flags & char.flag.UNDERWATER)
-			{
-				acceleration = 0x380
-			}
-			else if (super.active && char.character == CHARACTER_SONIC)
-			{
-				acceleration = 0x800
-			}
-			else
-			{
-				acceleration = 0x680
-			}
+			acceleration = 0x380
+		}
+		else if (super.active)
+		{
+			acceleration = 0x800
 		}
 		else
 		{
-			if (char.flags & char.flag.UNDERWATER)
-			{
-				acceleration = 0x300
-			}
-			else
-			{
-				acceleration = 0x600
-			}
+			acceleration = 0x680
 		}
 
 		u8 angle = char.rotation - 0x40
@@ -97,7 +83,7 @@ function bool Character.CheckStartJump()
 
 function void Character.updateJumpMoves()
 {
-	if (char.character == CHARACTER_SONIC)
+	if (TESonic.isTESonic(A0))
 	{
 		u8 input_state     = control.player1.state
 		u8 input_pressed   = control.player1.pressed
@@ -135,10 +121,7 @@ function void Character.updateJumpMoves()
 						// Check for other things to do instead of the usual reaction to jump button pressed
 						if (onCharacterPressedJumpInMidAir(input_state, input_pressed))
 						{
-							if (char.character == CHARACTER_SONIC)
-							{
-								SonicPressedJumpInMidAir()
-							}
+							SonicPressedJumpInMidAir()
 						}
 					}
 				}
@@ -160,7 +143,7 @@ function void Character.updateJumpMoves()
 
 function void SonicPressedJumpInMidAir()
 {
-	if (char.character == CHARACTER_SONIC)
+	if (TESonic.isTESonic(A0))
 	{
 	}
 	else
@@ -171,59 +154,63 @@ function void SonicPressedJumpInMidAir()
 
 function void Character.updateUprightOnGroundInner()
 {
-	if (char.state != char.state.TEKICK)
+	if (TESonic.isTESonic(A0))
 	{
-		base.Character.updateUprightOnGroundInner()
-	}
-	else
-	{
-		u8 input_state     = (char.character == CHARACTER_TAILS) ? control.tails.state : control.player1.state
-		bool isSuperActive = (char.character == CHARACTER_TAILS) ? super.active.tails  : super.active
-
-		// These are in order:
-		//  - maximum speed
-		//  - maximum acceleration
-		//  - maximum deceleration
-		D6.u16 = u16[A4]
-		D5.u16 = u16[A4 + 2]
-		D4.u16 = u16[A4 + 4]
-
-		if ((char.bonus_effect & char.bonus.INFINITE_INERTIA) == 0)
+		if (char.state != char.state.TEKICK)
 		{
-			// Camera move state:
-			//   0 = no input up/down
-			//   1 = up/down pressed, but still in delay
-			//   2 = up/down pressed, actual movement (limit may be reached)
-			u8 cameraMoveState = 0
+			base.Character.updateUprightOnGroundInner()
+		}
+		else
+		{
+			u8 input_state     = (char.character == CHARACTER_TAILS) ? control.tails.state : control.player1.state
+			bool isSuperActive = (char.character == CHARACTER_TAILS) ? super.active.tails  : super.active
 
-			if (char.hlock_countdown == 0)
+			// These are in order:
+			//  - maximum speed
+			//  - maximum acceleration
+			//  - maximum deceleration
+			D6.u16 = u16[A4]
+			D5.u16 = u16[A4 + 2]
+			D4.u16 = u16[A4 + 4]
+
+			if ((char.bonus_effect & char.bonus.INFINITE_INERTIA) == 0)
 			{
-				// Standing upright?
-				D0.u8 = (char.rotation + 0x20) & 0xc0
-				if (D0.u8 == 0 && char.groundspeed == 0)
-				{
-					char.flags &= ~char.flag.PUSHING
+				// Camera move state:
+				//   0 = no input up/down
+				//   1 = up/down pressed, but still in delay
+				//   2 = up/down pressed, actual movement (limit may be reached)
+				u8 cameraMoveState = 0
 
-					checkForBalancing()
+				if (char.hlock_countdown == 0)
+				{
+					// Standing upright?
+					D0.u8 = (char.rotation + 0x20) & 0xc0
+					if (D0.u8 == 0 && char.groundspeed == 0)
+					{
+						char.flags &= ~char.flag.PUSHING
+
+						checkForBalancing()
+					}
 				}
+
 			}
 
+			char.velocity.x = (s32(lookupCos(char.rotation)) * char.groundspeed) >> 8
+			char.velocity.y = (s32(lookupSin(char.rotation)) * char.groundspeed) >> 8
+
+			Character.UpdateControlOnGroundShared()
+			
 		}
-
-		char.velocity.x = (s32(lookupCos(char.rotation)) * char.groundspeed) >> 8
-		char.velocity.y = (s32(lookupSin(char.rotation)) * char.groundspeed) >> 8
-
-		Character.UpdateControlOnGroundShared()
-		
-	}
 	
-	if (char.character == CHARACTER_SONIC)
-	{
 		u8 input_pressed   = control.player1.pressed
 		if (input_pressed & CONTROL_B)
 		{
 			Character.DoTEKick()
 		}
+	}
+	else
+	{
+		base.Character.updateUprightOnGroundInner()
 	}
 }
 
@@ -232,7 +219,7 @@ function void Character.updateUprightOnGroundInner()
 //# address-hook(0x017680) end(0x01770e)
 function void Character.UpdateControlInAir()
 {
-	if (char.character == CHARACTER_SONIC)
+	if (TESonic.isTESonic(A0))
 	{
 		u8 input_state = control.player1.state
 		s16 vx = char.velocity.x
@@ -466,7 +453,7 @@ function bool Character.CheckTEKickOverLap(u16 px, u16 py, u16 sx, u16 sy)
 //# address-hook(0x00fe8e) end(0x00ff04)
 function void Character.CheckCollisionsWithDynamicObjects()
 {
-	if (char.character == CHARACTER_SONIC)
+	if (TESonic.isTESonic(A0))
 	{
 		SonicUpdateRingCollection()
 		UpdateShieldDeflecting()
@@ -487,7 +474,7 @@ function void Character.CheckCollisionsWithDynamicObjects()
 //# address-hook(0x00ff06) end(0x00ff5e)
 function void Character.CheckCollisionsWithDynamicObjects_partial()
 {
-	if (char.character == CHARACTER_SONIC)
+	if (TESonic.isTESonic(A0))
 	{
 	#if STANDALONE
 		// Bounding box of player
@@ -614,7 +601,7 @@ function void Character.CheckCollisionsWithDynamicObjects_partial()
 //# address-hook(0x00ffd4) end(0x010214)
 function void Character.OnCollisionWithDynamicObject()
 {
-	if (char.character == CHARACTER_SONIC)
+	if (TESonic.isTESonic(A0))
 	{
 		// Example values for objA1.collision_attributes:
 		//  - 0x06, 0x0b, 0x17, 0x1a = Different types of enemies
@@ -858,7 +845,7 @@ function void Character.OnKickCollisionWithDynamicObject()
 //# address-hook(0x01560c) end(0x01569a)
 function void Character.LandingOnGround()
 {
-	if (char.character == CHARACTER_SONIC && char.state == char.state.TEKICK)
+	if (TESonic.isTESonic(A0) && char.state == char.state.TEKICK)
 	{
 		
 		if (char.rotation > 0x20 && char.rotation < 0xe0 && (char.flags & char.flag.ROLLING) == 0)
@@ -883,7 +870,7 @@ function void Character.LandingOnGround()
 
 function void setSpeedCapProperties(u32 address, bool isSuperActive)
 {
-	if (char.character == CHARACTER_SONIC)
+	if (TESonic.isTESonic(A0))
 	{
 		// Set new max speed cap etc.:
 		//  - u16[address]     = maximum speed			-> e.g. global.move.speedcap
@@ -953,7 +940,7 @@ function void setSpeedCapProperties(u32 address, bool isSuperActive)
 //# translated(0x015332) end(0x0153c0)
 function bool Character.UpdateSpindash()
 {
-	if (char.character == CHARACTER_SONIC)
+	if (TESonic.isTESonic(A0))
 		return false
 	else
 		return base.Character.UpdateSpindash()
@@ -963,7 +950,7 @@ function bool Character.UpdateSpindash()
 function void Character.updateUprightOnGround()
 {
 	// update on solid ground
-	if (char.character == CHARACTER_SONIC)
+	if (TESonic.isTESonic(A0))
 	{
 		if (Character.UpdateSpindash())
 			return
@@ -990,7 +977,7 @@ function void Character.updateUprightOnGround()
 function void fn018cb6()
 {
 	A1 = 0xffff0000 + objA0.dustcloud.character_address
-	if (u8[A1 + 0x38] == CHARACTER_SONIC)
+	if (TESonic.isTESonic(A1))
 	{
 		A2 = 0xffff0000 + objA0.dustcloud.character_address
 		D1 = 0x10
@@ -1047,7 +1034,7 @@ function void fn018cb6()
 
 function void updateCharacterControlOnGround()
 {
-	if (char.character == CHARACTER_SONIC)
+	if (TESonic.isTESonic(A0))
 	{
 		u8 input_state     = control.player1.state
 		bool isSuperActive = super.active
@@ -1143,7 +1130,7 @@ function void updateCharacterControlOnGround()
 //# address-hook(0x012232) end(0x0122b8)
 function void SonicLandingBubbleBounce()
 {
-	if (char.character == CHARACTER_SONIC)
+	if (TESonic.isTESonic(A0))
 	{
 		// sorry nothing
 	}
@@ -1158,7 +1145,7 @@ function void gainExtraLife()
 	// we need to back up and restore the A1 here otherwise the game shits itself
 	u32 A1backup = A1
 	A1 = 0xffffb000
-	if (u8[A1 + 0x38] == CHARACTER_SONIC)
+	if (TESonic.isTESonic(A1))
 	{
 		if (!Game.getSetting(SETTING_INFINITE_LIVES))
 		{
@@ -1178,7 +1165,7 @@ function void gainExtraLife()
 //# address-hook(0x01036e) end(0x0103b8)
 function void Character.Die_internal()
 {
-	if (char.character == CHARACTER_SONIC)
+	if (TESonic.isTESonic(A0))
 	{
 		TESonic.health = 0
 		Character.Die_noSound()
@@ -1194,7 +1181,7 @@ function void Character.Die_internal()
 //# address-hook(0x010366) end(0x01036c)
 function void Character.Die()
 {
-	if (char.character == CHARACTER_SONIC)
+	if (TESonic.isTESonic(A0))
 	{
 		if (debug_mode.state == 0)
 		{
@@ -1221,7 +1208,7 @@ function bool debugModeRescue()
 {
 	A1 = 0xffffb000
 	// Get character out of damage state and into object placement mode
-	if (debug_mode.enabled && (control.pad1.pressed & CONTROL_B) && (u8[A1 + 0x38] == CHARACTER_SONIC))
+	if (debug_mode.enabled && (control.pad1.pressed & CONTROL_B) && TESonic.isTESonic(A1))
 	{
 		debug_mode.state = 1
 		player1.control_override = 0
@@ -1239,20 +1226,23 @@ function bool debugModeRescue()
 
 function bool Character.performSuperTransformation()
 {
-	u8 possibleSuperForm = 0	// 1 for Super, 2 for Hyper
-	// Can go super?
-	if (global.super_emeralds >= 7)
+	if (TESonic.isTESonic(A0))
 	{
-		possibleSuperForm = 2
-	}
-	else if (global.chaos_emeralds >= 7 && global.traded_emeralds == 0)
-	{
-		possibleSuperForm = 1
-	}
+		u8 possibleSuperForm = 0	// 1 for Super, 2 for Hyper
+		// Can go super?
+		if (global.super_emeralds >= 7)
+		{
+			possibleSuperForm = 2
+		}
+		else if (global.chaos_emeralds >= 7 && global.traded_emeralds == 0)
+		{
+			possibleSuperForm = 1
+		}
 
-	if (char.character == CHARACTER_SONIC && !super.active && ring_counter >= 50 && hud.dirty.timer && char.control_flags == 0 && possibleSuperForm != 0)
-	{		
-		Audio.playAudio("te_sonic")
+		if (!super.active && ring_counter >= 50 && hud.dirty.timer && char.control_flags == 0 && possibleSuperForm != 0)
+		{		
+			Audio.playAudio("te_sonic")
+		}
 	}
 	
 	return base.Character.performSuperTransformation()

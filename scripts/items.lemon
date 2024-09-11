@@ -2,7 +2,7 @@
 function void MonitorIntact.Init()
 {
 	A1 = 0xffffb000
-	if (u8[A1 + 0x38] == CHARACTER_SONIC)
+	if (TESonic.isTESonic(A1))
 	{
 		objA0.base_state += 2
 		objA0.hitbox_extends.x = 8
@@ -45,7 +45,7 @@ function void MonitorIntact.Init()
 function void MonitorIntact.UpdateDefault()
 {
 	A1 = 0xffffb000
-	if (u8[A1 + 0x38] == CHARACTER_SONIC)
+	if (TESonic.isTESonic(A1))
 	{
 		fn01d63a()
 		AddAsDynamicObject()
@@ -75,7 +75,7 @@ function void MonitorIntact.UpdateDefault()
 function void MonitorIntact.Opening()
 {
 	A1 = 0xffffb000
-	if (u8[A1 + 0x38] == CHARACTER_SONIC)
+	if (TESonic.isTESonic(A1))
 	{
 	#if STANDALONE
 		u8[A0 + 0x49] = objA0.state		// Backup original
@@ -142,7 +142,7 @@ function void MonitorIntact.Opening()
 function void ItemEffect.ApplyRobotnik()
 {
 	A1 = 0xffffb000
-	if (u8[A1 + 0x38] == CHARACTER_SONIC)
+	if (TESonic.isTESonic(A1))
 	{
 		++u16[A2]
 		if (TESonic.maxhealth > 1)
@@ -166,7 +166,7 @@ function void ItemEffect.ApplyRobotnik()
 function void ItemEffect.ApplySpeedUp()
 {
 	A1 = 0xffffb000
-	if (u8[A1 + 0x38] == CHARACTER_SONIC)
+	if (TESonic.isTESonic(A1))
 		Audio.playAudio("te_sonic")
 	
 	base.ItemEffect.ApplySpeedUp()
@@ -176,7 +176,7 @@ function void ItemEffect.ApplySpeedUp()
 function void ItemEffect.ApplyExtraRings()
 {
 	A1 = 0xffffb000
-	if (u8[A1 + 0x38] == CHARACTER_SONIC)
+	if (TESonic.isTESonic(A1))
 	{
 		Audio.playAudio("te_restore")
 		if (TESonic.health < TESonic.maxhealth)
@@ -198,7 +198,7 @@ function void ItemEffect.ApplyExtraRings()
 function void ItemEffect.ApplyInvincibility()
 {
 	A1 = 0xffffb000
-	if (u8[A1 + 0x38] == CHARACTER_SONIC)
+	if (TESonic.isTESonic(A1))
 	{
 		Audio.playAudio("te_newheart")
 		if (TESonic.maxhealth < 5)
@@ -225,7 +225,7 @@ function void ItemEffect.ApplyInvincibility()
 function void ItemEffect.ApplySuperTransformation()
 {
 	A1 = 0xffffb000
-	if (u8[A1 + 0x38] == CHARACTER_SONIC)
+	if (TESonic.isTESonic(A1))
 	{
 		++u16[A2]
 		ring_counter += 50		// Without a check for 999 rings...

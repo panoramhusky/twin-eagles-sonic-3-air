@@ -22,7 +22,7 @@ function bool TESonic.checkIfKickFacingObject()
 function void fn083a70()
 {
 	A1 = 0xffffb000
-	if (u8[A1 + 0x38] == CHARACTER_SONIC)
+	if (TESonic.isTESonic(A1))
 	{
 		A1 = 0xffff0000 + D0.u16
 		if (u8[A1 + 0x20] != char.state.TEKICK)
@@ -62,7 +62,7 @@ function void fn083a70()
 //# address-hook(0x024280) end(0x0242b4)
 function void DamageCharacter()
 {
-	if (u8[A1 + 0x38] == CHARACTER_SONIC)
+	if (TESonic.isTESonic(A1))
 	{
 		if ((u8[A1 + 0x2b] & char.bonus.INVINCIBLE) == 0)
 		{
@@ -108,25 +108,17 @@ function void fn01fd08()
 		D1.u16 = u16[A0 + 0x30]
 		if (D6.u16 & 0x01)
 		{
-			if (u8[A1 + 0x38] == CHARACTER_KNUCKLES)
+			if ((objA0.subtype2c & 0x80) == 0)	// Special Knuckles-only wall?
 			{
-				// Knuckles can break all walls
-				canBreakWall = true
-			}
-			else
-			{
-				if ((objA0.subtype2c & 0x80) == 0)	// Special Knuckles-only wall?
+				if (super.active || (TESonic.isTESonic(A1) && objA1.state == char.state.TEKICK && TESonic.checkIfKickFacingObject()))
 				{
-					if (super.active || (u8[A1 + 0x38] == CHARACTER_SONIC && objA1.state == char.state.TEKICK && TESonic.checkIfKickFacingObject()))
-					{
-						// Super form breaks walls even when going slow
-						canBreakWall = true
-					}
-					else if ((objA0.flags2a & object.flag.P1_PUSHING) || (u8[A1 + 0x2b] & char.bonus.SHIELD_FIRE))
-					{
-						// Normal Sonic and Tails need to quickly roll into a wall to break it (this includes the fire shield attack)
-						canBreakWall = (objA1.state == char.state.ROLLING && abs(D1.s16) >= 0x480)
-					}
+					// Super form breaks walls even when going slow
+					canBreakWall = true
+				}
+				else if ((objA0.flags2a & object.flag.P1_PUSHING))
+				{
+					// Normal Sonic and Tails need to quickly roll into a wall to break it (this includes the fire shield attack)
+					canBreakWall = (objA1.state == char.state.ROLLING && abs(D1.s16) >= 0x480)
 				}
 			}
 
@@ -134,50 +126,6 @@ function void fn01fd08()
 			{
 				objA0.flags2a &= ~object.flag.P1_PUSHING
 				Rocks.BreakWall()
-
-				if (objA0.flags2a & object.flag.P2_PUSHING)
-				{
-					// Check for second character
-					A1 = 0xffffb04a
-					if (u8[A1 + 0x38] == CHARACTER_KNUCKLES || objA1.state == char.state.ROLLING)
-					{
-						objA1.velocity.x = u16[A0 + 0x36]
-						objA1.groundspeed = objA1.velocity.x
-						objA0.flags2a &= ~object.flag.P2_PUSHING
-						objA1.flags2a &= ~char.flag.PUSHING
-					}
-				}
-			}
-		}
-
-		if (!canBreakWall)
-		{
-			// Give second character a try
-			A1 = 0xffffb04a
-			D1.u16 = u16[A0 + 0x36]
-
-			if (objA0.flags2a & object.flag.P2_PUSHING)
-			{
-				if (u8[A1 + 0x38] == CHARACTER_KNUCKLES)
-				{
-					// Knuckles can break all walls
-					canBreakWall = true
-				}
-				else
-				{
-					if ((objA0.subtype2c & 0x80) == 0)	// Special Knuckles-only wall?
-					{
-						// Normal Sonic and Tails need to quickly roll into a wall to break it (this includes the fire shield attack)
-						canBreakWall = (objA1.state == char.state.ROLLING && abs(D1.s16) >= 0x480)
-					}
-				}
-			}
-
-			if (canBreakWall)
-			{
-				objA0.flags2a &= ~object.flag.P2_PUSHING
-				Rocks.BreakWall()
-				return
 			}
 		}
 	}
@@ -229,7 +177,7 @@ function void fn021568()
 	if (D6.u16 & 0x01)
 	{
 		bool canBreakWall = false
-		if (super.active || u8[A1 + 0x38] == CHARACTER_KNUCKLES || (u8[A1 + 0x38] == CHARACTER_SONIC && objA1.state == char.state.TEKICK && TESonic.checkIfKickFacingObject()))
+		if (super.active || (TESonic.isTESonic(A1) && objA1.state == char.state.TEKICK && TESonic.checkIfKickFacingObject()))
 		{
 			// Super/Hyper forms can break walls, and Knuckles can
 			canBreakWall = true
@@ -237,7 +185,7 @@ function void fn021568()
 		else
 		{
 			// Does this wall allow for rolling into the wall? Otherwise the fire shield will do
-			if ((objA0.flags2a & object.flag.P1_PUSHING) || (u8[A1 + 0x2b] & char.bonus.SHIELD_FIRE))
+			if ((objA0.flags2a & object.flag.P1_PUSHING))
 			{
 				canBreakWall = (objA1.state == char.state.ROLLING && abs(D1.s16) >= 0x0480)
 			}
@@ -247,15 +195,6 @@ function void fn021568()
 		{
 			objA0.flags2a &= ~object.flag.P1_PUSHING
 			fn02165a()
-
-			A1 = 0xffffb04a
-			if ((objA0.flags2a & object.flag.P2_PUSHING) && objA1.state == char.state.ROLLING)
-			{
-				objA0.flags2a &= ~object.flag.P2_PUSHING
-				objA1.velocity.x = objA0.value32
-				objA1.groundspeed = objA1.velocity.x
-				objA1.flags2a &= ~char.flag.PUSHING
-			}
 
 			DrawOrUnloadObject()
 			return
@@ -300,7 +239,7 @@ function void fn021568()
 function void Rocks.Update()
 {
 	A1 = 0xffffb000
-	if (u8[A1 + 0x38] == CHARACTER_SONIC && objA0.subtype2c & 0x01)
+	if (TESonic.isTESonic(A1) && objA0.subtype2c & 0x01)
 	{
 		objA0.update_address = 0x01fd08
 	}
@@ -318,7 +257,7 @@ function void fn06b734()
 	{
 		base.fn06b734()
 		A1 = 0xffffb000
-		if (u8[A1 + 0x38] == CHARACTER_SONIC)
+		if (TESonic.isTESonic(A1))
 		{
 			u16 charpos_x = objA1.position.x.u16
 			u16 charpos_y = objA1.position.y.u16
@@ -389,7 +328,7 @@ function void fn06b734()
 function void fn025d9c()
 {
 	A1 = 0xffffb000
-	if (u8[A1 + 0x38] == CHARACTER_SONIC)
+	if (TESonic.isTESonic(A1))
 	{
 		D1.u16 = 0x1b
 		D2.u16 = 0x10
@@ -427,30 +366,6 @@ function void fn025d9c()
 					objA1.state = char.state.GOT_HURT_PANIC
 				}
 			}
-
-			D6.u8 &= 0x22
-			if (D6.u8 != 0)
-			{
-				A1 = 0xffffb04a
-			#if STANDALONE
-				if (objA1.state == char.state.SPINDASH || (u8[A1 + 0x38] == CHARACTER_SONIC && objA1.state.former == char.state.SONIC_DROPDASH))
-			#else
-				if (objA1.state == char.state.SPINDASH)
-			#endif
-				{
-					u16[A0 + 0x30] = 0x3c
-					u8[A0 + 0x32] = 1
-					D0.u8 = (u8[A1 + 0x2a] + objA0.flags2a) & 0x01
-					if (D0.u8 == 0)
-					{
-						u8[A0 + 0x32] = 0xff
-					}
-				#if STANDALONE
-					if (objA1.state.former == char.state.SONIC_DROPDASH)
-						objA1.state = char.state.SONIC_DROPDASH
-				#endif
-				}
-			}
 		}
 
 		if (u16[A0 + 0x30] != 0)
@@ -470,11 +385,6 @@ function void fn025d9c()
 				if (objA0.flags2a & object.flag.P1_ON_OBJECT)
 				{
 					A1 = 0xffffb000
-					fn025ea6()
-				}
-				if (objA0.flags2a & object.flag.P2_ON_OBJECT)
-				{
-					A1 = 0xffffb04a
 					fn025ea6()
 				}
 
@@ -501,7 +411,7 @@ function void fn025d9c()
 function void fn02a502()
 {
 	A1 = 0xffffb000
-	if (u8[A1 + 0x38] == CHARACTER_SONIC)
+	if (TESonic.isTESonic(A1))
 	{
 		u16[A0 + 0x38] = score.bonus_counter
 		u8[A0 + 0x34] = u8[0xffffb000 + 0x20]
@@ -568,7 +478,7 @@ function void fn02a502()
 function void fn02a58e()
 {
 	A1 = 0xffffb000
-	if (u8[A1 + 0x38] == CHARACTER_SONIC && (objA1.state == char.state.TEJUMP || objA1.state == char.state.TEAIRSLASH))
+	if (TESonic.isTESonic(A1) && (objA1.state == char.state.TEJUMP || objA1.state == char.state.TEAIRSLASH))
 	{
 		objA1.flags2a |= char.flag.IN_AIR
 		objA1.flags2a &= ~char.flag.ON_OBJECT
@@ -588,7 +498,7 @@ function void fn065d8c()
 	base.fn065d8c()
 
 	A1 = 0xffffb000
-	if (u8[A1 + 0x38] == CHARACTER_SONIC)
+	if (TESonic.isTESonic(A1))
 	{
 		if (objA0.flags2a & (object.flag.P1_ON_OBJECT | object.flag.P2_ON_OBJECT))
 		{
@@ -609,7 +519,7 @@ function void Button.checkIfPressed()
 
 	base.Button.checkIfPressed()
 	A1 = 0xffffb000
-	if (u8[A1 + 0x38] == CHARACTER_SONIC)
+	if (TESonic.isTESonic(A1))
 	{
 		// This points to one of "level.trigger00" ... "level.trigger0f"
 		A3 = 0xfffff7e0 + (objA0.subtype2c & 0x0f)
@@ -638,7 +548,7 @@ function void Button.checkIfPressed()
 function void fn06e8a2()
 {
 	A1 = 0xffffb000
-	if (u8[A1 + 0x38] == CHARACTER_SONIC)
+	if (TESonic.isTESonic(A1))
 	{
 		if (objA1.state == char.state.TEKICK)
 		{
@@ -702,7 +612,7 @@ function void fn06e8a2()
 function void fn06e8e8()
 {
 	A1 = 0xffffb000
-	if (u8[A1 + 0x38] == CHARACTER_SONIC)
+	if (TESonic.isTESonic(A1))
 	{
 		if (objA1.state == char.state.TEKICK)
 		{
@@ -781,69 +691,72 @@ function bool TESonic.CheckForCNZBallKick()
 //# translated(0x08ac80) end(0x08accc)
 function bool fn08ac80()
 {
-	u8 bit = (1 << D1.u8)
-
-	u16 charpos_x = objA1.position.x.u16
-	u16 charpos_y = objA1.position.y.u16
-	
-	u16 offset_x = objA0.box_size.x
-	u16 offset_y = objA0.box_size.y
-	
-	u16 blockpos_x = objA0.position.x.u16
-	u16 blockpos_y = objA0.position.y.u16
-	
-	bool inBoundLeft = (charpos_x > blockpos_x - offset_x - 20)
-	bool inBoundRight = (charpos_x < blockpos_x + offset_x + 20)
-	bool inBoundTop = (charpos_y > blockpos_y - offset_y - 16)
-	bool inBoundBottom = (charpos_y < blockpos_y + offset_y + 16)
-
-	if (inBoundLeft && inBoundRight && inBoundTop && inBoundBottom)
+	if (TESonic.isTESonic(A1))
 	{
-		bool TEKick = ((u8[A1 + 0x38] == CHARACTER_SONIC) && objA1.state == char.state.TEKICK && objA1.animation.sprite == 0x03 && TESonic.checkIfKickFacingObject())
-	
-		// To break through, the character needs to kick it
-		if (TEKick)
+		u8 bit = (1 << D1.u8)
+
+		u16 charpos_x = objA1.position.x.u16
+		u16 charpos_y = objA1.position.y.u16
+		
+		u16 offset_x = objA0.box_size.x
+		u16 offset_y = objA0.box_size.y
+		
+		u16 blockpos_x = objA0.position.x.u16
+		u16 blockpos_y = objA0.position.y.u16
+		
+		bool inBoundLeft = (charpos_x > blockpos_x - offset_x - 20)
+		bool inBoundRight = (charpos_x < blockpos_x + offset_x + 20)
+		bool inBoundTop = (charpos_y > blockpos_y - offset_y - 16)
+		bool inBoundBottom = (charpos_y < blockpos_y + offset_y + 16)
+
+		if (inBoundLeft && inBoundRight && inBoundTop && inBoundBottom)
 		{
-			if (objA0.value3a >= 1)
+			bool TEKick = (objA1.state == char.state.TEKICK && objA1.animation.sprite == 0x03 && TESonic.checkIfKickFacingObject())
+		
+			// To break through, the character needs to kick it
+			if (TEKick)
 			{
-				u8[A1 + 0x2a] &= ~bit
-
-				objA0.flags2a &= ~bit
-				objA0.flags38 |= 0x01
-
-				// "spawnChildObjects(0x08aaea)" replaced by:
-				spawnChildObject(0x08a8dc, 0x00, -12, -8)
-				spawnChildObject(0x08a8dc, 0x02, -4, -8)
-				spawnChildObject(0x08a8dc, 0x04, 4, -8)
-				spawnChildObject(0x08a8dc, 0x06, 12, -8)
-				spawnChildObject(0x08a8dc, 0x08, -12, 0)
-				spawnChildObject(0x08a8dc, 0x0a, -4, 0)
-				spawnChildObject(0x08a8dc, 0x0c, 4, 0)
-				spawnChildObject(0x08a8dc, 0x0e, 12, 0)
-				spawnChildObject(0x08a8dc, 0x10, -12, 8)
-				spawnChildObject(0x08a8dc, 0x12, -4, 8)
-				spawnChildObject(0x08a8dc, 0x14, 4, 8)
-				spawnChildObject(0x08a8dc, 0x16, 12, 8)
-
-				fn08594e()
-				Object.TriggerUnloading()
-				playSound(SFX_COLLAPSE)
-				return true
-			}
-			else
-			{
-				bool onLeft = (objA1.position.x.u16 < objA0.position.x.u16)
-			
-				if (objA0.value3a == 0)
+				if (objA0.value3a >= 1)
 				{
-					playSound(0x5d)
+					u8[A1 + 0x2a] &= ~bit
+
+					objA0.flags2a &= ~bit
+					objA0.flags38 |= 0x01
+
+					// "spawnChildObjects(0x08aaea)" replaced by:
+					spawnChildObject(0x08a8dc, 0x00, -12, -8)
+					spawnChildObject(0x08a8dc, 0x02, -4, -8)
+					spawnChildObject(0x08a8dc, 0x04, 4, -8)
+					spawnChildObject(0x08a8dc, 0x06, 12, -8)
+					spawnChildObject(0x08a8dc, 0x08, -12, 0)
+					spawnChildObject(0x08a8dc, 0x0a, -4, 0)
+					spawnChildObject(0x08a8dc, 0x0c, 4, 0)
+					spawnChildObject(0x08a8dc, 0x0e, 12, 0)
+					spawnChildObject(0x08a8dc, 0x10, -12, 8)
+					spawnChildObject(0x08a8dc, 0x12, -4, 8)
+					spawnChildObject(0x08a8dc, 0x14, 4, 8)
+					spawnChildObject(0x08a8dc, 0x16, 12, 8)
+
+					fn08594e()
+					Object.TriggerUnloading()
+					playSound(SFX_COLLAPSE)
+					return true
 				}
+				else
+				{
+					bool onLeft = (objA1.position.x.u16 < objA0.position.x.u16)
 				
-				objA1.velocity.x = (onLeft ? -0x200 : 0x200)
-				
-				objA0.position.x.u16 += (onLeft ? 0x08 : -0x08)
-				
-				objA0.value3a += 1
+					if (objA0.value3a == 0)
+					{
+						playSound(0x5d)
+					}
+					
+					objA1.velocity.x = (onLeft ? -0x200 : 0x200)
+					
+					objA0.position.x.u16 += (onLeft ? 0x08 : -0x08)
+					
+					objA0.value3a += 1
+				}
 			}
 		}
 	}
@@ -857,42 +770,45 @@ function void fn08b384()
 {
 	base.fn08b384()
 	
-	D6 = (D6 << 16) + (D6 >> 16)
-	if (D6.u16 & 0x03)
+	A1 = 0xffffb000
+	if (TESonic.isTESonic(A1))
 	{
-		A1 = 0xffffb000
-		if (u8[A1 + 0x38] == CHARACTER_SONIC && (objA1.state == char.state.TEKICK || objA1.state == char.state.TEAIRSLASH) && TESonic.checkIfKickFacingObject())
+		D6 = (D6 << 16) + (D6 >> 16)
+		if (D6.u16 & 0x03)
 		{
-			bool onLeft = (objA1.position.x.u16 < objA0.position.x.u16)
-			u8[A1 + 0x05] = base_state.NORMAL
-			objA1.velocity.x = (onLeft ? -0x200 : 0x200)
-			objA1.velocity.y = -0x300
-			objA1.flags2a |= (char.flag.IN_AIR)
-			objA1.flags2a &= ~char.flag.ON_OBJECT
-
-			if (A2 != 0)
+			if ((objA1.state == char.state.TEKICK || objA1.state == char.state.TEAIRSLASH) && TESonic.checkIfKickFacingObject())
 			{
-				u8[A2 + 0x2a] |= char.flag.IN_AIR
-				u8[A2 + 0x2a] &= ~char.flag.ON_OBJECT
+				bool onLeft = (objA1.position.x.u16 < objA0.position.x.u16)
+				u8[A1 + 0x05] = base_state.NORMAL
+				objA1.velocity.x = (onLeft ? -0x200 : 0x200)
+				objA1.velocity.y = -0x300
+				objA1.flags2a |= (char.flag.IN_AIR)
+				objA1.flags2a &= ~char.flag.ON_OBJECT
+
+				if (A2 != 0)
+				{
+					u8[A2 + 0x2a] |= char.flag.IN_AIR
+					u8[A2 + 0x2a] &= ~char.flag.ON_OBJECT
+				}
+
+				// Spawn broken ice block chunks
+				// "spawnChildObjects(0x08b480)" replaced by:
+				spawnChildObject(0x08b432, 0x00, 0, -8)
+				spawnChildObject(0x08b432, 0x02, 0, 8)
+				spawnChildObject(0x08b432, 0x04, -16, -8)
+				spawnChildObject(0x08b432, 0x06, 16, -8)
+				spawnChildObject(0x08b432, 0x08, -16, 8)
+				spawnChildObject(0x08b432, 0x0a, 16, 8)
+				spawnChildObject(0x08b432, 0x0c, 0, 0)
+				spawnChildObject(0x08b432, 0x0e, 0, 0)
+				spawnChildObject(0x08b432, 0x10, 0, 0)
+				spawnChildObject(0x08b432, 0x12, 0, 0)
+				spawnChildObject(0x08b432, 0x14, 0, 0)
+				spawnChildObject(0x08b432, 0x16, 0, 0)
+
+				playSound(0x6e)
+				Object.TriggerUnloading()
 			}
-
-			// Spawn broken ice block chunks
-			// "spawnChildObjects(0x08b480)" replaced by:
-			spawnChildObject(0x08b432, 0x00, 0, -8)
-			spawnChildObject(0x08b432, 0x02, 0, 8)
-			spawnChildObject(0x08b432, 0x04, -16, -8)
-			spawnChildObject(0x08b432, 0x06, 16, -8)
-			spawnChildObject(0x08b432, 0x08, -16, 8)
-			spawnChildObject(0x08b432, 0x0a, 16, 8)
-			spawnChildObject(0x08b432, 0x0c, 0, 0)
-			spawnChildObject(0x08b432, 0x0e, 0, 0)
-			spawnChildObject(0x08b432, 0x10, 0, 0)
-			spawnChildObject(0x08b432, 0x12, 0, 0)
-			spawnChildObject(0x08b432, 0x14, 0, 0)
-			spawnChildObject(0x08b432, 0x16, 0, 0)
-
-			playSound(0x6e)
-			Object.TriggerUnloading()
 		}
 	}
 }
@@ -903,9 +819,9 @@ function void fn08b384()
 function void fn02a6d4()
 {
 	A1 = 0xffffb000
-	if (u8[A1 + 0x38] == CHARACTER_SONIC)
+	if (TESonic.isTESonic(A1))
 	{
-		// quite frankly, idgaf about these, im making them just cause the player to autospin instead
+		// quite frankly, idgaf about these, im just turning them into that one unused object instead
 		objA0.update_address = 0x02a502
 		if (objA0.subtype2c != 0)
 		{
@@ -938,45 +854,46 @@ function void fn071f30()
 	base.fn071f30()
 	
 	A1 = 0xffffb000
-	u16 charpos_x = objA1.position.x.u16
-	u16 charpos_y = objA1.position.y.u16
-	
-	u16 offset_x = objA0.box_size.x
-	u16 offset_y = 16
-	
-	u16 blockpos_x = objA0.position.x.u16
-	u16 blockpos_y = objA0.position.y.u16
-	
-	bool inBoundLeft = (charpos_x > blockpos_x - offset_x - 20)
-	bool inBoundRight = (charpos_x < blockpos_x + offset_x + 20)
-	bool inBoundTop = (charpos_y > blockpos_y - offset_y - 10)
-	bool inBoundBottom = (charpos_y < blockpos_y + offset_y + 10)
-
-	
-
-	if ((inBoundLeft && inBoundRight && inBoundTop && inBoundBottom) && (objA1.state == char.state.TEKICK || objA1.state == char.state.TEAIRSLASH) && TESonic.checkIfKickFacingObject())
+	if (TESonic.isTESonic(A1))
 	{
-		A1 = 0xffff0000 + u16[A0 + 0x46]
+		u16 charpos_x = objA1.position.x.u16
+		u16 charpos_y = objA1.position.y.u16
 		
-		if (objA1.state == 0)
+		u16 offset_x = objA0.box_size.x
+		u16 offset_y = 16
+		
+		u16 blockpos_x = objA0.position.x.u16
+		u16 blockpos_y = objA0.position.y.u16
+		
+		bool inBoundLeft = (charpos_x > blockpos_x - offset_x - 20)
+		bool inBoundRight = (charpos_x < blockpos_x + offset_x + 20)
+		bool inBoundTop = (charpos_y > blockpos_y - offset_y - 10)
+		bool inBoundBottom = (charpos_y < blockpos_y + offset_y + 10)
+
+		if ((inBoundLeft && inBoundRight && inBoundTop && inBoundBottom) && (objA1.state == char.state.TEKICK || objA1.state == char.state.TEAIRSLASH) && TESonic.checkIfKickFacingObject())
 		{
-			u8[A1 + 0x1c] = A0.u8
-			u8[A1 + 0x25] = u8[A1 + 0x28]
-			u8[A1 + 0x28] = 0
-			--u8[A1 + 0x29]
-			if (u8[A1 + 0x29] == 0)
-			{
-				u8[A1 + 0x2a] |= 0x80
-			}
+			A1 = 0xffff0000 + u16[A0 + 0x46]
 			
-			playSound(0x49)
+			if (objA1.state == 0)
+			{
+				u8[A1 + 0x1c] = A0.u8
+				u8[A1 + 0x25] = u8[A1 + 0x28]
+				u8[A1 + 0x28] = 0
+				--u8[A1 + 0x29]
+				if (u8[A1 + 0x29] == 0)
+				{
+					u8[A1 + 0x2a] |= 0x80
+				}
 				
-			A1 = 0xffffb000
-			bool onLeft = (objA1.position.x.u16 < objA0.position.x.u16)
-			objA1.velocity.x = (onLeft ? -0x200 : 0x200)
-			objA1.velocity.y = -0x300
-			objA1.flags2a |= (char.flag.IN_AIR)
-			objA1.flags2a &= ~char.flag.ON_OBJECT
+				playSound(0x49)
+					
+				A1 = 0xffffb000
+				bool onLeft = (objA1.position.x.u16 < objA0.position.x.u16)
+				objA1.velocity.x = (onLeft ? -0x200 : 0x200)
+				objA1.velocity.y = -0x300
+				objA1.flags2a |= (char.flag.IN_AIR)
+				objA1.flags2a &= ~char.flag.ON_OBJECT
+			}
 		}
 	}
 }
@@ -986,7 +903,7 @@ function void fn071f30()
 function void fn025d2c()
 {
 	base.fn025d2c()
-	if (u8[A1 + 0x38] == CHARACTER_SONIC && (objA1.state == char.state.TEKICK || objA1.state == char.state.TEAIRSLASH) && TESonic.checkIfKickFacingObject())
+	if (TESonic.isTESonic(A1) && (objA1.state == char.state.TEKICK || objA1.state == char.state.TEAIRSLASH) && TESonic.checkIfKickFacingObject())
 	{
 		objA1.velocity.x = -objA1.velocity.x
 		objA1.velocity.y = -objA1.velocity.y
@@ -1003,7 +920,7 @@ function void fn025d2c()
 function void fn027424()
 {
 	A1 = 0xffffb000
-	if (u8[A1 + 0x38] == CHARACTER_SONIC)
+	if (TESonic.isTESonic(A1))
 	{
 		u16[A0 + 0x30] = u16[0xffffb000 + 0x18]
 		objA0.value32 = u16[0xffffb04a + 0x18]
@@ -1037,7 +954,7 @@ function void fn027424()
 
 		A1 = 0xffffb000
 		D1.u16 = u16[A0 + 0x30]
-		if ((objA0.flags2a & object.flag.P1_PUSHING && objA1.state == char.state.ROLLING && abs(D1.s16) >= 0x0480) || (u8[A1 + 0x38] == CHARACTER_SONIC && (objA1.state == char.state.TEKICK || objA1.state == char.state.TEAIRSLASH) && TESonic.checkIfKickFacingObject()))
+		if ((objA0.flags2a & object.flag.P1_PUSHING && objA1.state == char.state.ROLLING && abs(D1.s16) >= 0x0480) || ((objA1.state == char.state.TEKICK || objA1.state == char.state.TEAIRSLASH) && TESonic.checkIfKickFacingObject()))
 		{
 			if (objA0.flags2a & object.flag.P2_PUSHING)
 			{
@@ -1050,22 +967,6 @@ function void fn027424()
 					u16[A2 + 0x18] = objA0.value32
 					u16[A2 + 0x1c] = u16[A2 + 0x18]
 				}
-			}
-		}
-		else
-		{
-			A1 = 0xffffb04a
-			D1.u16 = objA0.value32
-			if (((objA0.flags2a & object.flag.P2_PUSHING) == 0 || u8[A1 + 0x20] != char.state.ROLLING || abs(D1.s16) < 0x0480) || !(u8[A1 + 0x38] == CHARACTER_SONIC && (objA1.state == char.state.TEKICK || objA1.state == char.state.TEAIRSLASH) && TESonic.checkIfKickFacingObject()))
-			{
-				DrawOrUnloadObject()
-				return
-			}
-
-			if (objA0.flags2a & object.flag.P2_PUSHING)	// Isn't this always true here?
-			{
-				objA0.flags2a &= ~object.flag.P2_PUSHING
-				u8[0xffffb04a + 0x2a] &= ~char.flag.PUSHING
 			}
 		}
 
@@ -1152,7 +1053,7 @@ function void fn070c3c()
 	base.fn070c3c()
 
 	A1 = 0xffffb000
-	if (u8[A1 + 0x38] == CHARACTER_SONIC)
+	if (TESonic.isTESonic(A1))
 	{
 		if (objA0.update_address != 0x070c66)
 		{
@@ -1173,7 +1074,7 @@ function void fn070c3c()
 function void fn04172e()
 {
 	A1 = 0xffffb000
-	if (u8[A1 + 0x38] == CHARACTER_SONIC && (objA1.state == char.state.TEKICK || objA1.state == char.state.TEAIRSLASH))
+	if (TESonic.isTESonic(A1) && (objA1.state == char.state.TEKICK || objA1.state == char.state.TEAIRSLASH))
 	{
 		u8[A0 + 0x30] = u8[0xffffb000 + 0x20]
 		u8[A0 + 0x31] = u8[0xffffb04a + 0x20]
@@ -1245,7 +1146,7 @@ function void fn04172e()
 function void fn0417a6()
 {
 	A1 = 0xffffb000
-	if (u8[A1 + 0x38] == CHARACTER_SONIC)
+	if (TESonic.isTESonic(A1))
 	{
 		if (((D0.u8 == char.state.TEKICK || D0.u8 == char.state.TEAIRSLASH) && TESonic.checkIfKickFacingObject()) || D0.u8 == char.state.ROLLING)
 		{
@@ -1273,7 +1174,7 @@ function void fn040c2a()
 	base.fn040c2a()
 
 	A1 = 0xffffb000
-	if (u8[A1 + 0x38] == CHARACTER_SONIC)
+	if (TESonic.isTESonic(A1))
 	{
 		D1.u16 = 0x17
 		D2.u16 = 0x34
@@ -1335,7 +1236,7 @@ function void fn040c2a()
 function void fn041d5c()
 {
 	base.fn041d5c()
-	if (u8[A1 + 0x38] == CHARACTER_SONIC)
+	if (TESonic.isTESonic(A1))
 	{
 		bool kicking = ((u8[A1 + 0x20] == char.state.TEKICK || u8[A1 + 0x20] == char.state.TEAIRSLASH) && TESonic.checkIfKickFacingObject())
 		if (!kicking)
@@ -1391,7 +1292,7 @@ function void fn042904()
 {
 	base.fn042904()
 	
-	if (u8[A1 + 0x38] == CHARACTER_SONIC)
+	if (TESonic.isTESonic(A1))
 	{
 		A1 = 0xffffb000
 		u16 charpos_x = objA1.position.x.u16
@@ -1433,7 +1334,7 @@ function void fn042904()
 function void fn042ec0()
 {
 	base.fn042ec0()
-	if (u8[A1 + 0x38] == CHARACTER_SONIC && (objA1.state == char.state.TEKICK || objA1.state == char.state.TEAIRSLASH) && TESonic.checkIfKickFacingObject())
+	if (TESonic.isTESonic(A1) && (objA1.state == char.state.TEKICK || objA1.state == char.state.TEAIRSLASH) && TESonic.checkIfKickFacingObject())
 	{
 		objA1.velocity.x = -objA1.velocity.x
 		objA1.velocity.y = -objA1.velocity.y
@@ -1449,32 +1350,40 @@ function void fn042ec0()
 //# address-hook(0x07f900) end(0x07f9a6)
 function void fn07f900()
 {
-	fn085870()
-	if (_equal())
-		return
-
-	if (u8[A1 + 0x20] != char.state.ROLLING && (u8[A1 + 0x20] != char.state.TEKICK && u8[A1 + 0x20] != char.state.TEAIRSLASH) && !TESonic.checkIfKickFacingObject())
+	A1 = 0xffffb000
+	if (TESonic.isTESonic(A1))
 	{
-		if (u8[A1 + 0x34] == 0 && (u8[A1 + 0x2b] & char.bonus.INVINCIBLE) == 0)
+		fn085870()
+		if (_equal())
+			return
+
+		if (u8[A1 + 0x20] != char.state.ROLLING && (u8[A1 + 0x20] != char.state.TEKICK && u8[A1 + 0x20] != char.state.TEAIRSLASH) && !TESonic.checkIfKickFacingObject())
 		{
-			Enemy.DamageCharacter()
+			if (u8[A1 + 0x34] == 0 && (u8[A1 + 0x2b] & char.bonus.INVINCIBLE) == 0)
+			{
+				Enemy.DamageCharacter()
+			}
+			return
 		}
-		return
+
+		objA0.base_state = 0x06
+		objA0.collision_attributes = (collision.flag.SPECIAL | collision.size.16x16)
+		objA0.value42 = 0x07
+		objA0.value39 = 0x08
+
+		objA0.velocity.x = objA1.velocity.x
+
+		D4.u16 = 0x800
+		if (objA0.render_flags & render_flag.FLIP_Y)
+			D4.s16 = -D4.s16
+		objA0.velocity.y = D4.u16
+
+		signalMultiReturn()
 	}
-
-	objA0.base_state = 0x06
-	objA0.collision_attributes = (collision.flag.SPECIAL | collision.size.16x16)
-	objA0.value42 = 0x07
-	objA0.value39 = 0x08
-
-	objA0.velocity.x = objA1.velocity.x
-
-	D4.u16 = 0x800
-	if (objA0.render_flags & render_flag.FLIP_Y)
-		D4.s16 = -D4.s16
-	objA0.velocity.y = D4.u16
-
-	signalMultiReturn()
+	else
+	{
+		base.fn07f900()
+	}
 }
 
 // flying capsule
@@ -1482,7 +1391,7 @@ function void fn07f900()
 function void fn086770()
 {
 	A1 = 0xffffb000
-	if (u8[A1 + 0x38] == CHARACTER_SONIC)
+	if (TESonic.isTESonic(A1))
 	{
 		MoveWithParent()
 		fn086a54()
@@ -1498,7 +1407,7 @@ function void fn086770()
 				A1 = 0xffff0000 + D0.u16
 				if (objA1.velocity.y < 0)
 				{
-					active = (u8[A1 + 0x20] == char.state.ROLLING || u8[A1 + 0x38] == CHARACTER_TAILS) || (u8[A1 + 0x38] == 0 && objA1.state == char.state.TEJUMP)
+					active = (objA1.state == char.state.ROLLING || objA1.state == char.state.TEJUMP)
 				}
 			}
 
@@ -1532,7 +1441,7 @@ function bool Stone.canFightStoneGapsule()
 {
 	A1 = 0xffffb000
 	// check for base game knux
-	if (u8[A0 + 0x38] == CHARACTER_SONIC && u8[0xffffe654] == 0)
+	if (TESonic.isTESonic(A1) && u8[0xffffe654] == 0)
 		return true
 		
 	return base.Stone.canFightStoneGapsule()

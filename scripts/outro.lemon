@@ -6,7 +6,7 @@ function void fn05b1a2()
 	base.fn05b1a2()
 	
 	A1 = 0xffffb000
-	if (u8[A1 + 0x38] == CHARACTER_SONIC)
+	if (TESonic.isTESonic(A1))
 	{
 		outro.wait_time = 0
 	}
@@ -16,7 +16,7 @@ function void fn05b1a2()
 function void fn05b204()
 {
 	A1 = 0xffffb000
-	if (u8[A1 + 0x38] == CHARACTER_SONIC)
+	if (TESonic.isTESonic(A1))
 	{
 		outro.scroll_speed = 0x00008000
 		u16 oldCamPos = camera.position.y.player2 >> 16
@@ -140,7 +140,7 @@ function void fn05e1c2()
 {
 	base.fn05e1c2()
 	A1 = 0xffffb000
-	if (u8[A1 + 0x38] == CHARACTER_SONIC)
+	if (TESonic.isTESonic(A1))
 	{
 		playMusic(MUSIC_CTRL_STOP)
 	}

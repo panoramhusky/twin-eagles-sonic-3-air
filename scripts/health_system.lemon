@@ -4,7 +4,7 @@ global u8 TESonic.maxhealth = 3
 //# address-hook(0x010294) end(0x010364)
 function void Character.GettingHurt()
 {
-	if (char.character == CHARACTER_SONIC)
+	if (TESonic.isTESonic(A0))
 	{
 		bool canLoseShield = true	// Usually true, gets false e.g. for 2nd player Tails
 		bool isProtectedByObject = ((char.protection_flag & 0x80) != 0)
@@ -56,7 +56,7 @@ function void RenderHUD()
 	base.RenderHUD()
 
 	A1 = 0xffffb000
-	if (u8[A1 + 0x38] == CHARACTER_SONIC)
+	if (TESonic.isTESonic(A1))
 	{
 	#if STANDALONE
 		if (DEBUG_DISABLE_HUD)
