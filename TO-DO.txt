@@ -1,8 +1,5 @@
 ==HAZEL==
--Rework character checks into a dedicated function
--Make any other instance of monitor icons use the item icon (i.e. gumballs plus bonus stage)
-
--Set any objects that make the player go into the roll jump state to use the te jump state instead (i.e. vines)
+-Set any objects that make the player go into the roll jump state to use the te jump state instead (i.e. vines, CURRENTLY WIP)
 -Implement palette toggle
 -Change Super/Hyper requirement so that you need max hearts and health
 	-Also make the hearts glow Gold/Rainbow depending on form when active

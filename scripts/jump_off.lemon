@@ -1,0 +1,231 @@
+// AIZ INTRO
+//# address-hook(0x067472) end(0x06748a)
+function void fn067472()
+{
+	base.fn067472()
+	
+	A1 = 0xffffb000
+	if (TESonic.isTESonic(A1) && objA0.base_state < 0x08)
+	{
+		char.state = char.state.BALANCING1
+		UpdateSonicAnimation()
+	}
+}
+
+//# address-hook(0x067572) end(0x067592)
+function void fn067572()
+{
+	A1 = 0xffffb000
+	if (TESonic.isTESonic(A1))
+	{
+		objA0.base_state = 0x08
+		objA0.velocity.x = 0x400
+		objA0.velocity.y = -0x400
+		u32[A0 + 0x30] = 0x067a84
+		objA0.flags38 |= 0x08
+		Audio.playAudio("te_jump")
+		playMusic(MUSIC_CTRL_FADEOUT)
+	}
+	else
+	{
+		base.fn067572()
+	}
+}
+
+//# address-hook(0x067594) end(0x0675be)
+function void fn067594()
+{
+	A1 = 0xffffb000
+	if (TESonic.isTESonic(A1))
+	{
+		objA0.velocity.x -= 0x50
+
+		UpdateMovementSimple()
+		if (objA0.position.y.u16 < 0x0130)
+		{
+			if (objA0.position.y.u16 < 0x0100)
+			{
+				char.animation.sprite = 0x8e
+				char.state = char.state.TEJUMP
+			}
+			else
+			{
+				char.animation.sprite = (((level.framecounter % 8) < 4) ? 0xd7 : 0xd8)
+				
+				char.state = char.state.GOT_HURT_PANIC
+				if (char.state != char.state.former)
+				{
+					Audio.playAudio("te_death")
+					char.state.former = char.state
+				}
+			}
+		}
+		else
+		{
+			objA0.base_state = 0x0a
+			objA0.position.y.u16 = 0x0130
+			objA0.countdown_value = 0x40
+			objA0.velocity.y = 0
+		}
+	}
+	else
+	{
+		base.fn067594()
+	}
+}
+
+//# address-hook(0x0675c0) end(0x0675f6)
+function void fn0675c0()
+{
+	A1 = 0xffffb000
+	if (TESonic.isTESonic(A1))
+	{
+		char.animation.sprite = (((level.framecounter % 8) < 4) ? 0xd7 : 0xd8)
+		objA0.velocity.x -= 0x40
+		UpdateMovementStraightSimple()
+
+		--objA0.countdown_value
+		if (objA0.countdown_value >= 0)
+		{
+			if (objA0.countdown_value == 0x20)
+				playSound(SFX_SUPERTRANSFORM)
+			return
+		}
+
+		objA0.base_state = 0x0c
+		objA0.position.x.u16 = 0x40
+		objA0.countdown_value = 0x05
+		objA0.countdown_callback = 0x0675fa
+	#if STANDALONE
+		u16[A0 + 0x3a] = 47	// Fine-tuning
+	#else
+		u16[A0 + 0x3a] = 63
+	#endif
+
+		fn067996()
+		
+		playMusic(MUSIC_DDZ)
+		Audio.playAudio("te_sonic")
+	}
+	else
+	{
+		base.fn0675c0()
+	}
+}
+
+//# address-hook(0x067800) end(0x06781e)
+function void fn067800()
+{
+	A1 = 0xffffb000
+	if (TESonic.isTESonic(A1))
+	{
+		fn0847e6()
+		UpdateMovementStraightSimple()
+		objA0.position.x.u16 -= 2
+		objA0.position.y.u16 -= 1
+		if (objA0.position.x.u16 >= 0x20)
+		{
+			DrawObject()
+		}
+		else
+		{
+			Object.TriggerUnloading()
+		}
+	}
+	else
+	{
+		base.fn067800()
+	}
+}
+
+
+
+
+
+
+// AIZ Vines
+//# address-hook(0x0220c2) end(0x02219c)
+function void fn0220c2()
+{
+	u32 backup = A1
+	A1 = 0xffffb000
+	if (TESonic.isTESonic(A1))
+	{
+		A1 = backup
+	#if STANDALONE
+		if (debug_mode.state)
+		{
+			u8[A2] = 0
+			return
+		}
+	#endif
+
+		if (u8[A2] == 0)
+		{
+			fn0222f4()
+			return
+		}
+
+		if (s8[A2] > 0)
+		{
+			if ((objA1.render_flags & render_flag.VISIBLE) && u8[A1 + 0x05] < base_state.HURT)
+			{
+				// Check if jump button pressed
+				D1.u8 = D0.u8 & CONTROL_ABC
+				if (D1.u8 == 0)
+				{
+					fn0221ec()
+					return
+				}
+
+				u8[A2] = 0
+				u8[A1 + 0x2e] = 0
+				if (u16[A0 + 0x30] != 0x01)
+				{
+					D1.s16 = s16(objA0.position.x.u16 - objA0.value42) << 7
+					objA1.velocity.x = D1.u16
+					D1.s16 = s16(objA0.position.y.u16 - u16[A0 + 0x44]) << 7
+					objA1.velocity.y = D1.u16
+					u8[A2 + 0x02] = 0x3c
+					if (D0 & 0x0400)		// CONTROL_LEFT held
+					{
+						objA1.velocity.x = -0x200
+					}
+					if (D0 & 0x0800)		// CONTROL_RIGHT held
+					{
+						objA1.velocity.x = 0x200
+					}
+					objA1.velocity.y -= 0x380
+				}
+				else
+				{
+					u8[A2 + 0x02] = 0x3c
+					A3 = 0xffff0000 + u16[A0 + 0x3c]
+					u8 angle = u8[A3 + 0x26]
+					objA1.velocity.x = lookupCos(angle) << 3
+					objA1.velocity.y = lookupSin(angle) << 3
+				}
+
+				objA1.state = char.state.TEJUMP
+				Audio.playAudio("te_jump")
+				objA1.flags2a |= char.flag.IN_AIR
+				u8[A1 + 0x40] = 1
+				return
+			}
+		}
+		else
+		{
+			u8[A1 + 0x2a] |= char.flag.IN_AIR
+			objA1.velocity.x = 0x300
+			objA1.velocity.y = 0x200
+		}
+
+		u8[A1 + 0x2e] = 0
+		u8[A2] = 0
+		u8[A2 + 0x02] = 0x3c
+	}
+	else
+	{
+		base.fn0220c2()
+	}
+}
