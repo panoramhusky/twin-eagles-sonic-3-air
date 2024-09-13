@@ -1,0 +1,178 @@
+//# address-hook(0x067472) end(0x06748a)
+function void fn067472()
+{
+	base.fn067472()
+	
+	A1 = 0xffffb000
+	if (TESonic.isTESonic(A1) && objA0.base_state < 0x08)
+	{
+		char.state = char.state.BALANCING1
+		UpdateSonicAnimation()
+	}
+}
+
+//# address-hook(0x067572) end(0x067592)
+function void fn067572()
+{
+	A1 = 0xffffb000
+	if (TESonic.isTESonic(A1))
+	{
+		objA0.base_state = 0x08
+		objA0.velocity.x = -0x200
+		objA0.velocity.y = -0x200
+		u32[A0 + 0x30] = 0x067a84
+		objA0.flags38 |= 0x08
+		Audio.playAudio("te_hurt")
+		playMusic(MUSIC_CTRL_STOP)
+	}
+	else
+	{
+		base.fn067572()
+	}
+}
+
+//# address-hook(0x067594) end(0x0675be)
+function void fn067594()
+{
+	A1 = 0xffffb000
+	if (TESonic.isTESonic(A1))
+	{
+		objA0.velocity.x -= 0x50
+
+		UpdateMovementSimple()
+		if (objA0.position.y.u16 < 0x0130)
+		{
+			if (objA0.position.y.u16 < 0x00f0)
+			{
+				char.state = char.state.GOT_HURT_PANIC
+				UpdateSonicAnimation()
+			}
+			else
+			{
+				char.state = char.state.FALLING_PANIC
+				if (char.state != char.state.former)
+				{
+					Audio.playAudio("te_death")
+					char.state.former = char.state
+				}
+				
+				
+				UpdateSonicAnimation()
+				
+				
+			}
+		}
+		else
+		{
+			objA0.base_state = 0x0a
+			objA0.position.y.u16 = 0x0130
+			objA0.countdown_value = 0x40
+			objA0.velocity.y = 0
+		}
+	}
+	else
+	{
+		base.fn067594()
+	}
+}
+
+//# address-hook(0x0675c0) end(0x0675f6)
+function void fn0675c0()
+{
+	A1 = 0xffffb000
+	if (TESonic.isTESonic(A1))
+	{
+		char.animation.sprite = (((level.framecounter % 8) < 4) ? 0xd7 : 0xd8)
+		objA0.velocity.x -= 0x40
+		UpdateMovementStraightSimple()
+
+		--objA0.countdown_value
+		if (objA0.countdown_value >= 0)
+		{
+			if (objA0.countdown_value == 0x20)
+				playSound(SFX_SUPERTRANSFORM)
+			return
+		}
+
+		objA0.base_state = 0x0c
+		objA0.position.x.u16 = 0x40
+		objA0.countdown_value = 0x05
+		objA0.countdown_callback = 0x0675fa
+	#if STANDALONE
+		u16[A0 + 0x3a] = 47	// Fine-tuning
+	#else
+		u16[A0 + 0x3a] = 63
+	#endif
+
+		fn067996()
+		
+		playMusic(MUSIC_DDZ)
+		Audio.playAudio("te_sonic")
+	}
+	else
+	{
+		base.fn0675c0()
+	}
+}
+
+//# address-hook(0x067800) end(0x06781e)
+function void fn067800()
+{
+	A1 = 0xffffb000
+	if (TESonic.isTESonic(A1))
+	{
+		fn0847e6()
+		UpdateMovementStraightSimple()
+		objA0.position.x.u16 -= 2
+		objA0.position.y.u16 -= 1
+		if (objA0.position.x.u16 >= 0x20)
+		{
+			DrawObject()
+		}
+		else
+		{
+			Object.TriggerUnloading()
+		}
+	}
+	else
+	{
+		base.fn067800()
+	}
+}
+
+//# address-hook(0x067704) end(0x067774)
+function void fn067704()
+{
+	A1 = 0xffffb000
+	if (TESonic.isTESonic(A1))
+	{
+		fn0679b8()
+		if (u16[0xffffb000 + 0x10] < 0x13d0)
+			return
+
+		level.palettefx.state = 0xff
+
+		A1 = 0xffffb000
+		objA1.position.x.u16 += 0x08 // this is needed otherwise knuckles doesn't grab the leftmost emerald
+		u8[A1 + 0x05] = base_state.HURT
+		objA1.velocity.y = -0x400
+		objA1.velocity.x = -0x200
+		objA1.groundspeed = 0
+		objA1.state = char.state.TEFUCKINGDIED
+		objA1.flags2a |= char.flag.IN_AIR
+		u8[A1 + 0x2e] = 0
+
+		control.player1 = 0
+		player1.control_override = 0xff
+		super.active = 0
+		super.palettefx.state = 2
+		super.palettefx.frame = 30
+
+		copyMemory(0xfffffc60, 0x067aaa, 0x20)
+
+		// "spawnSimpleChildObjects(0x067a7e)" replaced by:
+		spawnSimpleChildObjects(0x067900, 7)		// Dropped emeralds
+
+		Object.TriggerUnloading()
+	}
+}

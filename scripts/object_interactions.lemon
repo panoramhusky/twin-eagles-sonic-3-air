@@ -946,29 +946,17 @@ function void fn027424()
 		bool inBoundTop = (charpos_y > blockpos_y - offset_y - 20)
 		bool inBoundBottom = (charpos_y < blockpos_y + offset_y + 20)
 
-		if (!(inBoundLeft && inBoundRight && inBoundTop && inBoundBottom))
+		bool collide = (objA0.flags2a & object.flag.P1_PUSHING && objA1.state == char.state.ROLLING && abs(D1.s16) >= 0x0480) || ((objA1.state == char.state.TEKICK || objA1.state == char.state.TEAIRSLASH) && TESonic.checkIfKickFacingObject())
+
+		if (!(inBoundLeft && inBoundRight && inBoundTop && inBoundBottom) || !collide)
 		{
 			DrawOrUnloadObject()
 			return
 		}
+		
+		
 
 		A1 = 0xffffb000
-		D1.u16 = u16[A0 + 0x30]
-		if ((objA0.flags2a & object.flag.P1_PUSHING && objA1.state == char.state.ROLLING && abs(D1.s16) >= 0x0480) || ((objA1.state == char.state.TEKICK || objA1.state == char.state.TEAIRSLASH) && TESonic.checkIfKickFacingObject()))
-		{
-			if (objA0.flags2a & object.flag.P2_PUSHING)
-			{
-				objA0.flags2a &= ~object.flag.P2_PUSHING
-
-				A2 = 0xffffb04a
-				u8[A2 + 0x2a] &= ~char.flag.PUSHING
-				if ((u8[A2 + 0x20] == char.state.ROLLING) || (u8[A1 + 0x38] == CHARACTER_SONIC && (objA1.state == char.state.TEKICK || objA1.state == char.state.TEAIRSLASH)))
-				{
-					u16[A2 + 0x18] = objA0.value32
-					u16[A2 + 0x1c] = u16[A2 + 0x18]
-				}
-			}
-		}
 
 		if (objA0.flags2a & object.flag.P1_PUSHING)
 		{
@@ -982,11 +970,13 @@ function void fn027424()
 		{
 			A4 = 0x027718
 			objA1.position.x.u16 -= 4
+			objA1.velocity.x = -0x200
 		}
 		else
 		{
 			A4 = 0x0276d8
 			objA1.position.x.u16 += 4
+			objA1.velocity.x = 0x200
 		}
 
 		objA1.groundspeed = objA1.velocity.x

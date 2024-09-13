@@ -156,7 +156,7 @@ function void Character.updateUprightOnGroundInner()
 {
 	if (TESonic.isTESonic(A0))
 	{
-		if (char.state != char.state.TEKICK)
+		if (char.state != char.state.TEKICK && char.state != char.state.TEFUCKINGDIED)
 		{
 			base.Character.updateUprightOnGroundInner()
 		}
@@ -860,6 +860,11 @@ function void Character.LandingOnGround()
 			Character.LandingOnGroundStandUp()
 			Character.LandingOnGroundResetState()
 		}
+	}
+	else if (char.state == char.state.TEFUCKINGDIED)
+	{
+		char.groundspeed = 0
+		char.velocity.x = 0
 	}
 	else
 	{
