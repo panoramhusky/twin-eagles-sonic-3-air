@@ -130,14 +130,17 @@ function void UpdateSonicAnimation()
 				0xc2, 0xc2, 0xc2, 0xc2,
 				0xc1, 0xc1, 0xc1, 0xc1,
 				0xc1, 0xc1, 0xc1, 0xc1,
+				0xbf, 0xbf, 0xbf, 0xbf,
 			}
 			++char.animation.timer
 		
-			if (char.animation.timer > 163)
+			if (char.animation.timer > 167)
 			{
 				char.base_state = 0x02
 				char.state = char.state.STANDING
 				char.invuln.countdown = 0
+				char.velocity.x = 0
+				char.flags = 0
 			}
 			else
 				char.animation.sprite = FUCKINGDEAD[char.animation.timer]

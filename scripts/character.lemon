@@ -351,6 +351,7 @@ function void Character.DoTEKick()
 		}
 		
 		char.state = char.state.former
+		char.rotation = 0
 		
 		if (!super.active)
 		{

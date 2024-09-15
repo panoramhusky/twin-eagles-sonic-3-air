@@ -93,6 +93,30 @@ function void fn0220c2()
 	}
 }
 
+// aiz hollow tree
+//# address-hook(0x01f8b4)
+function void fn01f8b4()
+{
+	u32 backup = A1
+	A1 = 0xffffb000
+	if (TESonic.isTESonic(A1))
+	{
+		A1 = backup
+		u8 bit = (1 << D6.u8)
+		objA1.velocity.x >>= 1
+		objA1.velocity.y >>= 1
+		TESonic.JumpOffObject()
+		u8[A1 + 0x2e] &= ~(control_flag.DISABLE_WALLS | control_flag.DISABLE_ANIMATION)
+		u8[A1 + 0x30] = 0		// "char.rotation.x.count"
+		u8[A1 + 0x31] = 4		// "char.rotation.x.speed"
+		objA0.flags2a &= ~bit
+	}
+	else
+	{
+		base.fn01f8b4()
+	}
+}
+
 // hcz hand launcher
 function void fn030cf8()
 {
@@ -309,6 +333,120 @@ function void fn031226()
 	else
 	{
 		base.fn031226()
+	}
+}
+
+// hcz sheldon pillar
+//# address-hook(0x032784) end(0x0328c2)
+function void fn032784()
+{
+	u32 backup = A1
+	A1 = 0xffffb000
+	if (TESonic.isTESonic(A1))
+	{
+		A1 = backup
+	#if STANDALONE
+		if (debug_mode.state)
+			return
+	#endif
+
+		u8 bit = (1 << D6.u8)
+		D0.u8 = u8[A2]
+		if (D0.u8 == 0)
+		{
+			if (objA0.flags2a & bit)
+			{
+				u8[A2 + 0x01] = 0
+				D0.u16 = objA1.position.x.u16 - objA0.position.x.u16
+				if (D0.s16 < 0)
+				{
+					D0.s16 = -D0.s16
+					u8[A2 + 0x01] = 0x80
+				}
+				u8[A2 + 0x02] = D0.u8
+
+				objA1.velocity.x = 0
+				objA1.velocity.y = 0
+				objA1.groundspeed = 0
+				u8[A1 + 0x1e] = u8[A1 + 0x44]
+				u8[A1 + 0x1f] = u8[A1 + 0x45]
+				u8[A1 + 0x20] = 0
+				objA1.flags2a &= ~(char.flag.IN_AIR | char.flag.ROLLING | char.flag.CONTROL_LOCK | char.flag.PUSHING)
+				u8[A1 + 0x2e] = (control_flag.DISABLE_ANIMATION | control_flag.DISABLE_UPDATE)
+				u8[A1 + 0x40] = 0
+
+				u8[A2] = 1
+				fn03260a()
+			}
+			return
+		}
+
+		if ((objA1.render_flags & render_flag.VISIBLE) && u8[A1 + 0x05] < base_state.HURT)
+		{
+			if ((objA0.flags2a & bit) == 0)
+			{
+				u8[A2] = 0
+				return
+			}
+
+			if (u8[A2 + 0x02] != 0)
+			{
+				--u8[A2 + 0x02]
+			}
+
+			D0 = u8[A2 + 0x01]
+			LookupSinCos()
+			D0.u16 = (D0.s16 + 0x0100) >> 2
+			u8[A2 + 0x03] = D0.u8
+
+			D2 = u16[A2 + 0x02]
+			D1.s32 = s32(D1.s16) * D2.s16
+		#if STANDALONE
+			bool negative = D1.s32 < 0 				// Prevents the game from shifting the characters over a pixel
+			D1.s32 = (negative) ? -D1.s32 : D1.s32	// everytime the game mirrors the rotation animation; #contributed by iCloudius
+			D1 >>= 16
+			D1.u16 = (negative) ? -D1.u16 : D1.u16
+		#else
+			D1 = (D1 << 16) + (D1 >> 16)
+		#endif
+			D1.u16 += objA0.position.x.u16
+			objA1.position.x.u16 = D1.u16
+			u8[A2 + 0x01] += 2
+			objA1.groundspeed = 0
+			D0.u16 = objA0.velocity.y
+			if (D0.s16 < 0)
+				D0.s16 = -D0.s16
+
+			if ((u8[A1 + 0x2a] & char.flag.IN_AIR) == 0)
+			{
+				if (D0.u16 >= 0x0480)
+				{
+					objA1.groundspeed = 0x800
+				}
+			}
+
+			// Check if jump button pressed
+			D5.u8 &= CONTROL_ABC
+			if (D5.u8 == 0)
+			{
+				fn03260a()
+				return
+			}
+
+			TESonic.JumpOffObject()
+			objA1.velocity.y = objA0.velocity.y - 0x680
+			objA1.velocity.x = 0
+			objA1.groundspeed = 0
+		}
+
+		u8[A1 + 0x2a] |= char.flag.IN_AIR
+		objA1.sprite_priority = 0x0100
+		u8[A1 + 0x2e] = 0
+		u8[A2] = 0
+	}
+	else
+	{
+		base.fn032784()
 	}
 }
 
