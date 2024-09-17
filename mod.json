@@ -19,7 +19,7 @@
                 "DefaultValue": "0",
                 "Options":
                 {
-					"0x00": "Sonic 4 (SNES)",
+					"0x00": "Sonic 1 (SNES)",
 					"0x01": "Sonic 2 (SNES)",
                 }
             },

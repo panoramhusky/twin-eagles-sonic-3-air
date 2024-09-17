@@ -1336,6 +1336,79 @@ function void fn042ec0()
 	}
 }
 
+
+// ssz mecha balloon
+//# address-hook(0x07aeb0) end(0x07af58)
+function void fn07aeb0()
+{
+	base.fn07aeb0()
+	
+	A1 = 0xffffb000
+
+	// i guess there's no harm in reusing the cnz ball code?
+	if (TESonic.checkIfBallCollidingWithBoss() && objA1.state == char.state.TEKICK && TESonic.checkIfKickFacingObject())
+	{
+		playSound(0x7b)
+		bool onLeft = (objA1.position.x.u16 < objA0.position.x.u16)
+		u8[A1 + 0x05] = base_state.NORMAL
+		objA1.state = char.state.TEJUMP
+		objA1.velocity.x = (onLeft ? -0x400 : 0x400)
+		objA1.velocity.y = -0x300
+		objA1.flags2a |= (char.flag.IN_AIR)
+		objA1.flags2a &= ~char.flag.ON_OBJECT
+		
+		A1 = objA0.countdown_callback
+		u8[A1 + 0x39] = 0
+		++u8[A1 + 0x30]
+		--u8[A1 + 0x3c]
+		
+		if (u8[A1 + 0x3c] == 0)
+		{
+			s16[0xfffffafa] = -0x180
+			if (objA1.flags2e & 0x80)
+			{
+				s16[0xfffffaf8] = SSZ_MidBoss2.getHorizontalMovementSpeed()
+				objA1.render_flags |= render_flag.FLIP_X
+			}
+			else
+			{
+				s16[0xfffffaf8] = -SSZ_MidBoss2.getHorizontalMovementSpeed()
+				objA1.render_flags &= ~render_flag.FLIP_X
+			}
+		
+			objA1.value26 = 0x0e
+			u8[A1 + 0x32] = 0
+			objA1.flags2e &= ~0x40
+			u8[A1 + 0x33] = 0
+		}
+
+		objA0.base_state += 2
+		u8[A0 + 0x3c] = 0x3c
+		objA0.state = 0x02
+		objA0.velocity.y = -0x400
+
+		D0.u16 = u16[0xffffb000 + 0x10] - objA0.position.x.u16
+		if (objA0.position.x.u16 < 0x16a0)
+		{
+			D1.u16 = 0x80
+		}
+		else if (objA0.position.x.u16 >= 0x1760)
+		{
+			D1.u16 = 0x80
+		}
+		else
+		{
+			D1.s16 = (D0.s16 < 0) ? 0x80 : -0x80
+		}
+		objA0.velocity.x = D1.u16
+
+		if (D1.s16 >= 0)
+			objA0.render_flags |= render_flag.FLIP_X
+		else
+			objA0.render_flags &= ~render_flag.FLIP_X
+	}
+}
+
 // little spike bot thing in death egg 2 boss
 //# address-hook(0x07f900) end(0x07f9a6)
 function void fn07f900()
