@@ -145,15 +145,19 @@ function void ItemEffect.ApplyRobotnik()
 	if (TESonic.isTESonic(A1))
 	{
 		++u16[A2]
-		if (TESonic.maxhealth > 1)
+		
+		if (!super.active)
 		{
-			--TESonic.maxhealth
-			Audio.playAudio("te_lostheart")
-		}
-		else
-		{
-			TESonic.maxhealth = 0
-			DamageCharacter()
+			if (TESonic.maxhealth > 1)
+			{
+				--TESonic.maxhealth
+				Audio.playAudio("te_lostheart")
+			}
+			else
+			{
+				TESonic.maxhealth = 0
+				DamageCharacter()
+			}
 		}
 	}
 	else
@@ -227,6 +231,9 @@ function void ItemEffect.ApplySuperTransformation()
 	A1 = 0xffffb000
 	if (TESonic.isTESonic(A1))
 	{
+		TESonic.health = 5
+		TESonic.maxhealth = 5
+	
 		++u16[A2]
 		ring_counter += 50		// Without a check for 999 rings...
 		super.palettefx.state = 1

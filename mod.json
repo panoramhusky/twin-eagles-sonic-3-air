@@ -6,5 +6,35 @@
 		"Author": "panoramhusky, HazelSpooder",
 		"Description": "slopper nintendo",
 		"ModVersion": "1.0"
-	}
+	},
+	
+	"Settings":
+    {
+        "Palette Options":
+        [
+            {
+                "InternalName": "tesonic_palette",
+                "DisplayName": "Palette",
+                "Variable": "tesonic.palette",
+                "DefaultValue": "0",
+                "Options":
+                {
+					"0x00": "Sonic 4 (SNES)",
+					"0x01": "Sonic 2 (SNES)",
+                }
+            },
+			
+			{
+                "InternalName": "tesonic_color_scheme",
+                "DisplayName": "Color Scheme",
+                "Variable": "tesonic.color_scheme",
+                "DefaultValue": "0",
+                "Options":
+                {
+					"0x00": "Rendered",
+					"0x01": "Original (may be buggy)",
+                }
+            },
+        ],
+    }
 }

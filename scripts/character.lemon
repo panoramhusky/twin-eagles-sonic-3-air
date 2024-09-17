@@ -298,7 +298,7 @@ function void Character.DoTEKick()
 		0x40, // char.state.TEJUMP
 	}
 
-	bool validState
+	bool validState = false
 	
 	for (u8 i = 0; i < 9; ++i)
 	{
@@ -308,10 +308,22 @@ function void Character.DoTEKick()
 		}
 	}
 	
-	char.double_jump_state = 1
+	// check with objects the player cannot kick on
+	A1 = 0xffff0000 + char.object_standing_on
+	if (char.flags & char.flag.ON_OBJECT)
+	{
+		// lbz cylinder
+		if (objA1.update_address == 0x02c3ca)
+			validState = false
+	}
+	
+	// check if in corkscrew state
+	if (char.rotation.x.count != 0)
+		validState = false
 	
 	if (char.state != char.state.TEKICK && char.control_flags == 0 && validState)
 	{
+		char.double_jump_state = 1
 		char.flags2d = 0
 		
 		if (!super.active)
@@ -1244,14 +1256,38 @@ function bool Character.performSuperTransformation()
 		{
 			possibleSuperForm = 1
 		}
+		
+		bool max_health = (TESonic.health == 5 && TESonic.maxhealth == 5)
+
+		if (!max_health)
+			return false
 
 		if (!super.active && ring_counter >= 50 && hud.dirty.timer && char.control_flags == 0 && possibleSuperForm != 0)
 		{		
 			Audio.playAudio("te_sonic")
+			TESonic.health = 5
+			TESonic.maxhealth = 5
 		}
 	}
 	
 	return base.Character.performSuperTransformation()
+}
+
+//# address-hook(0x08160a) end(0x081676)
+function void fn08160a()
+{
+	base.fn08160a()
+	
+	A1 = 0xffffb000
+	if (TESonic.isTESonic(A1))
+	{
+		if (objA0.countdown_value >= 0)
+			return
+			
+		Audio.playAudio("te_sonic")
+		TESonic.health = 5
+		TESonic.maxhealth = 5
+	}
 }
 
 function void EntryFunctions.sharedInit()

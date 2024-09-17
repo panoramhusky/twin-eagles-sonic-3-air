@@ -1,6 +1,4 @@
 ==HAZEL==
--Set any objects that make the player go into the roll jump state to use the te jump state instead (i.e. vines, CURRENTLY WIP)
--Implement palette toggle
 -Change Super/Hyper requirement so that you need max hearts and health
 	-Also make the hearts glow Gold/Rainbow depending on form when active
 -Make SSZ Boss 2 balloons inflate when kicked
@@ -12,4 +10,12 @@
 
 ==OWEN==
 -Implement Super/Hyper end pose
+
+
+
+
+
+==DONE==
 -Fix Mario/Luigi palette using blue for Sonic's fur
+-Set any objects that make the player go into the roll jump state to use the te jump state instead
+-Implement palette toggle

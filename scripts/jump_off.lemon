@@ -105,7 +105,12 @@ function void fn01f8b4()
 		u8 bit = (1 << D6.u8)
 		objA1.velocity.x >>= 1
 		objA1.velocity.y >>= 1
-		TESonic.JumpOffObject()
+		objA1.state = char.state.TEJUMP
+		objA1.flags2a |= char.flag.IN_AIR
+		objA1.flags2a &= ~char.flag.ON_OBJECT
+		objA1.hitbox_extends.x = char.hitbox.x.UPRIGHT
+		objA1.hitbox_extends.y = char.hitbox.y.UPRIGHT
+		u8[A1 + 0x40] = 1
 		u8[A1 + 0x2e] &= ~(control_flag.DISABLE_WALLS | control_flag.DISABLE_ANIMATION)
 		u8[A1 + 0x30] = 0		// "char.rotation.x.count"
 		u8[A1 + 0x31] = 4		// "char.rotation.x.speed"
@@ -1319,5 +1324,2411 @@ function void fn0338c4()
 	else
 	{
 		base.fn0338c4()
+	}
+}
+
+// icz snowboarding
+//# address-hook(0x053a4c) end(0x053ad2)
+function void fn053a4c()
+{
+	u32 backup = A1
+	A1 = 0xffffb000
+	if (TESonic.isTESonic(A1))
+	{
+		A1 = backup
+		// Part of the avalanche controller after the snowboarding section
+		if (level.scrolling_routine >= 0x08)
+		{
+			UnloadObject()
+			return
+		}
+
+		D0.u16 = 0x05e0 - level.display_routine
+		objA0.position.y.u16 = D0.u16
+		D1.u16 = 0x94
+		A2 = 0x053c1a
+		D4.u16 = objA0.position.x.u16
+		fn01e2fe()
+
+		if (objA0.position.y.u16 == 0x070e && player1.control_override != 0)
+		{
+			A1 = 0xffffb000
+			if ((u8[A1 + 0x2a] & char.flag.IN_AIR) == 0)
+			{
+			#if STANDALONE
+				Game.endSkippableCutscene()
+			#endif
+				if (control.pad1.pressed & CONTROL_ABC)
+				{
+					// Player jumped out of the snow
+					player1.control_override = 0
+					objA1.velocity.y = -0x600
+					TESonic.JumpOffObject()
+				}
+			}
+		}
+	}
+	else
+	{
+		base.fn053a4c()
+	}
+}
+
+
+// lbz cup elevator
+//# address-hook(0x026eda) end(0x02702c)
+function void fn026eda()
+{
+	u32 backup = A1
+	A1 = 0xffffb000
+	if (TESonic.isTESonic(A1))
+	{
+		A1 = backup
+	#if STANDALONE
+		if (debug_mode.state)
+			return
+	#endif
+
+		u8 bit = (1 << D6.u8)
+
+		if (u8[A2] == 0)
+		{
+			if (u8[A2 + 0x02] != 0)
+			{
+				--u8[A2 + 0x02]
+				return
+			}
+
+			D0.u8 = objA0.value26 - 0x20
+			if (D0.u8 < 0x40)
+				return
+
+			if (fn01dcb6_internal(A1, D6))
+			{
+				fn01df90()
+			}
+
+			if ((objA0.flags2a & bit) == 0)
+				return
+
+			if (u16[A0 + 0x34] == 0)
+			{
+				D0.u16 = objA1.position.x.u16 - objA0.position.x.u16 + 8
+				if (D0.s16 < 0 || D0.u16 >= 0x10)
+					return
+			}
+
+			// Character enters the cup elevator
+			u8[A2] = 1
+			objA1.velocity.x = 0
+			objA1.velocity.y = 0
+			objA1.groundspeed = 0
+			u8[A1 + 0x20] = 0
+			u8[A1 + 0x2e] = 3
+		}
+		else
+		{
+			if (s8[A1 + 0x04] >= 0 || u8[A1 + 0x05] >= base_state.HURT)
+			{
+				objA0.flags2a &= ~bit
+				u8[A1 + 0x2a] &= ~char.flag.ON_OBJECT
+				objA1.sprite_priority = 0x0100
+				u8[A1 + 0x2e] = 0
+				u8[A2] = 0
+				u8[A2 + 0x02] = 0x3c
+				return
+			}
+
+			// Check if jump button pressed
+			D0.u8 &= CONTROL_ABC
+			if (D0.u8 != 0 && u8[0xfffffaa9] == 0)
+			{
+				// Jumping out of the cup
+				objA1.sprite_priority = 0x0100
+				u8[A1 + 0x2e] = 0
+				objA0.flags2a &= ~bit
+				TESonic.JumpOffObject()
+				
+				if (D0 & 0x00000400)
+				{
+					objA1.velocity.x = -0x200
+				}
+				if (D0 & 0x00000800)
+				{
+					objA1.velocity.x = 0x200
+				}
+				objA1.velocity.y = -0x480
+
+				u8[A2] = 0
+				u8[A2 + 0x02] = 0x12
+				return
+			}
+		}
+
+		objA1.position.x.u16 = objA0.position.x.u16
+		objA1.position.y.u16 = objA0.position.y.u16 - 0x10
+		D0.u8 = objA0.value26 + 0x20
+		objA1.sprite_priority = (D0.u8 >= 0xc0) ? 0x0100 : 0x0280
+
+		D0 = objA0.value26
+		fn032610()
+	}
+	else
+	{
+		base.fn026eda()
+	}
+}
+
+// lbz grapple (the one that moves vertically)
+//# address-hook(0x0290f2) end(0x029214)
+function void fn0290f2()
+{
+	u32 backup = A1
+	A1 = 0xffffb000
+	if (TESonic.isTESonic(A1))
+	{
+		A1 = backup
+		if (u8[A2] != 0)
+		{
+			if ((objA1.render_flags & render_flag.VISIBLE) && u8[A1 + 0x05] < base_state.HURT)
+			{
+				// Check if jump button pressed
+				if ((D0.u8 & CONTROL_ABC) == 0)
+				{
+					objA1.position.y.u16 = objA0.position.y.u16 + 0x94
+					return
+				}
+
+				u8[A1 + 0x2e] = 0
+				u8[A2] = 0
+				u8[A2+2] = ((D0.u16 & 0x0f00) == 0) ? 0x12 : 0x3c	// Any direction held?
+				if (D0 & 0x0400)		// CONTROL_LEFT held
+				{
+					objA1.velocity.x = -0x200
+				}
+				if (D0 & 0x0800)		// CONTROL_RIGHT held
+				{
+					objA1.velocity.x = 0x200
+				}
+
+				objA1.velocity.y = -0x380
+				TESonic.JumpOffObject()
+			}
+			else
+			{
+				u8[A1 + 0x2e] = 0
+				u8[A2] = 0
+				u8[A2+2] = 0x3c
+			}
+		}
+		else
+		{
+			if (u8[A2+2] != 0)
+			{
+				--u8[A2+2]
+				if (u8[A2+2] != 0)
+					return
+			}
+
+			D0.u16 = objA1.position.x.u16 - objA0.position.x.u16 + 0x10
+			D1.u16 = objA1.position.y.u16 - objA0.position.y.u16 - 0x88
+			if (D0.u16 < 0x20 && D1.u16 < 0x18)
+			{
+				if (s8[A1 + 0x2e] >= 0 && u8[A1 + 0x05] < base_state.HURT && debug_mode.state == 0)
+				{
+					objA1.velocity.x = 0
+					objA1.velocity.y = 0
+					objA1.groundspeed = 0
+					objA1.position.x.u16 = objA0.position.x.u16
+					objA1.position.y.u16 = objA0.position.y.u16 + 0x94
+					objA1.state = char.state.HANGING
+					u8[A1 + 0x2e] = control_flag.DISABLE_UPDATE
+					u8[A2] = 0x01
+
+					playSound(SFX_CLICK)
+				}
+			}
+		}
+	}
+	else
+	{
+		base.fn0290f2()
+	}
+}
+
+// lbz grapple (the horizontal one)
+//# address-hook(0x0266b0) end(0x026792)
+function void fn0266b0()
+{
+	u32 backup = A1
+	A1 = 0xffffb000
+	if (TESonic.isTESonic(A1))
+	{
+		A1 = backup
+	#if STANDALONE
+		if (debug_mode.state)
+			return
+	#endif
+
+		if (u8[A2] == 0)
+		{
+			fn0267a4()
+			return
+		}
+
+		if ((objA1.render_flags & render_flag.VISIBLE) && u8[A1 + 0x05] < base_state.HURT)
+		{
+			// Check if jump button pressed
+			D0.u8 &= CONTROL_ABC
+			if (D0.u8 == 0)
+			{
+				if (D0 & 0x0400)		// CONTROL_LEFT held
+				{
+					u8[A1 + 0x2a] |= 0x01
+				}
+				if (D0 & 0x0800)		// CONTROL_RIGHT held
+				{
+					u8[A1 + 0x2a] &= ~0x01
+				}
+
+				objA0.flags2a = u8[A1 + 0x2a]
+				objA1.render_flags = (objA1.render_flags & ~char.flag.FACING_LEFT) | (u8[A1 + 0x2a] & char.flag.FACING_LEFT)
+				objA1.position.x.u16 = u16[A3 + 0x10]
+				objA1.position.y.u16 = u16[A3 + 0x14] + 0x24
+
+				fn026768()
+			}
+			else
+			{
+				u8[A1 + 0x2e] = 0
+				u8[A2] = 0
+				u8[A2 + 2] = (D0.u16 & 0x0f00) ? 0x3c : 0x12		// Any direction held?
+
+				objA1.velocity.x = objA0.velocity.x
+				objA1.velocity.y = -0x380
+				TESonic.JumpOffObject()
+			}
+		}
+		else
+		{
+			u8[A1 + 0x2e] = 0
+			u8[A2] = 0
+			u8[A2 + 2] = 0x3c
+		}
+	}
+	else
+	{
+		base.fn0266b0()
+	}
+}
+
+// mhz pulley elevator
+//# address-hook(0x03e508) end(0x03e596)
+function void fn03e508()
+{
+	u32 backup = A1
+	A1 = 0xffffb000
+	if (TESonic.isTESonic(A1))
+	{
+		A1 = backup
+		if (u8[A2] == 0)
+		{
+			fn03e682()
+			return
+		}
+
+		if ((objA1.render_flags & render_flag.VISIBLE) && u8[A1 + 0x05] < base_state.HURT && debug_mode.state == 0)
+		{
+			// Check if jump button pressed
+			D1.u16 = D0.u16 & CONTROL_ABC
+			if (D1.u8 == 0)
+			{
+			#if STANDALONE
+				// AI Tails should better not be able to use the pulleys
+				if (A1 == 0xffffb04a && tails.control_counter == 0)
+					D0.u16 &= ~0x0202
+			#endif
+				fn03e5f2()
+				return
+			}
+
+			u8[A1 + 0x2e] = 0
+			u8[A2] = 0
+			u8[A2 + 0x02] = 0x12
+
+			D0.u16 &= 0x0f00	// Any direction held?
+			if (D0.u16 != 0)
+			{
+				u8[A2 + 0x02] = 0x3c
+			}
+			if (D0 & 0x0400)	// CONTROL_LEFT held
+			{
+				objA1.velocity.x = -0x200
+			}
+			if (D0 & 0x0800)	// CONTROL_RIGHT held
+			{
+				objA1.velocity.x = 0x200
+			}
+
+			objA1.velocity.y = -0x380
+			TESonic.JumpOffObject()
+		}
+		else
+		{
+			u8[A1 + 0x2e] = 0
+			u8[A2] = 0
+			u8[A2 + 0x02] = 0x3c
+		}
+	}
+	else
+	{
+		base.fn03e508()
+	}
+}
+
+// mhz horizontal pole
+//# address-hook(0x03ed6e) end(0x03efb8)
+function void fn03ed6e()
+{
+	u32 backup = A1
+	A1 = 0xffffb000
+	if (TESonic.isTESonic(A1))
+	{
+		A1 = backup
+		if (u8[A2] != 0)
+		{
+			if (debug_mode.state == 0 && u8[A1 + 0x05] < base_state.HURT)
+			{
+				if (D1 & 0x0400)		// CONTROL_LEFT held
+				{
+					D0.u16 = objA0.position.x.u16 - 0x16
+					if (D0.s16 < s16[A1 + 0x10])
+					{
+						--objA1.position.x.u16
+						--u8[A2 + 0x06]
+						if (s8[A2 + 0x06] < 0)
+						{
+							u8[A2 + 0x06] = 0x07
+							u8[A2 + 0x08] += 0x10
+							u8[A2 + 0x08] &= 0x10
+						}
+					}
+				}
+
+				if (D1 & 0x0800)		// CONTROL_RIGHT held
+				{
+					D0.u16 = objA0.position.x.u16 + 0x15
+					if (D0.s16 > s16[A1 + 0x10])
+					{
+						++objA1.position.x.u16
+						--u8[A2 + 0x06]
+						if (s8[A2 + 0x06] < 0)
+						{
+							u8[A2 + 0x06] = 0x07
+							u8[A2 + 0x08] += 0x10
+							u8[A2 + 0x08] &= 0x10
+						}
+					}
+				}
+
+				// Check if jump button pressed
+				D1.u16 &= CONTROL_ABC
+				if (D1.u16 == 0)
+				{
+					bool goto03ee8c = false
+
+					if (u8[A2 + 0x04] == 0x28)
+					{
+						objA1.state = char.state.STRAIGHTJUMP
+						objA1.state.former = 0
+						D0.u16 = s16[A3] + (s16[A3] >> 1)
+						objA1.velocity.y = D0.u16
+						goto03ee8c = true
+					}
+
+					if (u8[A2 + 0x04] == 0x05)
+					{
+						objA1.state.both = 0
+						objA1.velocity.y = u16[A3]
+						goto03ee8c = true
+					}
+
+					if (goto03ee8c)
+					{
+						u8[A2] = 0
+						u8[A2 + 0x02] = 0x08
+						u8[A1 + 0x2e] &= ~(control_flag.DISABLE_ANIMATION | control_flag.DISABLE_UPDATE)
+						u8[A1 + 0x40] = 0
+						u8[A1 + 0x3d] = 0
+						u8[A1 + 0x05] = base_state.NORMAL
+						objA1.flags2a |= char.flag.IN_AIR
+						objA1.flags2a &= ~char.flag.CONTROL_LOCK
+						u8[A1 + 0x2f] = 0
+						u8[A1 + 0x27] = 0
+					}
+					else
+					{
+						fn03efba()
+
+						D0 = objA1.animation.sprite
+						u32 backupA2 = A2
+						SetCharacterSpritePatterns()
+						A2 = backupA2
+					}
+					return
+				}
+
+				objA1.velocity.y = -0x500
+				if (objA1.flags2a & char.flag.UNDERWATER)
+				{
+					objA1.velocity.y = -0x200
+				}
+			}
+
+			u8[A2] = 0
+			u8[A2 + 2] = (objA1.flags2a & char.flag.UNDERWATER) ? 0x3c : 0x1e // why is there an underwater flag check here?
+
+			u8[A1 + 0x2e] &= ~(control_flag.DISABLE_ANIMATION | control_flag.DISABLE_UPDATE)
+			TESonic.JumpOffObject()
+			
+			u8[A1 + 0x27] = 0
+			return
+		}
+
+		if (u8[A2 + 0x02] != 0)
+		{
+			--u8[A2 + 0x02]
+			return
+		}
+
+		D0.u16 = objA1.position.x.u16 - objA0.position.x.u16 + 0x16
+		if (D0.u16 < 0x2c)
+		{
+			D0.u16 = objA0.position.y.u16 + 0x14
+			if (D0.u16 < objA1.position.y.u16)
+			{
+				D0.u16 += 0x10
+				if (D0.u16 >= objA1.position.y.u16)
+				{
+					if (debug_mode.state == 0 && u8[A1 + 0x05] < base_state.HURT)
+					{
+						if (u8[A1 + 0x2e] == 0)
+						{
+							u16[A3] = objA1.velocity.y
+							objA1.velocity.x = 0
+							objA1.velocity.y = 0
+							objA1.groundspeed = 0
+							objA1.render_flags &= ~(render_flag.FLIP_X | render_flag.FLIP_Y)
+							objA1.position.y.u16 = objA0.position.y.u16 + 0x14
+							u8[A1 + 0x20] = 0
+							u8[A1 + 0x2e] = (control_flag.DISABLE_ANIMATION | control_flag.DISABLE_UPDATE)
+							objA1.animation.sprite = 0x94		// Player characters' bar hanging sprites
+							u8[A2 + 0x04] = 0
+							u8[A2 + 0x06] = 0
+							u8[A2 + 0x08] = 0
+
+							if (s16[A3] <= -0x400)
+							{
+								objA1.animation.sprite = 0x95		// Player characters' bar hanging sprites
+								u8[A2 + 0x04] = 0x20
+								u8[A2 + 0x08] = 0x10
+							}
+							else if (s16[A3] >= 0x0400)
+							{
+								objA1.animation.sprite = 0x95		// Player characters' bar hanging sprites
+								u8[A2 + 0x04] = 0x21
+								u8[A2 + 0x08] = 0x10
+							}
+
+							u8[A2] = 1
+							D0 = objA1.animation.sprite
+							u32 backupA2 = A2
+							SetCharacterSpritePatterns()
+							A2 = backupA2
+							playSound(SFX_GRAB)
+						}
+					}
+				}
+			}
+		}
+	}
+	else
+	{
+		base.fn03ed6e()
+	}
+}
+
+// mhz parashroom
+//# address-hook(0x03f5c2) end(0x03f6a2)
+function void fn03f5c2()
+{
+	u32 backup = A1
+	A1 = 0xffffb000
+	if (TESonic.isTESonic(A1))
+	{
+		A1 = backup
+		if (u8[A2] == 0)
+		{
+			fn03f6fe()
+			return
+		}
+
+		if (objA1.render_flags & render_flag.VISIBLE)
+		{
+			if (u8[A1 + 0x05] < base_state.HURT && debug_mode.state == 0)
+			{
+				if (u16[A0 + 0x34] == objA1.velocity.x && u16[A0 + 0x36] == objA1.velocity.y)
+				{
+					// Check if jump button pressed
+					if ((D0.u8 & CONTROL_ABC) == 0)
+					{
+						objA1.position.x.u16 = objA0.position.x.u16
+						objA1.position.y.u16 = objA0.position.y.u16 + 0x25
+						objA1.velocity.x = objA0.velocity.x
+						objA1.velocity.y = objA0.velocity.y
+
+						pushAll()
+						A0 = A1
+						Character.CheckCollision()
+						popAll()
+
+						fn03f6a6()
+					}
+					else
+					{
+						u16[A1 + 0x42] = 0
+						u8[A1 + 0x2e] = 0
+						u8[A2] = 0
+						u8[A2 + 0x02] = 0x12
+
+						if (D0 & 0x0f00)	// Any direction held?
+						{
+							u8[A2 + 0x02] = 0x3c
+						}
+						if (D0 & 0x0400)		// CONTROL_LEFT held
+						{
+							objA1.velocity.x = -0x200
+						}
+						if (D0 & 0x0800)		// CONTROL_RIGHT held
+						{
+							objA1.velocity.x = 0x0200
+						}
+
+						objA1.velocity.y = -0x380
+						TESonic.JumpOffObject()
+					}
+					return
+				}
+
+				objA1.velocity.y = -0x100
+			}
+		}
+		else
+		{
+			objA1.velocity.y = -0x100
+		}
+
+		u16[A1 + 0x42] = 0
+		u8[A1 + 0x2e] = 0
+		u8[A2] = 0
+		u8[A2 + 0x02] = 0x3c
+	}
+	else
+	{
+		base.fn03f5c2()
+	}
+}
+
+// mhz swing vine
+//# address-hook(0x02291a) end(0x022a22)
+function void fn02291a()
+{
+	u32 backup = A1
+	A1 = 0xffffb000
+	if (TESonic.isTESonic(A1))
+	{
+		A1 = backup
+		// This is 0 as long as character is not hanging on
+		if (u8[A2] == 0)
+		{
+			fn022af8()
+			return
+		}
+
+		if ((objA1.render_flags & render_flag.VISIBLE) && u8[A1 + 0x05] < base_state.HURT && debug_mode.state == 0)
+		{
+			// Check if jump button pressed
+			if ((D0.u8 & CONTROL_ABC) == 0)
+			{
+				if (u16[A0 + 0x30] != 0)
+				{
+					fn022a5c()
+				}
+				else
+				{
+					// Let go
+					objA1.position.x.u16 = objA0.position.x.u16
+					objA1.position.y.u16 = objA0.position.y.u16 + 0x14
+					A3 = 0xffff0000 + u16[A0 + 0x3c]
+					u8 angle = u8[A3 + 0x26]
+					if (u8[A1 + 0x2a] & char.flag.FACING_LEFT)
+						angle = -angle
+					D0.u16 = (angle + 8) >> 4
+					objA1.animation.sprite = u8[0x022a4c + D0.u16]		// Player characters' hanging sprites
+
+					fn022a28()
+				}
+				return
+			}
+
+			u8[A1 + 0x2e] = 0
+			u8[A2] = 0
+			if (u16[A0 + 0x30] != 1)
+			{
+				D1.u16 = objA0.position.x.u16 - objA0.value42
+				objA1.velocity.x = D1.s16 << 7
+				D1.u16 = objA0.position.y.u16 - u16[A0 + 0x44]
+				objA1.velocity.y = D1.s16 << 7
+
+				u8[A2 + 0x02] = 0x3c
+				if (D0 & 0x0400)		// CONTROL_LEFT held
+				{
+					objA1.velocity.x = -0x200
+				}
+				if (D0 & 0x0800)		// CONTROL_RIGHT held
+				{
+					objA1.velocity.x = 0x200
+				}
+				objA1.velocity.y -= 0x380
+			}
+			else
+			{
+				u8[A2 + 0x02] = 0x3c
+				A3 = 0xffff0000 + u16[A0 + 0x3c]
+				D0.u8 = u8[A3 + 0x26]
+				LookupSinCos()
+				objA1.velocity.x = D1.s16 * 12
+				objA1.velocity.y = D0.s16 * 12
+			}
+
+			TESonic.JumpOffObject()
+		}
+		else
+		{
+			u8[A1 + 0x2e] = 0
+			u8[A2] = 0
+			u8[A2 + 0x02] = 0x3c
+		}
+	}
+	else
+	{
+		base.fn02291a()
+	}
+}
+
+// mhz vertical pole
+//# address-hook(0x03f17a) end(0x03f1c6)
+function void fn03f17a()
+{
+	u32 backup = A1
+	A1 = 0xffffb000
+	if (TESonic.isTESonic(A1))
+	{
+		A1 = backup
+		u8[A2] = 0
+		u8[A2 + 0x02] = (u8[A1 + 0x2a] & char.flag.UNDERWATER) ? 0x3c : 0x1e
+
+		TESonic.JumpOffObject()
+		u8[A1 + 0x2e] &= ~(control_flag.DISABLE_ANIMATION | control_flag.DISABLE_UPDATE)
+		u8[A1 + 0x27] = 0
+	}
+	else
+	{
+		base.fn03f17a()
+	}
+}
+
+
+// fbz pendulum
+//# address-hook(0x03d4c2) end(0x03d730)
+function void fn03d4c2()
+{
+	u32 backup = A1
+	A1 = 0xffffb000
+	if (TESonic.isTESonic(A1))
+	{
+		A1 = backup
+		D0.u16 = (objA0.position.x.u16 & 0xff80) - level.despawn_position.x
+		if (D0.u16 > 0x0280)
+		{
+			D0.u16 = u16[A0 + 0x44]
+			if (D0.u16 != 0)
+			{
+				A1 = 0xffff0000 + D0.u16
+				u8[A1 + 0x05] = 0xff
+			}
+
+			D0.u16 = objA0.respawn_entry
+			if (D0.u16 != 0)
+			{
+				A1 = 0xffff0000 + D0.u16
+				D0.u8 = objA0.value26
+				if (s8[A0 + 0x2c] >= 0)
+				{
+					D0.u8 += 0x40
+				}
+
+				D1 = (D0.s8 >= 0) ? 1 : 0
+				u8[A1] = D1.u8
+			}
+
+			UnloadObject()
+			return
+		}
+
+		A2 = 0xffffb000
+		if (objA0.value2f != 0)
+		{
+			if (s8[A0 + 0x2f] >= 0)
+			{
+				D0.s32 = s16[A2 + 0x18]
+				D0 <<= 8
+				u32[A2 + 0x10] += D0
+				D0.s32 = s16[A2 + 0x1a]
+				D0 <<= 8
+				u32[A2 + 0x14] += D0
+
+				--objA0.value2f
+				if (objA0.value2f == 0)
+				{
+					u8[A2 + 0x2e] = 0
+					u8[A2 + 0x2a] &= ~0x02
+				}
+			}
+			else
+			{
+				D0.u16 = u16[A0 + 0x30]
+				u16[A0 + 0x26] += D0.u16
+				D0.u8 = objA0.value26 - 0x40
+				D1 = (D0.s8 >= 0) ? -6 : 6
+				u16[A0 + 0x30] += D1.u16
+
+				bool goto03d5c4 = false
+				D0.u8 = objA0.value26
+				if (s8[A0 + 0x2c] < 0)
+				{
+					if (s16[A0 + 0x30] < 0)
+					{
+						if (D0.s8 < 0 && D0.u8 <= 0xc0)
+						{
+							D0 = 0xffffffc0
+							D1 = 0
+							goto03d5c4 = true
+						}
+					}
+					else
+					{
+						if (D0.s8 >= 0 && D0.u8 >= 0x40)
+						{
+							D0 = 0x40
+							D1 = 0xffffffff
+							goto03d5c4 = true
+						}
+					}
+				}
+				else
+				{
+					D0.u8 += 0x40
+					if (s16[A0 + 0x30] < 0)
+					{
+						if (D0.s8 < 0 && D0.u8 <= 0xc0)
+						{
+							D0 = 0xffffff80
+							D1 = 0
+							goto03d5c4 = true
+						}
+					}
+					else
+					{
+						if (D0.s8 >= 0 && D0.u8 >= 0x40)
+						{
+							D0 = 0
+							D1 = 0xffffffff
+							goto03d5c4 = true
+						}
+					}
+				}
+
+				bool goto03d648 = false
+				if (goto03d5c4)
+				{
+					objA0.value26 = D0.u8
+					u8[A0 + 0x27] = 0
+					objA0.flags2e = D1.u8
+					objA0.value2f = 0
+					playSound(0x9e)
+					if (u8[A0 + 0x32] != 0)
+					{
+						u8[A0 + 0x32] = 0
+						objA0.value2f = 1
+
+						D0 = abs(s16[A0 + 0x30]) << 8
+						D0.u16 = D0 / 0x51
+						if (D0.u16 < 0x0100)
+							D0.u16 = 0x0100
+
+						if (s8[A0 + 0x2c] < 0)
+						{
+							u16[A2 + 0x1a] = 0
+							D0.s16 = -D0.s16
+							u16[A2 + 0x18] = D0.u16
+							u16[A2 + 0x1c] = D0.u16
+							if (s8[A0 + 0x26] >= 0)
+							{
+								s16[A2 + 0x1c] = -s16[A2 + 0x1c]
+							}
+						}
+						else
+						{
+							u16[A2 + 0x18] = 0
+							u16[A2 + 0x1a] = D0.u16
+							u16[A2 + 0x1c] = D0.u16
+							if (s8[A0 + 0x26] < 0)
+							{
+								s16[A2 + 0x1c] = -s16[A2 + 0x1c]
+							}
+						}
+
+						goto03d648 = true
+					}
+				}
+				else
+				{
+					goto03d648 = (u8[A0 + 0x32] != 0)
+				}
+
+				if (goto03d648)
+				{
+					D0.u8 = objA0.value26
+					LookupSinCos()
+					D1 = (D1 << 16)
+					D1.s32 >>= 1
+					D3 = D1
+					D3.s32 >>= 3
+					D1 += D3
+					D0 = (D0 << 16)
+					D0.s32 >>= 1
+					D2 = D0
+					D2.s32 >>= 3
+					D0 += D2
+					if ((u8[A2 + 0x2a] & char.flag.ROLLING) == 0)
+					{
+						D3.s32 >>= 2
+						D1 += D3
+						D2.s32 >>= 2
+						D0 += D2
+					}
+					else
+					{
+						D3.s32 >>= 4
+						D1 -= D3
+						D2.s32 >>= 4
+						D0 -= D2
+					}
+					D1 = (D1 << 16) + (D1 >> 16)
+					D1.u16 += objA0.position.x.u16
+					u16[A2 + 0x10] = D1.u16
+					D0 = (D0 << 16) + (D0 >> 16)
+					D0.u16 += objA0.position.y.u16
+					u16[A2 + 0x14] = D0.u16
+					D0.u8 = objA0.value26 + 0x40
+					u8[A2 + 0x26] = D0.u8
+					if (u8[A0 + 0x32] != 0)
+					{
+						D0.u8 = objA0.value26 + 0x40
+						LookupSinCos()
+						if (s16[A0 + 0x30] < 0)
+						{
+							D1.s16 = -D1.s16
+							D0.s16 = -D0.s16
+						}
+						u16[A2 + 0x18] = D1.u16
+						u16[A2 + 0x1a] = D0.u16
+
+						// Check if jump button pressed
+						D0.u16 = control.player1.pressed & CONTROL_ABC
+						if (D0.u16 != 0)
+						{
+							u8[A0 + 0x32] = 0
+							u8[A2 + 0x2e] = 0
+							u8[A2 + 0x3d] = 0
+							u8[A2 + 0x2a] |= 0x02
+							u8[A2 + 0x2a] |= 0x04
+							
+							backup = A1 // may as well reuse this var
+							A1 = A2
+							TESonic.JumpOffObject()
+							A1 = backup
+							
+							u16[A2 + 0x1c] = 0
+							D0.u8 = objA0.value26
+							LookupSinCos()
+							D3.u16 = D1.u16
+							D1.u16 <<= 3
+							D1.u16 -= D3.u16
+							u16[A2 + 0x18] = D1.u16
+							D2.u16 = D0.u16
+							D0.u16 <<= 3
+							D0.u16 -= D2.u16
+							u16[A2 + 0x1a] = D0.u16
+						}
+					}
+				}
+			}
+		}
+
+		DrawObject()
+	}
+	else
+	{
+		base.fn03d4c2()
+	}
+}
+
+// fbz monkey bars
+//# address-hook(0x03a8b8) end(0x03aa58)
+function void fn03a8b8()
+{
+	u32 backup = A1
+	A1 = 0xffffb000
+	if (TESonic.isTESonic(A1))
+	{
+		A1 = backup
+		if (u8[A2] != 0)
+		{
+			if ((objA1.render_flags & render_flag.VISIBLE) && debug_mode.state == 0 && u8[A1 + 0x05] < base_state.HURT)
+			{
+				// Check if jump button pressed
+				D0.u8 &= CONTROL_ABC
+				if (D0.u8 == 0)
+				{
+					if (D0 & 0x0400)		// CONTROL_LEFT held
+					{
+						objA1.flags2a |= char.flag.FACING_LEFT
+					}
+					if (D0 & 0x0800)		// CONTROL_RIGHT held
+					{
+						objA1.flags2a &= ~char.flag.FACING_LEFT
+					}
+					objA1.render_flags &= ~char.flag.FACING_LEFT
+					objA1.render_flags |= (u8[A1 + 0x2a] & char.flag.FACING_LEFT)
+					objA1.position.y.u16 = objA0.position.y.u16 + 0x9c
+				}
+				else
+				{
+					u8[A1 + 0x2e] = 0
+					u8[A2] = 0
+					u8[A2 + 0x02] = 0x12
+					D0.u16 &= 0x0f00			// Any direction held?
+					if (D0.u16 != 0)
+					{
+						u8[A2 + 0x02] = 0x3c
+					}
+					if (D0 & 0x0400)		// CONTROL_LEFT held
+					{
+						objA1.velocity.x = -0x200
+					}
+					if (D0 & 0x0800)		// CONTROL_RIGHT held
+					{
+						objA1.velocity.x = 0x0200
+					}
+					objA1.velocity.y = -0x380
+					TESonic.JumpOffObject()
+					u8[A1 + 0x27] = 0
+					u16[A1 + 0x42] = 0
+				}
+			}
+			else
+			{
+				u8[A2] = 0
+				u8[A2 + 0x02] = 0x3c
+
+				u8[A1 + 0x2e] = 0
+				u8[A1 + 0x2a] &= ~char.flag.ON_OBJECT
+				u16[A1 + 0x42] = 0
+			}
+			return
+		}
+
+		if (u8[A2 + 0x02] != 0)
+		{
+			--u8[A2 + 0x02]
+			if (u8[A2 + 0x02] != 0)
+				return
+		}
+
+		D0.u16 = objA1.position.x.u16 - objA0.position.x.u16 + 0x10
+		D1.u16 = objA1.position.y.u16 - objA0.position.y.u16 - 0x90
+		if (D0.u16 < 0x20 && D1.u16 < 0x18)
+		{
+			if (s8[A1 + 0x2e] >= 0 && u8[A1 + 0x05] < base_state.HURT && debug_mode.state == 0)
+			{
+			#if STANDALONE
+				// Ignore for Tails while he's carrying the main player
+				//  -> The other way round gets handled further below
+				if (A1 == 0xffffb04a && tails.carrying)
+					return
+			#endif
+
+				if (u8[A1 + 0x2a] & char.flag.ON_OBJECT)
+				{
+					A3 = 0xffff0000 + u16[A1 + 0x42]
+					if (u32[A3] == 0x03aa5a)
+					{
+						D0.u16 = A2.u16 - A0.u16
+						A3 += D0.u16
+						if (u8[A3 + 0x04] != 0)
+							return
+
+						u8[A3] = 0
+						u8[A3 + 0x02] = 0x3c
+					}
+				}
+				objA1.velocity.x = 0
+				objA1.velocity.y = 0
+				objA1.groundspeed = 0
+				objA1.position.x.u16 = objA0.position.x.u16
+				objA1.position.y.u16 = objA0.position.y.u16 + 0x9c
+				objA1.state = char.state.HANGING
+				objA1.flags2a |= char.flag.ON_OBJECT
+				u8[A1 + 0x2e] = control_flag.DISABLE_UPDATE
+				u16[A1 + 0x42] = A0.u16
+
+				u8[A2] = 0x01
+				playSound(SFX_GRAB)
+
+			#if STANDALONE
+				u8[A1 + 0x3d] = 0	// Clear char.spindash
+
+				// If player is carried by Tails, this connection should better get resolved now
+				if (tails.carrying)
+				{
+					tails.carrying = 0		// Seems to be this simple, or is anything else needed here?
+				}
+			#endif
+			}
+		}
+	}
+	else
+	{
+		base.fn03a8b8()
+	}
+}
+
+// fbz monkey bars... part 2?
+//# address-hook(0x03aa7e) end(0x03ac36)
+function void fn03aa7e()
+{
+	u32 backup = A1
+	A1 = 0xffffb000
+	if (TESonic.isTESonic(A1))
+	{
+		A1 = backup
+		if (u8[A2] == 0)
+		{
+			fn03ac86()
+			return
+		}
+
+		if ((objA1.render_flags & render_flag.VISIBLE) && debug_mode.state == 0 && u8[A1 + 0x05] < base_state.HURT)
+		{
+			// Check if jump button pressed
+			D0.u8 &= CONTROL_ABC
+			if (D0.u8 == 0)
+			{
+				while (true)
+				{
+					if (u8[A2 + 0x04] == 0)
+					{
+						D2.u16 = objA0.value3e - 0x10
+						if (D0 & 0x0400)		// CONTROL_LEFT held
+						{
+							objA1.flags2a |= char.flag.FACING_LEFT
+							D1.u16 = objA1.position.x.u16 - objA0.position.x.u16 + D2.u16
+							if (D1.u16 != 0)
+							{
+								u8[A2 + 0x04] = 4
+								u8[A2 + 0x02] = 1
+							}
+						}
+						if (D0 & 0x0800)		// CONTROL_RIGHT held
+						{
+							objA1.flags2a &= ~char.flag.FACING_LEFT
+							D1.u16 = objA1.position.x.u16 - objA0.position.x.u16 + D2.u16
+							if (D1.u16 != D2.u16 * 2)
+							{
+								u8[A2 + 0x04] = 4
+								u8[A2 + 0x02] = 0
+							}
+						}
+
+						D0.u8 = u8[A1 + 0x2a] & char.flag.FACING_LEFT
+						objA1.render_flags &= ~(render_flag.FLIP_X | render_flag.FLIP_Y)
+						objA1.render_flags |= D0.u8
+						objA1.position.y.u16 = objA0.position.y.u16 + 0x12
+						if (u8[A2 + 0x04] == 0)
+						{
+							break
+						}
+					}
+
+					--u8[A2 + 0x06]
+					if (s8[A2 + 0x06] >= 0)
+						break
+
+					u8[A2 + 0x06] = 7
+					D1 = u8[A2 + 0x04]
+					if (D1.u8 == 2)
+					{
+						playSound(SFX_GRAB)
+					}
+					--D1.u16
+					u8[A1 + 0x20] = (D1.u16 == 0) ? char.state.HANGING : char.state.RUNNING
+
+					D1.u8 += u8[A2 + 0x08]
+					objA1.animation.sprite = u8[0x03ac38 + D1.s16]		// Player characters' monkey bar sprites
+					D1.s16 = s8[0x03ac40 + D1.s16]
+					if (u8[A2 + 0x02] != 0)
+					{
+						D1.s16 = -D1.s16
+					}
+				#if STANDALONE
+					if (A1 == 0xffffb000)
+						globalCameraOffsetX -= D1.s16
+				#endif
+					objA1.position.x.u16 += D1.s16
+
+					--u8[A2 + 0x04]
+					if (u8[A2 + 0x04] != 0)
+						break
+
+					fn03ac48()
+
+					u8[A2 + 0x06] = 0
+					u8[A2 + 0x08] ^= 0x04
+
+					if ((D0.u16 & 0x0c00) == 0)
+						break
+				}
+			}
+			else
+			{
+				u8[A2] = 0
+				u8[A2 + 0x02] = 0x12
+
+				D0.u16 &= 0x0f00		// Any direction held?
+				if (D0.u16 != 0)
+				{
+					u8[A2 + 0x02] = 0x3c
+				}
+				if (D0 & 0x0400)		// CONTROL_LEFT held
+				{
+					objA1.velocity.x = -0x200
+				}
+				if (D0 & 0x0800)		// CONTROL_RIGHT held
+				{
+					objA1.velocity.x = 0x200
+				}
+				objA1.velocity.y = -0x380
+				TESonic.JumpOffObject()
+				u8[A1 + 0x27] = 0
+				u8[A1 + 0x2e] = 0
+				u16[A1 + 0x42] = 0
+			}
+
+			D0 = objA1.animation.sprite
+			u32 backupA2 = A2
+			SetCharacterSpritePatterns()
+			A2 = backupA2
+		}
+		else
+		{
+			fn03ab24()
+		}
+	}
+	else
+	{
+		base.fn03aa7e()
+	}
+}
+
+// fbz propellers
+//# address-hook(0x03c068) end(0x03c090)
+function void fn03c068()
+{
+	u32 backup = A1
+	A1 = 0xffffb000
+	if (TESonic.isTESonic(A1))
+	{
+		A1 = backup
+		objA1.velocity.x = (D1 & 0x0400) ? -0x1000 : 0x1000		// CONTROL_LEFT held
+		objA1.velocity.y = -0x100
+		TESonic.JumpOffObject()
+		objA1.state = char.state.GRABBED
+		objA1.animation.timer = 0
+		objA1.animation.frame = 0
+
+		fn03c096()
+	}
+	else
+	{
+		base.fn03c068()
+	}
+}
+
+// soz light switch
+//# address-hook(0x040f52) end(0x04108e)
+function void fn040f52()
+{
+	if (u8[A2] != 0)
+	{
+		if ((objA1.render_flags & render_flag.VISIBLE) && u8[A1 + 0x05] < base_state.HURT)
+		{
+			// Check if jump button pressed
+			D0.u8 &= CONTROL_ABC
+			if (D0.u8 == 0)
+			{
+				bool goto040fd8 = false
+				if (s8[A0 + 0x2c] < 0)
+				{
+					push(A2)
+					push(A1)
+					fn00f8ea()
+					A1 = pop()
+					A2 = pop()
+
+					goto040fd8 = (D1.s16 <= 0)
+				}
+
+				if (!goto040fd8)
+				{
+					objA1.position.y.u16 = objA0.velocity.y + 0x30
+					return
+				}
+			}
+			else
+			{
+				u8[A1 + 0x2e] = 0
+				u8[A2] = 0
+				u8[A2+2] = 0x12
+
+				if (D0.u16 & 0x0f00)		// Any direction held?
+				{
+					u8[A2+2] = 0x3c
+				}
+
+				if (D0.u16 & 0x0800)		// CONTROL_RIGHT held
+				{
+					objA1.velocity.x = 0x200
+				}
+				else if (D0.u16 & 0x0400)		// CONTROL_LEFT held
+				{
+					objA1.velocity.x = -0x200
+				}
+
+				objA1.velocity.y = -0x380
+				TESonic.JumpOffObject()
+				u8[A1 + 0x27] = 0
+				return
+			}
+		}
+
+		u8[A1 + 0x2e] = 0
+		u8[A2] = 0
+		u8[A2+2] = 0x3c
+	}
+	else
+	{
+		if (u8[A2+2] != 0)
+		{
+			--u8[A2+2]
+			if (u8[A2+2] != 0)
+				return
+		}
+
+		#if STANDALONE
+			// Don't react for any of the two if Tails is carrying the other character
+			if (tails.carrying)
+				return
+		#endif
+
+		u16 dx = objA1.position.x.u16 - objA0.position.x.u16 + 0x10
+		u16 dy = objA1.position.y.u16 - objA0.velocity.y - 0x30
+		if (dx < 0x20 && dy < 0x18)
+		{
+			if (s8[A1 + 0x2e] >= 0 && u8[A1 + 0x05] < base_state.HURT && debug_mode.state == 0)
+			{
+				objA1.velocity.x = 0
+				objA1.velocity.y = 0
+				objA1.groundspeed = 0
+				objA1.position.x.u16 = objA0.position.x.u16
+				objA1.position.y.u16 = objA0.velocity.y + 0x30
+				objA1.state = char.state.HANGING
+				u8[A1 + 0x2e] = 1
+
+				u8[A2] = 1
+
+				playSound(SFX_CLICK)
+			}
+		}
+	}
+}
+
+// soz zipline
+//# address-hook(0x04aac8) end(0x04ab6a)
+function void fn04aac8()
+{
+	u32 backup = A1
+	A1 = 0xffffb000
+	if (TESonic.isTESonic(A1))
+	{
+		A1 = backup
+		// State: Character hanging at the wall, waiting for next jump
+		A1 = 0xffff0000 + u16[A0 + 0x46]
+		if (u8[A1 + 0x38] == 0)
+		{
+			objA0.update_address = 0x04acc6
+		}
+
+	#if STANDALONE
+		// Allow for just holding a jump button
+		bool jumpPressed = (control.player1.state & CONTROL_ABC) != 0
+	#else
+		bool jumpPressed = (control.player1.pressed & CONTROL_ABC) != 0
+	#endif
+		if (jumpPressed)
+		{
+			Audio.playAudio("te_jump")
+
+			u8 subtype = objA0.subtype2c & 0xf0
+			if (subtype == 0)
+			{
+				// Just going down one wall
+				u16[A0 + 0x30] = 0x3f
+				objA0.value26 = 0
+
+			#if STANDALONE
+				// Try to make larger jumps
+				if (u8[A0 + 0x36] == 4)
+				{
+					u8[A0 + 0x49] = 2
+					u8[A0 + 0x36] -= 2
+				}
+				else if (u8[A0 + 0x36] >= 3)
+				{
+					u8[A0 + 0x49] = 3
+					u8[A0 + 0x36] -= 3
+				}
+				else
+				{
+					u8[A0 + 0x49] = u8[A0 + 0x36]
+					u8[A0 + 0x36] = 0
+				}
+			#else
+				--u8[A0 + 0x36]
+			#endif
+				if (u8[A0 + 0x36] == 0)
+				{
+					// Reached the end
+					objA0.update_address = 0x04ab9e
+				}
+				else
+				{
+					objA0.update_address = 0x04ab6e
+				}
+			}
+			else
+			{
+				// Alternating between two walls
+				u16[A0 + 0x30] = (subtype * 2) - 7
+				objA0.value26 = 0x80
+				if (objA0.flags2a & 0x01)
+				{
+					objA0.velocity.x = 0x400
+					u8[A0 + 0x37] = 0x80
+				}
+				else
+				{
+					objA0.velocity.x = -0x400
+					u8[A0 + 0x37] = 0
+				}
+
+				objA0.flags2a ^= 0x01
+				objA0.countdown_value = 0x03
+				u16[A0 + 0x3c] = 0x06
+
+				--u8[A0 + 0x36]
+				if (u8[A0 + 0x36] == 0)
+				{
+					// Reached the end
+					objA0.update_address = 0x04ac3a
+				}
+				else
+				{
+					objA0.update_address = 0x04abd8
+				}
+			}
+		}
+
+		fn04ad32()
+	}
+	else
+	{
+		base.fn04aac8()
+	}
+}
+
+// even more soz zipline (now with restored air functionality!)
+//# address-hook(0x04af80) end(0x04b088)
+function void fn04af80()
+{
+	u32 backup = A1
+	A1 = 0xffffb000
+	if (TESonic.isTESonic(A1))
+	{
+		A1 = backup
+		if (u8[A2] == 0)
+		{
+			fn04b130()
+			return
+		}
+		
+		objA1.flags2a |= char.flag.IN_AIR
+		objA1.flags2a &= ~char.flag.ON_OBJECT
+
+		// allow jumping off early
+		bool jumpPressed = (control.player1.pressed & CONTROL_ABC) != 0
+		
+		// every second roll from 0 to 32. if value is 32 then break the handlebar
+		bool rng_break = ((level.framecounter % 0x3c) == 0) && (System.randRange(0, 32) == 32)
+
+		if ((jumpPressed && control.player1.state & CONTROL_DPAD) || rng_break)
+		{
+			u8[A1 + 0x2e] = 0
+			u8[A2] = 0
+
+			objA1.velocity.x = (objA0.position.x.u16 - objA0.value3e) << 8
+			objA1.velocity.y = (objA0.position.y.u16 - u16[A0 + 0x40]) << 8
+
+			u8[A2 + 0x02] = 0x3c
+			if (D0 & 0x0800)		// CONTROL_RIGHT held
+			{
+				objA1.velocity.x = 0x200
+			}
+			else if (D0 & 0x0400)		// CONTROL_LEFT held
+			{
+				objA1.velocity.x = -0x200
+			}
+			objA1.velocity.y -= 0x380
+			objA1.state = char.state.GOT_HURT_PANIC
+			Audio.playAudio("te_hurt")
+			objA1.flags2a |= char.flag.IN_AIR
+			objA1.flags2a &= ~char.flag.ON_OBJECT
+			objA1.hitbox_extends.x = char.hitbox.x.UPRIGHT
+			objA1.hitbox_extends.y = char.hitbox.y.UPRIGHT
+			
+			objA0.value3a = 1
+
+			fn04ad32()
+			return
+		}
+
+		if (s8[A2] > 0)
+		{
+			if ((objA1.render_flags & render_flag.VISIBLE) && u8[A1 + 0x05] < base_state.HURT && debug_mode.state == 0)
+			{
+				if (u16[A3 + 0x2e] != 0x02 || (D0.u8 & 0x70) == 0)
+				{
+					objA1.position.x.u16 = objA0.position.x.u16
+					objA1.position.y.u16 = objA0.position.y.u16 + 0x14
+					objA1.state = char.state.HANGING
+
+					D0.u16 = u16[A3 + 0x2e]
+					if (D0.u16 == 0)
+					{
+						objA1.animation.sprite = 0x92		// Player characters' hanging sprite
+					}
+					else
+					{
+						if (D0.u16 != 1)
+						{
+							fn04b0b0()
+							return
+						}
+
+						D0 = u8(u8[A3 + 0x26] * 2 + 8) >> 4
+						objA1.animation.sprite = u8[0x04b0a0 + D0.u16]		// Player characters' hanging sprites
+					}
+
+					fn04b08e()
+				}
+				else
+				{
+					u8[A1 + 0x2e] = 0
+					u8[A2] = 0
+
+					objA1.velocity.x = (objA0.position.x.u16 - objA0.value3e) << 8
+					objA1.velocity.y = (objA0.position.y.u16 - u16[A0 + 0x40]) << 8
+
+					u8[A2 + 0x02] = 0x3c
+					if (D0 & 0x0800)		// CONTROL_RIGHT held
+					{
+						objA1.velocity.x = 0x200
+					}
+					else if (D0 & 0x0400)		// CONTROL_LEFT held
+					{
+						objA1.velocity.x = -0x200
+					}
+					objA1.velocity.y -= 0x380
+					TESonic.JumpOffObject()
+				}
+				return
+			}
+		}
+		else
+		{
+			objA1.velocity.x = 0x0300
+			objA1.velocity.y = 0x0200
+			u8[A1 + 0x2a] |= char.flag.IN_AIR
+		}
+
+	// 0x04b03c:
+		u8[A1 + 0x2e] = 0
+		u8[A2] = 0
+		u8[A2 + 0x02] = 0x3c
+		return
+	}
+	else
+	{
+		base.fn04af80()
+	}
+}
+
+// soz zipline more
+//# address-hook(0x04af0a) end(0x04af6a)
+function void fn04af0a()
+{
+	u32 backup = A1
+	A1 = 0xffffb000
+	if (TESonic.isTESonic(A1))
+	{
+		A1 = backup
+		if (objA0.value3a != 0)
+		{
+			DrawOrUnloadObject()
+			MoveWithGravity20()
+			if (objA0.value3a == 1)
+			{
+				A1 = 0xffffb000
+				objA0.value3a = 2
+				objA0.velocity.x = objA1.velocity.x
+				objA0.velocity.y = objA1.velocity.y
+				playSound(0x80)
+				
+				A1 = 0xffff0000 + u16[A0 + 0x46]
+				objA1.value3a = 1
+			}
+			
+			if (objA0.position.y.u16 > camera.position.y.u16 + getScreenHeight() + 0x40)
+				Object.TriggerUnloading()
+			
+			return
+		}
+	}
+	
+	base.fn04af0a()
+}
+
+// more soz zipline fucking hell
+//# address-hook(0x04aa80) end(0x04aa90)
+function void fn04aa80()
+{
+	u32 backup = A1
+	A1 = 0xffffb000
+	if (TESonic.isTESonic(A1))
+	{
+		A1 = backup
+		if (objA0.value3a != 0)
+		{
+			fn04ad32()
+			return
+		}
+	}
+	else
+	{
+		base.fn04aa80()
+	}
+		
+	base.fn04aa80()
+}
+
+// soz quicksand
+//# address-hook(0x0400f0) end(0x040274)
+function void fn0400f0()
+{
+	u32 backup = A1
+	A1 = 0xffffb000
+	if (TESonic.isTESonic(A1))
+	{
+		A1 = backup
+		u16 dx = objA1.position.x.u16 - objA0.position.x.u16 + D2.u16
+		u16 dy = objA1.position.y.u16 - objA0.position.y.u16 + 0x33
+
+		u8 bit = (1 << D6.u8)
+		if ((objA0.flags2a & bit) == 0)
+		{
+			if (dx < D3.u16 && dy < 0x40)
+			{
+				if (u8[A1 + 0x2a] & char.flag.IN_AIR && (u8[A1 + 0x2a] & char.flag.ON_OBJECT) == 0 && u8[A1 + 0x05] < base_state.DIED && u8[A1 + 0x2e] == 0)
+				{
+					if (objA1.velocity.y < 0)
+					{
+						objA1.velocity.y += 0x68
+						return
+					}
+
+					u8[A1 + 0x2a] |= char.flag.ON_OBJECT
+					objA0.flags2a |= bit
+					u8[A1 + 0x1e] = u8[A1 + 0x44]
+					u8[A1 + 0x1f] = u8[A1 + 0x45]
+					objA1.state = char.state.RUNNING
+					objA1.flags2a &= ~(char.flag.ROLLING | char.flag.CONTROL_LOCK)
+					u8[A1 + 0x2f] = 0
+					u8[A1 + 0x40] = 0
+					objA1.velocity.x >>= 1
+					objA1.groundspeed = objA1.velocity.x
+					objA1.velocity.y >>= 1
+
+					if (u8[A1 + 0x05] != base_state.NORMAL)
+					{
+						u8[A1 + 0x05] = base_state.NORMAL
+						u8[A1 + 0x34] = 0x78
+						u8[A1 + 0x3d] = 0
+					}
+
+				#if STANDALONE
+					// Fix for spindash bug (if e.g. a moving pillar pushes you into the quicksand)
+					u8[A1 + 0x3d] = 0
+
+					// Fix for bug when Tails carries other player and gets caught by the quicksand
+					if (u8[A1 + 0x38] == CHARACTER_TAILS && tails.carrying)
+					{
+						u8[0xffffb000 + 0x2a] |= char.flag.IN_AIR
+						u8[0xffffb000 + 0x2e] = 0
+					}
+				#endif
+				}
+			}
+		}
+		else
+		{
+			if (dx < D3.u16 && dy < 0x40)
+			{
+				if (u8[A1 + 0x2e] == 0 && u8[A1 + 0x2a] & char.flag.IN_AIR)
+				{
+					// Check if jump button pressed
+					D5.u16 &= CONTROL_ABC
+					if (D5.u16 != 0)
+					{
+						u8[A1 + 0x2a] &= ~char.flag.ON_OBJECT
+						objA0.flags2a &= ~bit
+						objA1.velocity.y = (u8[A1 + 0x38] == CHARACTER_KNUCKLES) ? -0x600 : -0x680
+						TESonic.JumpOffObject()
+					}
+					else
+					{
+						objA1.velocity.x >>= 1
+						objA1.groundspeed = objA1.velocity.x
+						if (objA1.velocity.y < 0)
+						{
+							objA1.velocity.y += 0x68
+						}
+						else
+						{
+							objA1.velocity.y = (objA0.flags2a & 0x02) ? 0xfe68 : 0xa8
+						}
+					}
+					return
+				}
+			}
+
+			u8[A1 + 0x2a] &= ~char.flag.ON_OBJECT
+			objA0.flags2a &= ~bit
+		}
+	}
+	else
+	{
+		base.fn0400f0()
+	}
+}
+
+// soz sand flow a (vertical)
+//# address-hook(0x03fd4e) end(0x03fe42)
+function void fn03fd4e()
+{
+	u32 backup = A1
+	A1 = 0xffffb000
+	if (TESonic.isTESonic(A1))
+	{
+		A1 = backup
+		u16 dx = objA1.position.x.u16 - objA0.position.x.u16 + 0x10
+		u16 dy = objA1.position.y.u16 - objA0.position.y.u16 + D2.u16
+		u8 bit = (1 << D6.u8)
+
+		if ((objA0.flags2a & bit) == 0)
+		{
+			if (dx < 0x20 && dy < D3.u16)
+			{
+				if (u8[A1 + 0x2a] & char.flag.IN_AIR && (u8[A1 + 0x2a] & char.flag.ON_OBJECT) == 0 && u8[A1 + 0x05] < base_state.HURT && u8[A1 + 0x2e] == 0)
+				{
+					objA0.flags2a |= bit
+
+					objA1.hitbox_extends.x = char.hitbox.x.ROLLING
+					objA1.hitbox_extends.y = char.hitbox.y.ROLLING
+					objA1.state = char.state.RUNNING
+					objA1.flags2a |= char.flag.ON_OBJECT
+					objA1.flags2a &= ~char.flag.CONTROL_LOCK
+					u8[A1 + 0x2f] = 0
+					u8[A1 + 0x40] = 0
+					objA1.velocity.y >>= 1
+					objA1.velocity.x >>= 1
+					
+					u16[A1 + 0x1c] = 1
+					if (u8[A1 + 0x27] == 0)
+					{
+						u8[A1 + 0x27] = 1
+						u8[A1 + 0x20] = 0
+						u8[A1 + 0x30] = 0x7f		// "char.rotation.x.count"
+						u8[A1 + 0x31] = 0x08		// "char.rotation.x.speed"
+					}
+				}
+			}
+		}
+		else
+		{
+			if (dx < 0x20 && dy < D3.u16)
+			{
+				if (u8[A1 + 0x2a] & char.flag.IN_AIR)
+				{
+					u8[A1 + 0x30] = 0x7f		// "char.rotation.x.count"
+					// Check if jump button pressed
+					if (D5.u16 & CONTROL_ABC)
+					{
+						objA1.velocity.y = -0x800
+						Audio.playAudio("te_jump")
+					}
+
+				#if STANDALONE
+					bool pressInDirection = ((D5.u16 >> 8) & ((objA1.velocity.x < 0) ? CONTROL_LEFT : CONTROL_RIGHT)) != 0
+					if (pressInDirection)
+					{
+						// Give player a bit more control over movement speed
+						objA1.velocity.x = objA1.velocity.x * 3/4
+					}
+					else
+				#endif
+					{
+						objA1.velocity.x >>= 1
+					}
+
+					if (objA1.velocity.y < 0)
+					{
+						objA1.velocity.y += 0x68
+					}
+					else
+					{
+						objA1.velocity.y = (objA0.flags2a & 0x02) ? -0x198 : 0xa8
+					}
+					return
+				}
+			}
+
+			u8[A1 + 0x2a] &= ~char.flag.ON_OBJECT
+			objA0.flags2a &= ~bit
+		}
+	}
+	else
+	{
+		base.fn03fd4e()
+	}
+}
+
+//# address-hook(0x03fe70) end(0x03ff7e)
+function void fn03fe70()
+{
+	u32 backup = A1
+	A1 = 0xffffb000
+	if (TESonic.isTESonic(A1))
+	{
+		A1 = backup
+		u8 bit = (1 << D6.u8)
+
+		if (u8[A2] != 0)
+		{
+			--u8[A2]
+			return
+		}
+
+		u16 dx = objA1.position.x.u16 - objA0.position.x.u16 + D2.u16
+		u16 dy = objA1.position.y.u16 - objA0.position.y.u16 + 0x10
+
+		if ((objA0.flags2a & bit) == 0)
+		{
+			if (dx < D3.u16 && dy < 0x20)
+			{
+				if (u8[A1 + 0x2a] & char.flag.IN_AIR && (u8[A1 + 0x2a] & char.flag.ON_OBJECT) == 0 && u8[A1 + 0x05] < base_state.HURT && u8[A1 + 0x2e] == 0 && objA1.velocity.y >= 0)
+				{
+					u8[A1 + 0x2a] |= char.flag.ON_OBJECT
+					objA0.flags2a |= bit
+					objA1.hitbox_extends.x = char.hitbox.x.ROLLING
+					objA1.hitbox_extends.y = char.hitbox.y.ROLLING
+					objA1.state = char.state.RUNNING
+					objA1.flags2a &= ~char.flag.CONTROL_LOCK
+					u8[A1 + 0x2f] = 0
+					u8[A1 + 0x40] = 0
+					objA1.velocity.y >>= 1
+					objA1.velocity.x >>= 1
+					
+					u16[A1 + 0x1c] = 1
+					if (u8[A1 + 0x27] == 0)
+					{
+						u8[A1 + 0x27] = 1
+						u8[A1 + 0x20] = 0
+						u8[A1 + 0x30] = 0x7f		// "char.rotation.x.count"
+						u8[A1 + 0x31] = 0x08		// "char.rotation.x.speed"
+					}
+				}
+			}
+		}
+		else
+		{
+			if (dx < D3.u16 && dy < 0x20)
+			{
+				if (u8[A1 + 0x2a] & char.flag.IN_AIR)
+				{
+					u8[A1 + 0x30] = 0x7f		// "char.rotation.x.count"
+				
+					// Check if jump button pressed
+					D5.u16 &= CONTROL_ABC
+					if (D5.u16 != 0)
+					{
+						objA1.velocity.y = 0x0400
+						u8[A1 + 0x2a] &= ~char.flag.ON_OBJECT
+						objA0.flags2a &= ~bit
+
+						u8[A2] = 0x1e
+						Audio.playAudio("te_jump")
+					}
+					else
+					{
+						objA1.velocity.y = 0
+					#if STANDALONE
+						// Give player a bit more control over movement speed
+						objA1.velocity.x = objA1.velocity.x * 3/4
+					#else
+						objA1.velocity.x >>= 1
+					#endif
+						objA1.position.x += (objA0.flags2a & 0x01) ? -0xb000 : 0xb000
+					}
+					return
+				}
+			}
+
+			objA1.velocity.y = 0
+			u8[A1 + 0x2a] &= ~char.flag.ON_OBJECT
+			objA0.flags2a &= ~bit
+		}
+	}
+	else
+	{
+		base.fn03fe70()
+	}
+}
+
+// ssz moving pillars
+//# address-hook(0x0453e6) end(0x045526)
+function void fn0453e6()
+{
+	u32 backup = A1
+	A1 = 0xffffb000
+	if (TESonic.isTESonic(A1))
+	{
+		A1 = backup
+		if (u8[A2] == 0)
+		{
+			if (u8[A2 + 0x02] != 0)
+			{
+				--u8[A2 + 0x02]
+				if (u8[A2 + 0x02] != 0)
+					return
+				objA0.sprite_priority = 0x0180
+			}
+
+			D0.u16 = objA1.position.x.u16 - objA0.position.x.u16 + 0x28
+			if (D0.u16 >= 0x50)
+				return
+
+			D0.u16 = objA1.position.y.u16 - objA0.position.y.u16
+			if (D0.u16 >= 0x18)
+				return
+
+			if (u8[A1 + 0x2e] != 0 || u8[A1 + 0x05] >= base_state.HURT || debug_mode.state != 0)
+				return
+
+			playSound(SFX_GRAB)
+			u8[A2] = 0xff
+
+			objA1.position.y.u16 = objA0.position.y.u16 + D1.u16
+			objA1.velocity.x = 0
+			objA1.groundspeed = 0
+			u8[A1 + 0x3d] = 0
+			u8[A1 + 0x2e] = (control_flag.DISABLE_ANIMATION | control_flag.DISABLE_UPDATE)
+			objA1.render_flags &= ~(render_flag.FLIP_X | render_flag.FLIP_Y)
+			u8[A1 + 0x20] = 0
+
+			D0.u16 = (u8[A1 + 0x2a] & char.flag.FACING_LEFT) ? 0xe9 : 0xe5		// Player characters' hanging sprites, facing forward or back
+			objA1.animation.sprite = D0.u8
+			SetCharacterSpritePatterns()
+		}
+		else
+		{
+			objA1.position.y.u16 = objA0.position.y.u16 + D1.u16
+			if (u8[A1 + 0x05] >= base_state.HURT)
+			{
+				u8[A1 + 0x2e] = 0
+				u8[A2] = 0
+				u8[A2 + 0x02] = 0x3c
+			}
+			else
+			{
+				D1.u16 = D0.u16 & 0xff70
+				if (D1.u8 != 0)
+				{
+					u8[A1 + 0x2e] = 0
+					u8[A2] = 0
+					u8[A2 + 0x02] = 0x1e
+					objA0.sprite_priority = 0x80
+
+					D1.u16 = -0x200
+					D2.u16 = -0x400
+					if ((D0 & 0x0400) == 0)		// CONTROL_LEFT not held
+					{
+						objA0.sprite_priority = 0x0180
+						D1.s16 = -D1.s16
+						if ((D0 & 0x0800) == 0)		// CONTROL_RIGHT not held
+						{
+							D1 = 0
+							if (D0 & 0x0200)	// CONTROL_DOWN held
+							{
+								D2 = 0
+							}
+						}
+					}
+
+					objA1.velocity.x = D1.u16
+					D0 = s32[A0 + 0x2e] >> 8
+					D0.u16 += D2.u16
+					objA1.velocity.y = D0.u16
+					TESonic.JumpOffObject()
+				}
+			}
+		}
+	}
+	else
+	{
+		base.fn0453e6()
+	}
+}
+
+//# address-hook(0x045e6e) end(0x045f0e)
+function void fn045e6e()
+{
+	u32 backup = A1
+	A1 = 0xffffb000
+	if (TESonic.isTESonic(A1))
+	{
+		A1 = backup
+		u8 bit = (1 << D6.u8)
+		if (u8[A3] == 0)
+		{
+			if ((objA0.flags2a & bit) == 0)
+				return
+
+			u16[A3] = 0x0100
+		}
+		else
+		{
+			if (s8[A3] > 0 && (objA0.flags2a & bit) == 0)
+			{
+				u8[A3] = 0
+				return
+			}
+
+			u8[A3] = 0xff
+		#if STANDALONE
+			// Needed when releasing a drop dash here
+			s8 dy = s8(objA1.hitbox_extends.y - u8[A1 + 0x44])
+			objA1.position.y.u16 += global.inv_gravity ? -dy : dy
+			objA1.hitbox_extends.x = u8[A1 + 0x45]
+			objA1.hitbox_extends.y = u8[A1 + 0x44]
+		#endif
+			objA1.velocity.x = 0
+			objA1.groundspeed = 0
+			objA1.state = char.state.RUNNING
+			objA1.flags2a &= ~char.flag.ROLLING
+			u8[A1 + 0x2e] = (control_flag.DISABLE_ANIMATION | control_flag.DISABLE_UPDATE)
+			u8[A1 + 0x3d] = 0
+
+			D0.u16 = u16[A2] & CONTROL_ABC
+			if (D0.u16 != 0)
+			{
+				u8[A3] = 0
+				objA1.velocity.y = -0x680
+				TESonic.JumpOffObject()
+				u8[A1 + 0x2e] = 0
+				return
+			}
+
+			D1 = 1
+			D0.u16 = objA1.position.x.u16
+			if (D0.u16 != objA0.position.x.u16)
+			{
+				if (D0.u16 >= objA0.position.x.u16)
+				{
+					D1.s16 = -D1.s16
+				}
+				objA1.position.x.u16 += D1.u16
+			}
+
+			u8[A3 + 0x01] += 2
+			D0.u8 = u8[A3 + 0x01]
+			fn0460a6()
+		}
+	}
+	else
+	{
+		base.fn045e6e()
+	}
+}
+
+//# address-hook(0x045f74) end(0x0460a2)
+function void fn045f74()
+{
+	u32 backup = A1
+	A1 = 0xffffb000
+	if (TESonic.isTESonic(A1))
+	{
+		A1 = backup
+		u8 bit = (1 << D6.u8)
+		if (u8[A3] == 0)
+		{
+			if ((objA0.flags2a & bit) == 0)
+			{
+				if (u8[A3 + 0x01] != 0)
+				{
+					D0.u16 = objA0.position.y.u16 - 0x64
+					if (D0.u16 < objA1.position.y.u16)
+					{
+						D0.u16 = objA1.position.x.u16 - objA0.position.x.u16
+						D1 = objA0.box_size.x + 11
+						D0.u16 += D1.u16
+						if (D0.u16 < D1.u16 * 2)
+							return
+					}
+
+					u8[A3 + 0x01] = 0
+					objA1.sprite_priority = 0x0100
+				}
+			}
+			else
+			{
+				u16[A3] = 0x01ff
+				D1 = 0
+				D0.u16 = objA1.position.x.u16 - objA0.position.x.u16
+				if (D0.s16 < 0)
+				{
+					D0.s16 = -D0.s16
+					D1 = -0x80
+				}
+				u16[A3 + 0x04] = D0.u16
+				u8[A3 + 0x02] = D1.u8
+			}
+			return
+		}
+
+		if (s8[A3] >= 0 && (objA0.flags2a & bit) == 0)
+		{
+			u8[A3] = 0
+			return
+		}
+
+		u8[A3] = 0xff
+	#if STANDALONE
+		// Needed when releasing a drop dash here
+		s8 dy = s8(objA1.hitbox_extends.y - u8[A1 + 0x44])
+		objA1.position.y.u16 += global.inv_gravity ? -dy : dy
+		objA1.hitbox_extends.x = u8[A1 + 0x45]
+		objA1.hitbox_extends.y = u8[A1 + 0x44]
+	#endif
+		objA1.velocity.x = 0
+		objA1.groundspeed = 0
+		objA1.state = char.state.RUNNING
+		objA1.flags2a &= ~char.flag.ROLLING
+		u8[A1 + 0x2e] = (control_flag.DISABLE_ANIMATION | control_flag.DISABLE_UPDATE)
+		u8[A1 + 0x3d] = 0
+
+		D0.u16 = u16[A2] & CONTROL_ABC
+		if (D0.u16 != 0)
+		{
+			u8[A3] = 0
+			objA1.velocity.y = -0x680
+			TESonic.JumpOffObject()
+			u8[A1 + 0x2e] = 0
+			return
+		}
+
+		u8[A3 + 0x02] += 2
+		if (u16[A3 + 0x04] < 0x14)
+		{
+			++u16[A3 + 0x04]
+		}
+
+		D0.u8 = u8[A3 + 0x02]
+		if (D0.u8 >= 0x80)
+		{
+			D1.u16 = 0x0180
+			if (u8[A4] != 0)
+			{
+				D2.u16 = u16[A4 + 0x04]
+				if (D2.u16 < u16[A3 + 0x04])
+				{
+					D1.u16 = 0x0200
+				}
+			}
+		}
+		else
+		{
+			D1.u16 = 0x0100
+			if (u8[A4] != 0)
+			{
+				D2.u16 = u16[A4 + 0x04]
+				if (D2.u16 < u16[A3 + 0x04])
+				{
+					D1.u16 = 0x80
+				}
+			}
+		}
+
+		objA1.sprite_priority = D1.u16
+		LookupSinCos()
+		D1.s32 = s32(D1.s16) * s16[A3 + 0x04]
+		D1.s32 >>= 8
+		D1.u16 += objA0.position.x.u16
+		objA1.position.x.u16 = D1.u16
+
+		D0.u8 = u8[A3 + 0x02]
+		fn0460a6()
+	}
+	else
+	{
+		base.fn045f74()
+	}
+}
+
+// ssz swinging shell
+//# address-hook(0x046324) end(0x046424)
+function void fn046324()
+{
+	u32 backup = A1
+	A1 = 0xffffb000
+	if (TESonic.isTESonic(A1))
+	{
+		A1 = backup
+		u8 bit = (1 << D5.u8)
+
+		if (u8[A3] == 0)
+		{
+			if (u8[A1 + 0x2e] != 0 || u8[A1 + 0x05] >= base_state.HURT)
+				return
+
+			if (objA0.flags2a & bit)
+			{
+				playSound(SFX_ROLL)
+				u8[A3] = 0xff
+
+				objA1.velocity.y = 0
+				objA1.velocity.x = 0
+				objA1.groundspeed = 0
+				objA1.hitbox_extends.x = char.hitbox.x.ROLLING
+				objA1.hitbox_extends.y = char.hitbox.y.ROLLING
+				objA1.state = char.state.ROLLING
+				u8[A1 + 0x2a] |= char.flag.ROLLING
+				u8[A1 + 0x2e] = control_flag.DISABLE_UPDATE
+				u8[A1 + 0x3d] = 0
+
+				if (s8[A0 + 0x2c] < 0)
+				{
+					D0.u16 = objA0.flags2a & 0x01
+					u8[A1 + 0x2a] &= ~0x01
+					u8[A1 + 0x2a] |= D0.u8
+				}
+			}
+			else
+			{
+				D6.u16 &= 0x05
+				if (D6.u16 != 0)
+				{
+					DamageCharacter()
+				}
+				return
+			}
+		}
+
+		objA1.position.x.u16 = objA0.position.x.u16
+		objA1.position.y.u16 = objA0.position.y.u16 - 0x0c
+
+		if (s8[A0 + 0x2c] < 0)
+		{
+			push(A3)
+			push(A2)
+			push(A1)
+			push(D5)
+			fn00f8ea()
+			D5 = pop()
+			A1 = pop()
+			A2 = pop()
+			A3 = pop()
+
+			if (D1.s16 < 0)
+			{
+				objA1.position.y.u16 += D1.u16
+				if (D1.s16 <= -0x10)
+				{
+					u8[A3] = 0
+					objA0.flags2a &= ~bit
+					u8[A1 + 0x2e] = 0
+					u8[A1 + 0x2a] &= ~char.flag.ON_OBJECT
+					D0.s16 = (objA0.flags2a & 0x01) ? -0x800 : 0x800
+					objA1.velocity.x = D0.u16
+					u16[A1 + 0x1c] = D0.u16
+
+					playSound(SFX_SPINDASH_RELEASE)
+					return
+				}
+			}
+		}
+
+		D0.u16 = u16[A2] & CONTROL_ABC
+		if (D0.u16 != 0)
+		{
+			u8[A3] = 0
+			objA1.velocity.y = -0x680
+			u8[A1 + 0x2e] = 0
+			TESonic.JumpOffObject()
+		}
+	}
+	else
+	{
+		base.fn046324()
+	}
+}
+
+// dez hanging balls
+//# address-hook(0x04703e) end(0x04717c)
+function void fn04703e()
+{
+	u32 backup = A1
+	A1 = 0xffffb000
+	if (TESonic.isTESonic(A1))
+	{
+		A1 = backup
+		if (u8[A2] != 0)
+		{
+			if ((objA1.render_flags & render_flag.VISIBLE) && u8[A1 + 0x05] < base_state.HURT)
+			{
+				if ((D0.u8 & CONTROL_ABC) == 0)
+				{
+					objA1.position.x.u16 = objA0.position.x.u16
+					objA1.position.y.u16 = objA0.position.y.u16 + 0x28
+					if ((level.framecounter.low & 0x0f) == 0)
+					{
+						playSound(0xd0)
+					}
+					return
+				}
+
+				u8[A2] = 0
+				u8[A2 + 0x02] = 0x12
+
+				if (D0.u16 & 0x0f00)	// Any direction held?
+				{
+					u8[A2 + 0x02] = 0x3c
+					if (D0 & 0x0800)		// CONTROL_RIGHT held
+					{
+						objA1.velocity.x = 0x200
+					}
+					else if (D0 & 0x0400)		// CONTROL_LEFT held
+					{
+						objA1.velocity.x = -0x200
+					}
+				}
+
+				objA1.velocity.y = -0x380
+				TESonic.JumpOffObject()
+				u8[A1 + 0x27] = 0
+				objA1.flags2a &= ~char.flag.CONTROL_LOCK
+				u8[A1 + 0x2e] = 0
+			}
+			else
+			{
+				u8[A1 + 0x2e] = 0
+				u8[A2] = 0
+				u8[A2 + 0x02] = 0x3c
+			}
+			return
+		}
+
+		if (u8[A2 + 0x02] != 0)
+		{
+			--u8[A2 + 0x02]
+			return
+		}
+
+		D0.u16 = objA1.position.x.u16 - objA0.position.x.u16 + 0x10
+		D1.u16 = objA1.position.y.u16 - objA0.position.y.u16 - 0x28
+		if (D0.u16 < 0x20 && D1.u16 < 0x18)
+		{
+			if ((u8[A1 + 0x2e] & control_flag.DISABLE_INTERACTION) == 0 && u8[A1 + 0x05] < base_state.HURT && debug_mode.state == 0)
+			{
+				objA1.velocity.x = 0
+				objA1.velocity.y = 0
+				u16[A1 + 0x1c] = 0
+				objA1.position.x.u16 = objA0.position.x.u16
+				objA1.position.y.u16 = objA0.position.y.u16 + 0x28
+				objA1.state = char.state.HANGING
+			#if !STANDALONE
+				// This interferes with the drop dash and does not seem to be necessary (also see FBZ monkeybars -> "fn03a8b8")
+				objA1.flags2a &= ~char.flag.IN_AIR
+			#endif
+				u8[A1 + 0x2e] = 1
+
+				u8[A2] = 1
+				playSound(SFX_CLICK)
+			}
+		}
+	}
+	else
+	{
+		base.fn04703e()
 	}
 }

@@ -8,6 +8,7 @@ function void Character.GettingHurt()
 	{
 		bool canLoseShield = true	// Usually true, gets false e.g. for 2nd player Tails
 		bool isProtectedByObject = ((char.protection_flag & 0x80) != 0)
+		bool giveKnockback = isProtectedByObject
 
 		if (canLoseShield && (char.bonus_effect & char.bonus.ANY_SHIELD) == 0)
 		{
@@ -36,11 +37,37 @@ function void Character.GettingHurt()
 				char.bonus_effect &= ~char.bonus.ALL_SHIELDS
 			}
 		}
+		
+		// force him off of whatever he's holding on to
+		if (char.control_flags & control_flag.DISABLE_UPDATE)
+			giveKnockback = true
+		
+		if (giveKnockback)
+		{
+			char.base_state = base_state.HURT
+			Character.LandingOnGroundNoSpindash()
+			char.flags |= char.flag.IN_AIR
+			if (char.flags & char.flag.UNDERWATER)
+			{
+				char.velocity.x = -0x100
+				char.velocity.y = -0x200
+			}
+			else
+			{
+				char.velocity.x = -0x200
+				char.velocity.y = -0x400
+			}
+			if (char.position.x.u16 >= u16[A2 + 0x10])
+			{
+				char.velocity.x = -char.velocity.x
+			}
+
+			char.groundspeed = 0
+			char.state = char.state.GOT_HURT_PANIC
+		}
 
 		playSound(0x35)
 		char.invuln.countdown = 120
-		
-		char.control_flags &= ~(control_flag.DISABLE_UPDATE | control_flag.DISABLE_INTERACTION)
 		
 		D0 = 0xffffffff
 	}
@@ -81,12 +108,40 @@ function void RenderHUD()
 				string key
 				
 				if (i < TESonic.health)
-					key = "hud_health_icon_full"
+				{
+					if (super.active)
+						key = "hud_health_icon_super"
+					else
+						key = "hud_health_icon_full"
+				}
 				else
 					key = "hud_health_icon_empty"
 				
-				HUD.drawSprite(key, baseX + offset, baseY, renderQueue)
+				TESonic.HUD.drawHeart(key, baseX + offset, baseY, renderQueue)
 			}
 		}
+	}
+}
+
+function void TESonic.HUD.drawHeart(u64 key, u16 px, u16 py, u16 renderQueue)
+{
+	SpriteHandle heart = Renderer.addSpriteHandle(key, px, py, renderQueue)
+	
+	heart.setPriorityFlag(true)
+	
+	if (super.active)
+	{
+		u32 color = convertColors32(unpackColor(u32[0x802002]))
+		//debugLog(color)
+		
+		u8 r = u8(color >> 24)
+		u8 g = u8(color >> 16)
+		u8 b = u8(color >> 8)
+		
+		float r2 = r / 255.0
+		float g2 = g / 255.0
+		float b2 = b / 255.0
+		
+		heart.setAddedColor(r2 / 1.2, g2 / 1.2, b2 / 1.2)
 	}
 }

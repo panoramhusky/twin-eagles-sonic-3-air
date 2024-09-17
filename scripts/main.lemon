@@ -12,6 +12,38 @@ include badniks
 
 include outro
 
+global u8 tesonic.palette
+global u8 tesonic.color_scheme
+
+function string getCharacterPaletteKey(u8 character)
+{
+	if (TESonic.isTESonic(A0))
+	{
+		if (character == CHARACTER_SONIC)
+		{
+			// this probably could have been done better with a stringformat but idgaf rn
+			if (tesonic.palette == 0x00)
+			{
+				if (tesonic.color_scheme == 0)
+					return "character_palette_sonic_s4_r"
+				else
+					return "character_palette_sonic_s4"
+			}
+			else if (tesonic.palette == 0x01)
+			{
+				if (tesonic.color_scheme == 0)
+					return "character_palette_sonic_s2_r"
+				else
+					return "character_palette_sonic_s2"
+			}			
+			else //Failsafe, might end up making this the broken s4 results palette for shits and giggles later
+				return "character_palette_sonic_s4_r"
+		}
+	}
+
+	return base.getCharacterPaletteKey(character)
+}
+
 function u64 Standalone.getModdedSoundKey(u64 soundKey, u8 sfxId, u8 soundRegType)
 {
 	s64 backup = A1 // backing up and restoring A1 is necessary otherwise the game explodes
@@ -41,7 +73,7 @@ function u64 Standalone.getModdedSoundKey(u64 soundKey, u8 sfxId, u8 soundRegTyp
 
 function bool TESonic.isTESonic(u32 address)
 {
-	if (u8[address + 0x38] == CHARACTER_SONIC)
+	if (global.characters == 1)
 		return true
 	else
 		return false

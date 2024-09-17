@@ -1,5 +1,6 @@
 {
 	"hud_lives_icon_sonic":  { "File": "hud_life_sprites.png", "Rect": "0,16,48,16", "Center": "0,0" },
 	"hud_health_icon_full":  { "File": "hud_life_sprites.png", "Rect": "0,32,16,16", "Center": "0,0" },
-	"hud_health_icon_empty":  { "File": "hud_life_sprites.png", "Rect": "16,32,16,16", "Center": "0,0" }
+	"hud_health_icon_empty":  { "File": "hud_life_sprites.png", "Rect": "16,32,16,16", "Center": "0,0" },
+	"hud_health_icon_super":  { "File": "hud_life_sprites.png", "Rect": "32,32,16,16", "Center": "0,0" }
 }
