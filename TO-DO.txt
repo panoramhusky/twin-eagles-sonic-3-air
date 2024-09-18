@@ -1,4 +1,5 @@
 ==HAZEL==
+-Fix MGZ2 boss fake death
 -Implement custom dust object
 -Add achievements menu over competition menu
 -Fix any issues with Super/Hyper
@@ -7,6 +8,7 @@
 
 ==OWEN==
 -Implement Super/Hyper end pose
+-Add signpost sprite (probably the one rosie did)
 
 
 
