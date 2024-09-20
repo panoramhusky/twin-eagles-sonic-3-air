@@ -166,6 +166,18 @@ function void UpdateSonicAnimation()
 
 function void TESonic.UpdateAirSlashAnim()
 {
+	if ((char.flags & char.flag.IN_AIR) == 0)
+	{
+		char.state = char.state.RUNNING
+		return
+	}
+	
+	if (char.spindash_charge == 0)
+	{
+		char.state = char.state.ROLLING
+		return
+	}
+
 	char.rotation = lookupAngleByVector(char.velocity.x, char.velocity.y)
 	
 	if (char.flags & char.flag.FACING_LEFT)

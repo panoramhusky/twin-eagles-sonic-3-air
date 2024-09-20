@@ -214,6 +214,21 @@ function void Character.updateUprightOnGroundInner()
 	}
 }
 
+//# address-hook(0x01ab6c) end(0x01ab92)
+function void Character.UpdateMovement()
+{
+	if (TESonic.isTESonic(A0))
+	{
+		if (super.active && char.state == char.state.TEAIRSLASH && char.spindash_charge > 0)
+		{
+			UpdateMovementStraightSimple()
+			return
+		}
+	}
+	
+	base.Character.UpdateMovement()
+}
+
 //# address-hook(0x01164e) end(0x0116dc)
 //# address-hook(0x014e78) end(0x014f06)
 //# address-hook(0x017680) end(0x01770e)
@@ -221,6 +236,27 @@ function void Character.UpdateControlInAir()
 {
 	if (TESonic.isTESonic(A0))
 	{
+		if (super.active && char.state == char.state.TEAIRSLASH && char.spindash_charge > 0)
+		{
+			--char.spindash_charge
+			// Center camera y-offset again
+			centerCameraYOffset()
+			
+			if (char.velocity.x == 0 && char.velocity.y == 0)
+				char.spindash_charge = 0
+			
+			if (char.spindash_charge == 0)
+			{
+				char.flags |= (char.flag.IN_AIR | char.flag.ROLLING)
+				char.state = char.state.ROLLING
+				char.jumping = 0
+				char.hitbox_extends.x = char.hitbox.x.ROLLING
+				char.hitbox_extends.y = char.hitbox.y.ROLLING
+			}
+			
+			return
+		}
+	
 		u8 input_state = control.player1.state
 		s16 vx = char.velocity.x
 
@@ -282,6 +318,7 @@ function void Character.UpdateControlInAir()
 		base.Character.UpdateControlInAir()
 	}
 }
+
 
 function void Character.DoTEKick()
 {
@@ -389,19 +426,21 @@ function void Character.DoTEKick()
 			}
 			else
 			{
-				TESonic.DoAirSlash()
+				TESonic.DoTEAirSlash()
 			}
 		}
 	}
 }
 
-function void TESonic.DoAirSlash()
+function void TESonic.DoTEAirSlash()
 {
-	char.double_jump_state = 1	// Always set this flag; needed for Drop Dash
+	char.jumping = 0
+	char.double_jump_state = 2	// Always set this flag; needed for Drop Dash
 	bool isHyperSonic = (super.active & 0x80)			// Hyper Sonic active
 	u8 input = control.player1.state & CONTROL_DPAD		// Only directions
 	
 	char.state = char.state.TEAIRSLASH
+	char.spindash_charge = 30
 
 	if (isHyperSonic)	// Super Sonic's dash does not cause a screen flash
 	{
@@ -419,17 +458,33 @@ function void TESonic.DoAirSlash()
 		u8[0xffffcd7c + 0x20] = 1
 
 	playSound(SFX_SPINDASH_RELEASE)
+	playSound(0x48)
 
 	if (input != 0 && input < 0x0b)		// Not left and right at the same time
 	{
-		// Perform Hyper Dash
-		A1 = 0x011afa + input * 4
-		char.velocity.x = s16[A1] * 2
-		char.velocity.y = s16[A1+2] * 2
+		// Perform Jet Dash
+		
+		if (input & CONTROL_LEFT)
+			char.velocity.x = -0x800
+		else if (input & CONTROL_RIGHT)
+			char.velocity.x = 0x800
+		else if (((input & CONTROL_LEFT) == 0) && ((input & CONTROL_RIGHT) == 0))
+			char.velocity.x = 0
+			
+			if (input & CONTROL_UP)
+			char.velocity.y = -0x800
+		else if (input & CONTROL_DOWN)
+			char.velocity.y = 0x800
+		else if (((input & CONTROL_UP) == 0) && ((input & CONTROL_DOWN) == 0))
+			char.velocity.y = 0
+
+		char.velocity.x = ((char.velocity.x * 3) / 2)
+		char.velocity.y = ((char.velocity.y * 3) / 2)
 	}
 	else
 	{
-		char.velocity.x = (char.flags & char.flag.FACING_LEFT) ? -0x800 * 2 : 0x800 * 2
+		char.velocity.x = (char.flags & char.flag.FACING_LEFT) ? -0x800 : 0x800
+		char.velocity.x = ((char.velocity.x * 3) / 2)
 		char.velocity.y = 0
 	}
 
