@@ -4,6 +4,18 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 	if (TESonic.isTESonic(A1))
 	{
 		bool prioFlag = (objA0.sprite_attributes & sprite_attribute.PRIORITY) != 0
+		// signpost. this is here purely to change the atex. thanks veenee.
+		if (objA0.update_address == 0x0837b2)
+		{
+			u8 flags = ((objA0.render_flags & render_flag.FLIP_Y) ? SPRITE_FLAG_FLIP_Y : 0) | (prioFlag ? SPRITE_FLAG_PRIO : 0)
+			if (objA0.animation.sprite == 0x00)
+			{
+				Renderer.drawSpriteTinted("signpost_tesonic", px, py, 0x00, flags, renderQueue, 0, 0xffffffff, 0x10000)		
+				return true
+			}
+		}
+		
+		// items
 		if (objA0.update_address == 0x01d566)
 		{
 			u8 flags = ((objA0.render_flags & render_flag.FLIP_Y) ? SPRITE_FLAG_FLIP_Y : 0) | (prioFlag ? SPRITE_FLAG_PRIO : 0)
@@ -22,6 +34,7 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 			return true
 		}
 		
+		// mario
 		if (objA0.update_address == 0x02cfa8)
 		{
 			if (objA0.base_state <= 0x04)

@@ -15,6 +15,18 @@ include outro
 global u8 tesonic.palette
 global u8 tesonic.color_scheme
 
+//# address-hook(0x028c80) end(0x028db6)
+function void fn028c80()
+{
+	if (global.game_mode != 0x88 && competition_mode.active == 0 && global.characters == CHARS_SONIC_AND_TAILS)
+	{
+		// no partner tails for you lol
+		levelselect.characters = CHARS_SONIC_ALONE
+		global.characters = CHARS_SONIC_ALONE
+	}
+	base.fn028c80()
+}
+
 function string getCharacterPaletteKey(u8 character)
 {
 	A1 = 0xffffb000
