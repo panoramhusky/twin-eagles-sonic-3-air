@@ -710,8 +710,8 @@ function bool fn08ac80()
 		u16 blockpos_x = objA0.position.x.u16
 		u16 blockpos_y = objA0.position.y.u16
 		
-		bool inBoundLeft = (charpos_x > blockpos_x - offset_x - 24)
-		bool inBoundRight = (charpos_x < blockpos_x + offset_x + 24)
+		bool inBoundLeft = (charpos_x > blockpos_x - offset_x - 20)
+		bool inBoundRight = (charpos_x < blockpos_x + offset_x + 20)
 		bool inBoundTop = (charpos_y > blockpos_y - offset_y - 16)
 		bool inBoundBottom = (charpos_y < blockpos_y + offset_y + 16)
 
