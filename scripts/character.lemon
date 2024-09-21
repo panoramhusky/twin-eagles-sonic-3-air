@@ -1356,7 +1356,7 @@ function bool Character.performSuperTransformation()
 			possibleSuperForm = 1
 		}
 		
-		bool max_health = (TESonic.health == 5 && TESonic.maxhealth == 5)
+		bool max_health = (TESonic.health >= 3 && TESonic.maxhealth >= 3)
 
 		if (!max_health)
 			return false
