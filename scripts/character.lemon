@@ -229,6 +229,26 @@ function void Character.UpdateMovement()
 	base.Character.UpdateMovement()
 }
 
+//# address-hook(0x011036) end(0x01105e)
+function void Character.UpdateSonicRollingInAir()
+{
+	base.Character.UpdateSonicRollingInAir()
+
+	// s3k jank moment
+	if (TESonic.isTESonic(A0))
+	{
+		if (super.active && char.state == char.state.TEAIRSLASH && char.spindash_charge > 0)
+		{
+			if (char.flags & char.flag.UNDERWATER)
+			{
+				// Gravity
+				char.velocity.y += 0x28
+			}
+		}
+	}
+
+}
+
 //# address-hook(0x01164e) end(0x0116dc)
 //# address-hook(0x014e78) end(0x014f06)
 //# address-hook(0x017680) end(0x01770e)
@@ -248,7 +268,19 @@ function void Character.UpdateControlInAir()
 			if (char.spindash_charge == 0)
 			{
 				char.flags |= (char.flag.IN_AIR | char.flag.ROLLING)
-				char.state = char.state.ROLLING
+				
+				if (char.velocity.x == 0 && char.velocity.y == 0)
+				{
+					char.state = char.state.RUNNING
+					char.groundspeed = 0
+					char.rotation = 0
+				}
+				else
+				{
+					char.state = char.state.ROLLING
+					char.groundspeed = 0x800
+				}
+				
 				char.jumping = 0
 				char.hitbox_extends.x = char.hitbox.x.ROLLING
 				char.hitbox_extends.y = char.hitbox.y.ROLLING

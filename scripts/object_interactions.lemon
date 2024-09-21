@@ -456,7 +456,7 @@ function void fn02a502()
 				return
 			}
 
-			if (u8[A0 + 0x34] != char.state.TEJUMP && u8[A0 + 0x34] != char.state.TEAIRSLASH)
+			if (u8[A0 + 0x34] != char.state.TEJUMP && u8[A0 + 0x34] != char.state.TEAIRSLASH && u8[A0 + 0x34] != char.state.ROLLING)
 			{
 				DrawOrUnloadObject()
 				return
@@ -478,12 +478,18 @@ function void fn02a502()
 function void fn02a58e()
 {
 	A1 = 0xffffb000
-	if (TESonic.isTESonic(A1) && (objA1.state == char.state.TEJUMP || objA1.state == char.state.TEAIRSLASH))
+	if (TESonic.isTESonic(A1) && (objA1.state == char.state.TEJUMP || objA1.state == char.state.TEAIRSLASH || objA1.state == char.state.ROLLING))
 	{
 		objA1.flags2a |= char.flag.IN_AIR
 		objA1.flags2a &= ~char.flag.ON_OBJECT
 		objA1.velocity.y = -0x300
 		u8[A1 + 0x05] = base_state.NORMAL
+		
+		if (objA1.state == char.state.TEAIRSLASH)
+		{
+			objA1.state = char.state.ROLLING
+			objA1.groundspeed = 0x800
+		}
 	}
 	else
 	{
@@ -704,24 +710,33 @@ function bool fn08ac80()
 		u16 blockpos_x = objA0.position.x.u16
 		u16 blockpos_y = objA0.position.y.u16
 		
-		bool inBoundLeft = (charpos_x > blockpos_x - offset_x - 20)
-		bool inBoundRight = (charpos_x < blockpos_x + offset_x + 20)
+		bool inBoundLeft = (charpos_x > blockpos_x - offset_x - 24)
+		bool inBoundRight = (charpos_x < blockpos_x + offset_x + 24)
 		bool inBoundTop = (charpos_y > blockpos_y - offset_y - 16)
 		bool inBoundBottom = (charpos_y < blockpos_y + offset_y + 16)
 
 		if (inBoundLeft && inBoundRight && inBoundTop && inBoundBottom)
 		{
 			bool TEKick = (objA1.state == char.state.TEKICK && objA1.animation.sprite == 0x03 && TESonic.checkIfKickFacingObject())
+			bool superSlash = (super.active && objA1.state == char.state.TEKICK && TESonic.checkIfKickFacingObject())
+			bool onLeft = (objA1.position.x.u16 < objA0.position.x.u16)
 		
 			// To break through, the character needs to kick it
-			if (TEKick)
+			if (TEKick || superSlash)
 			{
-				if (objA0.value3a >= 1)
+				if (objA0.value3a >= 1 || superSlash)
 				{
 					u8[A1 + 0x2a] &= ~bit
 
 					objA0.flags2a &= ~bit
 					objA0.flags38 |= 0x01
+					
+					objA1.hitbox_extends.x = char.hitbox.x.ROLLING
+					objA1.hitbox_extends.y = char.hitbox.y.ROLLING
+					objA1.state = char.state.ROLLING
+					objA1.flags2a |= char.flag.ROLLING
+					objA1.velocity.x = (onLeft ? 0xa00 : -0xa00)
+					objA1.groundspeed = objA1.velocity.x
 
 					// "spawnChildObjects(0x08aaea)" replaced by:
 					spawnChildObject(0x08a8dc, 0x00, -12, -8)
@@ -744,8 +759,6 @@ function bool fn08ac80()
 				}
 				else
 				{
-					bool onLeft = (objA1.position.x.u16 < objA0.position.x.u16)
-				
 					if (objA0.value3a == 0)
 					{
 						playSound(0x5d)
@@ -780,8 +793,16 @@ function void fn08b384()
 			{
 				bool onLeft = (objA1.position.x.u16 < objA0.position.x.u16)
 				u8[A1 + 0x05] = base_state.NORMAL
+				
 				objA1.velocity.x = (onLeft ? -0x200 : 0x200)
 				objA1.velocity.y = -0x300
+				
+				if (objA1.state == char.state.TEAIRSLASH)
+				{
+					objA1.state = char.state.ROLLING
+					objA1.groundspeed = 0x800
+				}
+				
 				objA1.flags2a |= (char.flag.IN_AIR)
 				objA1.flags2a &= ~char.flag.ON_OBJECT
 
@@ -812,6 +833,59 @@ function void fn08b384()
 		}
 	}
 }
+
+// icz ice block again
+//# address-hook(0x08b3aa) end(0x08b430)
+function void fn08b3aa()
+{
+	base.fn08b3aa()
+	
+	A1 = 0xffffb000
+	if (TESonic.isTESonic(A1))
+	{
+		// Note that this differs from the original code (usage of A2)
+		//  -> Needed for standalone to fix the known bugs here
+
+		// Any character on top rolling?
+		A2 = 0
+		if ((objA0.flags2a & object.flag.P1_ON_OBJECT) && (objA0.value3a == char.state.ROLLING || objA0.value3a == char.state.TEAIRSLASH))
+		{
+			A1 = 0xffffb000
+		}
+		else
+		{
+			return
+		}
+
+		u8[A1 + 0x05] = base_state.NORMAL
+		objA1.velocity.y = -0x300
+		objA1.hitbox_extends.x = char.hitbox.x.ROLLING
+		objA1.hitbox_extends.y = char.hitbox.y.ROLLING
+		objA1.state = char.state.ROLLING
+		objA1.groundspeed = 0x800
+		objA1.flags2a |= (char.flag.IN_AIR | char.flag.ROLLING)
+		objA1.flags2a &= ~char.flag.ON_OBJECT
+		
+		// Spawn broken ice block chunks
+		// "spawnChildObjects(0x08b480)" replaced by:
+		spawnChildObject(0x08b432, 0x00, 0, -8)
+		spawnChildObject(0x08b432, 0x02, 0, 8)
+		spawnChildObject(0x08b432, 0x04, -16, -8)
+		spawnChildObject(0x08b432, 0x06, 16, -8)
+		spawnChildObject(0x08b432, 0x08, -16, 8)
+		spawnChildObject(0x08b432, 0x0a, 16, 8)
+		spawnChildObject(0x08b432, 0x0c, 0, 0)
+		spawnChildObject(0x08b432, 0x0e, 0, 0)
+		spawnChildObject(0x08b432, 0x10, 0, 0)
+		spawnChildObject(0x08b432, 0x12, 0, 0)
+		spawnChildObject(0x08b432, 0x14, 0, 0)
+		spawnChildObject(0x08b432, 0x16, 0, 0)
+
+		playSound(0x6e)
+		Object.TriggerUnloading()
+	}
+}
+
 
 // icz cork floor
 //# address-hook(0x02a6d4) end(0x02a7ae)
@@ -1042,6 +1116,7 @@ function void fn070c3c()
 {
 	base.fn070c3c()
 
+	u32 A1backup = A1
 	A1 = 0xffffb000
 	if (TESonic.isTESonic(A1))
 	{
@@ -1053,109 +1128,57 @@ function void fn070c3c()
 
 		A2 = A0
 		A0 = A1
-		Character.DoTEKick()
+		
+		// kick
+		char.flags |= char.flag.IN_AIR
+		
+		if (char.flags & char.flag.ON_OBJECT)
+		{
+			char.flags &= ~char.flag.ON_OBJECT
+			objA0.position.y.u16 -= 1
+		}
+		
+		u16 acceleration = ((char.flags & char.flag.UNDERWATER) ? 0x080 : 0x200)
+		
+		u8 angle = char.rotation - 0x40
+		s32 accel_x = (s32(lookupCos(angle)) * acceleration) >> 8
+		s32 accel_y = (s32(lookupSin(angle)) * acceleration) >> 8
+
+		char.velocity.x += accel_x
+		char.velocity.y += accel_y
+		char.state = char.state.former
+		char.rotation = 0
+		char.state = char.state.TEKICK
+		char.animation.sprite = 1
+		Audio.playAudio("te_kick")
+		
 		char.velocity.x = -0x500
 		A0 = A2
 	}
 }
 
-// zis game is obsessed with ROCK
-//# address-hook(0x04172e) end(0x0417a4)
-function void fn04172e()
+// autospin
+//# address-hook(0x01e896)
+function void fn01e896()
 {
-	A1 = 0xffffb000
-	if (TESonic.isTESonic(A1) && (objA1.state == char.state.TEKICK || objA1.state == char.state.TEAIRSLASH))
-	{
-		u8[A0 + 0x30] = u8[0xffffb000 + 0x20]
-		u8[A0 + 0x31] = u8[0xffffb04a + 0x20]
-		D1.u16 = 0x23
-		D2.u16 = 0x10
-		D3.u16 = 0x11
-		D4.u16 = objA0.position.x.u16
-		fn01dc56()
-
-		A1 = 0xffffb000
-		u16 charpos_x = objA1.position.x.u16
-		u16 charpos_y = objA1.position.y.u16
-		
-		u16 offset_x = objA0.box_size.x
-		u16 offset_y = objA0.box_size.y
-		
-		u16 blockpos_x = objA0.position.x.u16
-		u16 blockpos_y = objA0.position.y.u16
-		
-		bool inBoundLeft = (charpos_x > blockpos_x - offset_x - 20)
-		bool inBoundRight = (charpos_x < blockpos_x + offset_x + 20)
-		bool inBoundTop = (charpos_y > blockpos_y - offset_y - 10)
-		bool inBoundBottom = (charpos_y < blockpos_y + offset_y + 10)
-
-		if ((inBoundLeft && inBoundRight && inBoundTop && inBoundBottom))
-		{
-			if ((u8[A0 + 0x30] != char.state.TEKICK && u8[A0 + 0x31] != char.state.TEKICK && u8[A0 + 0x30] != char.state.TEAIRSLASH) || !TESonic.checkIfKickFacingObject())
-			{
-				DrawOrUnloadObject()
-				return
-			}
-
-			A1 = 0xffffb000
-			D0.u8 = u8[A0 + 0x30]
-			fn0417a6()
-
-			fn0417f6()
-		}
-		else
-		{
-			D1.u8 = D0.u8 & 0x08
-			if (D1.u8 == 0)
-			{
-				fn0417de()
-				return
-			}
-
-			if (u8[A0 + 0x30] != 0x02)
-			{
-				DrawOrUnloadObject()
-				return
-			}
-
-			A1 = 0xffffb000
-			D0.u8 = 2
-			fn0417a6()
-
-			fn0417f6()
-		}
-	}
-	else
-	{
-		base.fn04172e()
-	}
-}
-
-// more soz rock
-//# address-hook(0x0417a6) end(0x0417dc)
-function void fn0417a6()
-{
+	u32 A1backup = A1
 	A1 = 0xffffb000
 	if (TESonic.isTESonic(A1))
 	{
-		if (((D0.u8 == char.state.TEKICK || D0.u8 == char.state.TEAIRSLASH) && TESonic.checkIfKickFacingObject()) || D0.u8 == char.state.ROLLING)
+		A1 = A1backup
+		
+		// unload this specific instance of the autospin
+		if (global.zone_act.apparent == 0x0401 && level.results_done == 0xff)
 		{
-			bool onLeft = (objA1.position.x.u16 < objA0.position.x.u16)
-			u8[A1 + 0x05] = base_state.NORMAL
-			
-			if (D0.u8 != char.state.ROLLING)
-				objA1.velocity.x = (onLeft ? -0x200 : 0x200)
-			
-			objA1.velocity.y = -0x300
-			objA1.flags2a |= (char.flag.IN_AIR)
-			objA1.flags2a &= ~char.flag.ON_OBJECT
+			UnloadObject()
+			return
 		}
 	}
-	else
-	{
-		base.fn0417a6()
-	}
+	
+	base.fn01e896()
 }
+
+
 
 // sandwall:tm:
 //# address-hook(0x040c2a) end(0x040ce6)
@@ -1191,6 +1214,12 @@ function void fn040c2a()
 		{
 			objA1.velocity.x >>= 1
 			objA1.groundspeed >>= 1
+			
+			if (objA1.state == char.state.TEAIRSLASH)
+			{
+				objA1.state = char.state.ROLLING
+				objA1.groundspeed = 0x800
+			}
 
 			playSound(0x82)
 
@@ -1346,7 +1375,7 @@ function void fn07aeb0()
 	A1 = 0xffffb000
 
 	// i guess there's no harm in reusing the cnz ball code?
-	if (TESonic.checkIfBallCollidingWithBoss() && objA1.state == char.state.TEKICK && TESonic.checkIfKickFacingObject())
+	if (TESonic.checkIfBallCollidingWithBoss() && ((objA1.state == char.state.TEKICK && TESonic.checkIfKickFacingObject()) || objA1.state == char.state.TEAIRSLASH))
 	{
 		playSound(0x7b)
 		bool onLeft = (objA1.position.x.u16 < objA0.position.x.u16)

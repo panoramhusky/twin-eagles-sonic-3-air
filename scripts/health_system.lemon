@@ -110,7 +110,13 @@ function void RenderHUD()
 				if (i < TESonic.health)
 				{
 					if (super.active)
+					{
 						key = "hud_health_icon_super"
+						
+						// just in case...
+						TESonic.health = 5
+						TESonic.maxhealth = 5
+					}
 					else
 						key = "hud_health_icon_full"
 				}
