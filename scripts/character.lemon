@@ -994,20 +994,23 @@ function void setSpeedCapProperties(u32 address, bool isSuperActive)
 		#if STANDALONE
 			if (char.bonus_effect & char.bonus.SPEED_UP)
 			{
+				//debugLog("speed up in water")
 				u16[address] = Math.roundToInt(TESONIC_SPEEDCAP * 1.0)
 				u16[address + 2] = Math.roundToInt(TESONIC_ACCEL * 1.0)
-				u16[address + 4] = Math.roundToInt(TESONIC_DECEL * 1.0)
+				u16[address + 4] = Math.roundToInt(TESONIC_DECEL * 0.5)
 			}
 			else
 		#endif
 			if (isSuperActive)
 			{
+				//debugLog("super in water")
 				u16[address] = Math.roundToInt(TESONIC_SPEEDCAP * 0.833333333)
 				u16[address + 2] = Math.roundToInt(TESONIC_ACCEL * 2.0)
 				u16[address + 4] = Math.roundToInt(TESONIC_DECEL * 1.0)
 			}
 			else
 			{
+				//debugLog("in water")
 				u16[address] = Math.roundToInt(TESONIC_SPEEDCAP * 0.5) 
 				u16[address + 2] = Math.roundToInt(TESONIC_ACCEL * 0.5) 
 				u16[address + 4] = Math.roundToInt(TESONIC_DECEL * 0.5) 
@@ -1019,20 +1022,23 @@ function void setSpeedCapProperties(u32 address, bool isSuperActive)
 		#if STANDALONE
 			if (char.bonus_effect & char.bonus.SPEED_UP)
 			{
-				u16[address] = Math.roundToInt(TESONIC_SPEEDCAP * 1.5) 
-				u16[address + 2] = Math.roundToInt(TESONIC_ACCEL * 1.0)
-				u16[address + 4] = Math.roundToInt(TESONIC_DECEL * 0.666666666)
+				//debugLog("speed up")
+				u16[address] = Math.roundToInt(TESONIC_SPEEDCAP * 2)
+				u16[address + 2] = Math.roundToInt(TESONIC_ACCEL * 2.0)
+				u16[address + 4] = Math.roundToInt(TESONIC_DECEL * 1.0)
 			}
 			else
 		#endif
 			if (isSuperActive)
 			{
-				u16[address] = Math.roundToInt(TESONIC_SPEEDCAP * 1.25)
-				u16[address + 2] = Math.roundToInt(TESONIC_ACCEL * 2.0)
-				u16[address + 4] = Math.roundToInt(TESONIC_DECEL * 1.33333333)
+				//debugLog("super")
+				u16[address] = Math.roundToInt(TESONIC_SPEEDCAP * 1.66666667)
+				u16[address + 2] = Math.roundToInt(TESONIC_ACCEL * 4.0)
+				u16[address + 4] = Math.roundToInt(TESONIC_DECEL * 2.0)
 			}
 			else
 			{
+				//debugLog("normal")
 				u16[address] = TESONIC_SPEEDCAP
 				u16[address + 2] = TESONIC_ACCEL
 				u16[address + 4] = TESONIC_DECEL

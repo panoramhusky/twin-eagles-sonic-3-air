@@ -240,30 +240,18 @@ function void ItemEffect.ApplySuperTransformation()
 		super.palettefx.timer = 0x0f
 		super.active = 1
 		super.ring_dec.frames = 60
-	#if STANDALONE
+		
 		setSpeedCapProperties(addressof(global.move.speedcap), true)		// Address: 0xfffff760
-	#else
-		global.move.speedcap = 0x800
-		global.move.acceleration = 0x18
-		global.move.deceleration = 0xc0
-	#endif
+
 		u8[0xffffb000 + 0x20] = char.state.TRANSFORMING
 
-		if (isMainCharacter(CHARACTER_SONIC))
-		{
-			// Sonic
-			u32[0xffffb000 + 0x0c] = 0x146816		// "char.mapping_offset"
-			super.active = 0xff
-		#if STANDALONE
-			setSpeedCapProperties(addressof(global.move.speedcap), true)	// Address: 0xfffff760
-		#else
-			global.move.speedcap = 0xa00
-			global.move.acceleration = 0x30
-			global.move.deceleration = 0x100
-		#endif
-			u32[0xffffcd7c] = 0x019348		// Hyper Sonic stars
-			u32[0xffffcbc0] = addressof(AfterImages.Init)		// After-images effect
-		}
+		// Sonic
+		u32[0xffffb000 + 0x0c] = 0x146816		// "char.mapping_offset"
+		super.active = 0xff
+		//setSpeedCapProperties(global.move.speedcap)
+		
+		u32[0xffffcd7c] = 0x019348		// Hyper Sonic stars
+		u32[0xffffcbc0] = addressof(AfterImages.Init)		// After-images effect
 
 		u8[0xffffb000 + 0x2e] = (control_flag.DISABLE_INTERACTION | control_flag.DISABLE_UPDATE)
 		u8[0xffffb000 + 0x35] = 0
