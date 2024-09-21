@@ -276,17 +276,9 @@ function void Character.UpdateControlInAir()
 			{
 				char.flags |= (char.flag.IN_AIR | char.flag.ROLLING)
 				
-				if (char.velocity.x == 0 && char.velocity.y == 0)
-				{
-					char.state = char.state.RUNNING
-					char.groundspeed = 0
-					char.rotation = 0
-				}
-				else
-				{
-					char.state = char.state.ROLLING
-					char.groundspeed = 0x800
-				}
+				char.state = char.state.ROLLING
+				char.groundspeed = 0x800
+				char.rotation = 0
 				
 				char.jumping = 0
 				char.hitbox_extends.x = char.hitbox.x.ROLLING
@@ -454,14 +446,6 @@ function void Character.DoTEKick()
 				char.state = char.state.TEKICK
 				char.animation.sprite = 1
 				playSound(SFX_SPINDASH_RELEASE)
-				
-				bool isHyperSonic = (super.active & 0x80)			// Hyper Sonic active
-				if (isHyperSonic)	// Super Sonic's dash does not cause a screen flash
-				{
-					Character.ClearEnemiesOnScreen()
-					ClearPositionBackup()
-					u8[0xffffcd7c + 0x20] = 1
-				}
 			}
 			else
 			{
