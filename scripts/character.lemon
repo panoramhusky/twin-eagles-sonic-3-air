@@ -1,3 +1,7 @@
+constant u16 TESONIC_SPEEDCAP = 0x580
+constant u16 TESONIC_ACCEL = 0x0f
+constant u16 TESONIC_DECEL = 0xf0
+
 //# translated(0x0117da) end(0x0118ba)
 //# translated(0x015002) end(0x0150d8)
 //# translated(0x017710) end(0x0177e8)
@@ -990,23 +994,23 @@ function void setSpeedCapProperties(u32 address, bool isSuperActive)
 		#if STANDALONE
 			if (char.bonus_effect & char.bonus.SPEED_UP)
 			{
-				u16[address] = max(u16[address], 0x600)
-				u16[address + 2] = max(u16[address + 2], 0x0c)
-				u16[address + 4] = max(u16[address + 4], 0x40)
+				u16[address] = Math.roundToInt(TESONIC_SPEEDCAP * 1.0)
+				u16[address + 2] = Math.roundToInt(TESONIC_ACCEL * 1.0)
+				u16[address + 4] = Math.roundToInt(TESONIC_DECEL * 1.0)
 			}
 			else
 		#endif
 			if (isSuperActive)
 			{
-				u16[address] = 0x500
-				u16[address + 2] = 0x18
-				u16[address + 4] = 0x80
+				u16[address] = Math.roundToInt(TESONIC_SPEEDCAP * 0.833333333)
+				u16[address + 2] = Math.roundToInt(TESONIC_ACCEL * 2.0)
+				u16[address + 4] = Math.roundToInt(TESONIC_DECEL * 1.0)
 			}
 			else
 			{
-				u16[address] = 0x300
-				u16[address + 2] = 0x06
-				u16[address + 4] = 0x40
+				u16[address] = Math.roundToInt(TESONIC_SPEEDCAP * 0.5) 
+				u16[address + 2] = Math.roundToInt(TESONIC_ACCEL * 0.5) 
+				u16[address + 4] = Math.roundToInt(TESONIC_DECEL * 0.5) 
 			}
 		}
 		else
@@ -1015,23 +1019,23 @@ function void setSpeedCapProperties(u32 address, bool isSuperActive)
 		#if STANDALONE
 			if (char.bonus_effect & char.bonus.SPEED_UP)
 			{
-				u16[address] = Math.roundToInt(0x580 * 1.5) 
-				u16[address + 2] = Math.roundToInt(0x0f * 1)
-				u16[address + 4] = Math.roundToInt(0xf0 * 0.666666666)
+				u16[address] = Math.roundToInt(TESONIC_SPEEDCAP * 1.5) 
+				u16[address + 2] = Math.roundToInt(TESONIC_ACCEL * 1.0)
+				u16[address + 4] = Math.roundToInt(TESONIC_DECEL * 0.666666666)
 			}
 			else
 		#endif
 			if (isSuperActive)
 			{
-				u16[address] = Math.roundToInt(0x580 * 1.25)
-				u16[address + 2] = Math.roundToInt(0x0f * 2)
-				u16[address + 4] = Math.roundToInt(0xf0 * 1.33333333)
+				u16[address] = Math.roundToInt(TESONIC_SPEEDCAP * 1.25)
+				u16[address + 2] = Math.roundToInt(TESONIC_ACCEL * 2.0)
+				u16[address + 4] = Math.roundToInt(TESONIC_DECEL * 1.33333333)
 			}
 			else
 			{
-				u16[address] = 0x580
-				u16[address + 2] = 0x0f
-				u16[address + 4] = 0xf0
+				u16[address] = TESONIC_SPEEDCAP
+				u16[address + 2] = TESONIC_ACCEL
+				u16[address + 4] = TESONIC_DECEL
 			}
 		}
 	}
