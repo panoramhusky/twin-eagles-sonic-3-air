@@ -221,6 +221,9 @@ function void Character.UpdateMovement()
 	{
 		if (super.active && char.state == char.state.TEAIRSLASH && char.spindash_charge > 0)
 		{
+			if ((char.spindash_charge % 5) == 0)
+				playSound(0x48)
+		
 			UpdateMovementStraightSimple()
 			return
 		}
@@ -490,7 +493,6 @@ function void TESonic.DoTEAirSlash()
 		u8[0xffffcd7c + 0x20] = 1
 
 	playSound(SFX_SPINDASH_RELEASE)
-	playSound(0x48)
 
 	if (input != 0 && input < 0x0b)		// Not left and right at the same time
 	{
@@ -1013,23 +1015,23 @@ function void setSpeedCapProperties(u32 address, bool isSuperActive)
 		#if STANDALONE
 			if (char.bonus_effect & char.bonus.SPEED_UP)
 			{
-				u16[address] = max(u16[address], 0xf00)
-				u16[address + 2] = max(u16[address + 2], 0x18)
-				u16[address + 4] = max(u16[address + 4], 0x80)
+				u16[address] = Math.roundToInt(0x580 * 1.5) 
+				u16[address + 2] = Math.roundToInt(0x0f * 1)
+				u16[address + 4] = Math.roundToInt(0xf0 * 0.666666666)
 			}
 			else
 		#endif
 			if (isSuperActive)
 			{
-				u16[address] = 0xa00
-				u16[address + 2] = 0x30
-				u16[address + 4] = 0x100
+				u16[address] = Math.roundToInt(0x580 * 1.25)
+				u16[address + 2] = Math.roundToInt(0x0f * 2)
+				u16[address + 4] = Math.roundToInt(0xf0 * 1.33333333)
 			}
 			else
 			{
-				u16[address] = 0x600
-				u16[address + 2] = 0x0c
-				u16[address + 4] = 0x80
+				u16[address] = 0x580
+				u16[address + 2] = 0x0f
+				u16[address + 4] = 0xf0
 			}
 		}
 	}
