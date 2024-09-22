@@ -71,6 +71,17 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 				return true
 			}
 		}
+		
+		
+		if (objA0.update_address == 0x2302fa)
+		{
+			// fake dust cloud
+			u64 key = stringformat("tesonic_dust_0x%02x", objA0.animation.sprite)
+			u8 flags = ((objA0.render_flags & render_flag.FLIP_Y) ? SPRITE_FLAG_FLIP_Y : 0) | (prioFlag ? SPRITE_FLAG_PRIO : 0)
+
+			Renderer.drawSpriteTinted(key, px, py, 0, flags, renderQueue, 0, 0xffffffff, 0x10000, 0x10000)
+			return true
+		}
 	}
 	
 	return base.Standalone.onWriteToSpriteTable(px, py, renderQueue)

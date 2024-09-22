@@ -15,6 +15,27 @@ include outro
 global u8 tesonic.palette
 global u8 tesonic.color_scheme
 
+//# address-hook(0x2302fa)
+function void FAKE_DUST_CLOUD_BECAUSE_REGULAR_DUST_CLOUD_CODE_SUCKS()
+{
+	objA0.position.x.u16 -= u16[0xffffeebc]
+	DrawObject()
+	UpdateMovementStraightSimple()
+	++objA0.animation.timer
+	if (objA0.animation.timer > 3)
+	{
+		if (objA0.animation.sprite < 3)
+			++objA0.animation.sprite
+		else
+		{
+			UnloadObject()
+			return
+		}
+			
+		objA0.animation.timer = 0
+	}
+}
+
 //# address-hook(0x028c80) end(0x028db6)
 function void fn028c80()
 {
@@ -46,6 +67,13 @@ function string getCharacterPaletteKey(u8 character)
 				return "character_palette_sonic_s2_r"
 			else
 				return "character_palette_sonic_s2"
+		}
+		else if (tesonic.palette == 0x02)
+		{
+			if (tesonic.color_scheme == 0)
+				return "character_palette_sonic_s6_r"
+			else
+				return "character_palette_sonic_s6"
 		}			
 		else //Failsafe, might end up making this the broken s4 results palette for shits and giggles later
 			return "character_palette_sonic_s4_r"

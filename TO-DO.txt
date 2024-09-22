@@ -1,5 +1,4 @@
 ==HAZEL==
--Fix MGZ2 boss fake death
 -Implement custom dust object
 -Add achievements menu over competition menu
 -Fix any issues with Super/Hyper
@@ -21,3 +20,4 @@
 -Change Super/Hyper requirement so that you need max hearts and health
 	-Also make the hearts glow Gold/Rainbow depending on form when active
 -Make SSZ Boss 2 balloons inflate when kicked
+-Fix MGZ2 boss fake death

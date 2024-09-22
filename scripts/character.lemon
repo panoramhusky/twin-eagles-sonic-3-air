@@ -1073,65 +1073,56 @@ function void Character.updateUprightOnGround()
 	}
 }
 
-/*
-//# address-hook(0x018cb6) end(0x018d68)
-function void fn018cb6()
+
+//# address-hook(0x018b3e) end(0x018b48)
+function void fn018b3e()
 {
-	A1 = 0xffff0000 + objA0.dustcloud.character_address
+	base.fn018b3e()
+
+	A1 = 0xffffb000
 	if (TESonic.isTESonic(A1))
 	{
-		A2 = 0xffff0000 + objA0.dustcloud.character_address
-		D1 = 0x10
+		A2 = A1
 		
-		bool isRunning = (u8[A2 + 0x20] == char.state.RUNNING) && (abs(s16[A2 + 0x1c]) >= 0x600) && ((u8[A2 + 0x26] < 0x40) || (u8[A2 + 0x26] > 0xc0)) && ((u8[A2 + 0x2a] & char.flag.IN_AIR) == 0)
-		if (u8[A2 + 0x20] != char.state.BRAKING && !isRunning)
-		{
-				objA0.base_state = 0x02
-				u8[A0 + 0x36] = 0
-				return
-		}
+		bool isRunning = (u8[A2 + 0x20] == char.state.RUNNING || u8[A2 + 0x20] == char.state.RUNNING2) && ((u8[A2 + 0x26] < 0x40) || (u8[A2 + 0x26] > 0xc0)) && ((u8[A2 + 0x2a] & char.flag.IN_AIR) == 0) && (u8[A2 + 0x2e] & control_flag.DISABLE_UPDATE) == 0 && abs(s16[A2 + 0x1c]) > 0x80
 
-		--u8[A0 + 0x36]
-		if (s8[A0 + 0x36] < 0)
+		if (!isRunning)
+			return
+
+		--u8[A0 + 0x38]
+		if (s8[A0 + 0x38] < 0)
 		{
-			u8[A0 + 0x36] = 3
-			if ((u8[A2 + 0x2a] & char.flag.UNDERWATER) == 0)
+			u8[A0 + 0x38] = 4
+			if ((u8[A2 + 0x2a] & char.flag.UNDERWATER) == 0 && !super.active && u8[A2 + 0x2a] != char.flag.PUSHING)
 			{
 				if (allocDynamicObjectStd())
 				{
 					// Spawn skidding dust
-					objA1.update_address = objA0.update_address
-					objA1.position.x.u16 = u16[A2 + 0x10]
-					objA1.position.y.u16 = u16[A2 + 0x14]
-					if (objA0.flags38 != 0)
-					{
-						D1.u16 -= 4
-					}
-					if (global.inv_gravity)
-						D1.s16 = -D1.s16
-
-					objA1.position.y.u16 += D1.u16
+					objA1.update_address = 0x2302fa
 					objA1.render_flags = objA0.render_flags
-					u8[A1 + 0x05] += 2
-					objA1.box_size.x = 4
+
+					u8[A1 + 0x05] += 0x02
+					objA1.box_size.x = 0x04
 					objA1.sprite_priority = 0x80
 					objA1.sprite_attributes = (objA0.sprite_attributes & ~sprite_attribute.PRIORITY) | (u16[A2 + 0x0a] & sprite_attribute.PRIORITY)
-					objA1.mapping_offset = objA0.mapping_offset
-					u8[A1 + 0x20] = 3
+					u16[A1 + 0x10] = u16[A2 + 0x10]
+					u16[A1 + 0x14] = u16[A2 + 0x14] + 0x0c
+					u8[A1 + 0x20] = 0x03
 					u8[A1 + 0x2a] = 0
-					objA1.dustcloud.character_address = objA0.dustcloud.character_address
+					
+					
+					
+					if (u8[A2 + 0x3d] != 0)
+					{
+						objA1.velocity.x = (s16[A2 + 0x1c] >> 1)
+						objA1.velocity.x *= ((u8[A2 + 0x04] & render_flag.FLIP_X) ? 1 : -1)
+					}
 				}
 			}
 		}
-
-		fn018d6a()
-	}
-	else
-	{
-		base.fn018cb6()
 	}
 }
-*/
+
 
 function void updateCharacterControlOnGround()
 {

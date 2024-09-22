@@ -1,0 +1,6 @@
+{
+	"tesonic_dust_0x00":  { "File": "dust.bmp", "Rect": "0,0,16,16", "Center": "8,8" },
+	"tesonic_dust_0x01":  { "File": "dust.bmp", "Rect": "16,0,16,16", "Center": "8,8" },
+	"tesonic_dust_0x02":  { "File": "dust.bmp", "Rect": "32,0,16,16", "Center": "8,8" },
+	"tesonic_dust_0x03":  { "File": "dust.bmp", "Rect": "48,0,16,16", "Center": "8,8" },
+}

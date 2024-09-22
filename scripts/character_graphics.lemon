@@ -212,20 +212,3 @@ function void TESonic.UpdateAirSlashAnim()
 	char.animation.sprite = D0.u8 + D3.u8		// Change sprites based on rotations
 	++char.animation.frame
 }
-
-/*
-function void updateSonicAnimationRunning()
-{
-	if (TESonic.isTESonic(A0))
-	{
-		A1 = 0xffffb000
-		A6 = 0xffffcc54
-		if (objA0.state == char.state.RUNNING && (char.flags & char.flag.UNDERWATER) == 0)
-		{
-			u8[A6 + 0x05] = 0x06		// Base update for braking dust
-			u8[A6 + 0x22] = 0x15		// First frame of dust animation
-		}
-	}
-	base.updateSonicAnimationRunning()
-}
-*/
