@@ -967,7 +967,7 @@ function void fn0317ae()
 		objA1.flags2a &= ~char.flag.ON_OBJECT
 		objA1.hitbox_extends.x = char.hitbox.x.UPRIGHT
 		objA1.hitbox_extends.y = char.hitbox.y.UPRIGHT
-		u8[A1 + 0x40] = 1
+		u8[A1 + 0x40] = 0
 	}
 }
 
@@ -1578,6 +1578,9 @@ function void fn0266b0()
 
 		if ((objA1.render_flags & render_flag.VISIBLE) && u8[A1 + 0x05] < base_state.HURT)
 		{
+			u8[A1 + 0x26] = 0
+			objA1.render_flags &= ~render_flag.FLIP_Y // this game hates me sometimes
+		
 			// Check if jump button pressed
 			D0.u8 &= CONTROL_ABC
 			if (D0.u8 == 0)

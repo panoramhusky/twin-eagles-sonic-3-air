@@ -74,6 +74,18 @@ function string getCharacterPaletteKey(u8 character)
 				return "character_palette_sonic_s6_r"
 			else
 				return "character_palette_sonic_s6"
+		}
+		else if (tesonic.palette == 0x03)
+		{
+			if (tesonic.color_scheme == 0)
+				return "character_palette_sonic_s3d5_r"
+			else
+				return "character_palette_sonic_s3d5"
+		}
+		else if (tesonic.palette == 0x04)
+		{
+			// we don't need a rendered check here because the palette is already a genesis palette! :D
+				return "character_palette_sonic_sj6"
 		}			
 		else //Failsafe, might end up making this the broken s4 results palette for shits and giggles later
 			return "character_palette_sonic_s4_r"

@@ -154,9 +154,9 @@ function void fn067704()
 
 		A1 = 0xffffb000
 		objA1.position.x.u16 += 0x08 // this is needed otherwise knuckles doesn't grab the leftmost emerald
-		u8[A1 + 0x05] = base_state.HURT
-		objA1.velocity.y = -0x400
-		objA1.velocity.x = -0x200
+		//u8[A1 + 0x05] = base_state.HURT
+		objA1.velocity.y = -0x480
+		objA1.velocity.x = -0x4c0 // increase velocity a little bit since we're not using the hurt base state here
 		objA1.groundspeed = 0
 		objA1.state = char.state.TEFUCKINGDIED
 		objA1.flags2a |= char.flag.IN_AIR

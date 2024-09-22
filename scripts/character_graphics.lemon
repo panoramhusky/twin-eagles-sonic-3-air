@@ -80,10 +80,16 @@ function void UpdateSonicAnimation()
 			D1.u8 = char.flags & char.flag.FACING_LEFT
 			char.render_flags = (char.render_flags & ~(render_flag.FLIP_X | render_flag.FLIP_Y)) | D1.u8
 			
-			if (char.velocity.x != 0)
+			if (char.flags & char.flag.IN_AIR)
 			{
-				char.animation.sprite = 0x8d
+				char.animation.sprite = 0xd8
+				char.animation.timer = 0
 				return
+			}
+			
+			if (char.animation.timer == 1)
+			{
+				playSound(0x4c)
 			}
 		
 			constant array<u8> FUCKINGDEAD =
@@ -137,10 +143,10 @@ function void UpdateSonicAnimation()
 			if (char.animation.timer > 167)
 			{
 				char.base_state = 0x02
-				char.state = char.state.STANDING
+				char.state = char.state.RUNNING
 				char.invuln.countdown = 0
 				char.velocity.x = 0
-				char.flags = 0
+				char.control_flags = 0
 			}
 			else
 				char.animation.sprite = FUCKINGDEAD[char.animation.timer]

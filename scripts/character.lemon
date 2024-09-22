@@ -1,5 +1,5 @@
 constant u16 TESONIC_SPEEDCAP = 0x580
-constant u16 TESONIC_ACCEL = 0x0f
+constant u16 TESONIC_ACCEL = 0x000c
 constant u16 TESONIC_DECEL = 0xf0
 
 //# translated(0x0117da) end(0x0118ba)
@@ -11,6 +11,9 @@ function bool Character.CheckStartJump()
 	{
 		u8 input_pressed = control.player1.pressed
 		if ((input_pressed & CONTROL_A) == 0 && (input_pressed & CONTROL_C) == 0)
+			return false
+			
+		if (char.state == char.state.TEFUCKINGDIED)
 			return false
 
 		D0 = char.rotation
@@ -166,6 +169,18 @@ function void Character.updateUprightOnGroundInner()
 		}
 		else
 		{
+			if (char.state == char.state.TEFUCKINGDIED)
+			{
+				s16 speed = ((char.rotation > 0x20) ? 0x40 : 0xa0)
+				if (char.groundspeed > 0)
+					char.groundspeed = max(char.groundspeed - speed, 0)
+				else
+					char.groundspeed = min(char.groundspeed + speed, 0)
+				
+				
+				char.flags &= ~char.flag.IN_AIR
+			}
+		
 			u8 input_state     = (char.character == CHARACTER_TAILS) ? control.tails.state : control.player1.state
 			bool isSuperActive = (char.character == CHARACTER_TAILS) ? super.active.tails  : super.active
 
@@ -263,6 +278,9 @@ function void Character.UpdateControlInAir()
 {
 	if (TESonic.isTESonic(A0))
 	{
+		if (char.state == char.state.TEFUCKINGDIED)
+			return
+	
 		if (super.active && char.state == char.state.TEAIRSLASH && char.spindash_charge > 0)
 		{
 			--char.spindash_charge
@@ -378,8 +396,13 @@ function void Character.DoTEKick()
 	
 	// check with objects the player cannot kick on
 	A1 = 0xffff0000 + char.object_standing_on
+	//debugLog(A1)
 	if (char.flags & char.flag.ON_OBJECT)
 	{
+		// cnz barber pole
+		if (objA1.update_address == 0x033376)
+			validState = false
+			
 		// lbz cylinder
 		if (objA1.update_address == 0x02c3ca)
 			validState = false
@@ -935,26 +958,37 @@ function void Character.OnKickCollisionWithDynamicObject()
 //# address-hook(0x01560c) end(0x01569a)
 function void Character.LandingOnGround()
 {
-	if (TESonic.isTESonic(A0) && char.state == char.state.TEKICK)
+	if (TESonic.isTESonic(A0))
 	{
-		
-		if (char.rotation > 0x20 && char.rotation < 0xe0 && (char.flags & char.flag.ROLLING) == 0)
+		if (char.state == char.state.TEKICK)
 		{
-			char.flags &= ~(char.flag.IN_AIR | char.flag.PUSHING | char.flag.CONTROL_LOCK)
-			char.state = char.state.RUNNING
-			char.animation.timer = 0
-			char.rotation.x = 0
+			if (char.rotation > 0x20 && char.rotation < 0xe0 && (char.flags & char.flag.ROLLING) == 0)
+			{
+				char.flags &= ~(char.flag.IN_AIR | char.flag.PUSHING | char.flag.CONTROL_LOCK)
+				char.state = char.state.RUNNING
+				char.animation.timer = 0
+				char.rotation.x = 0
+			}
+			else
+			{	
+				Character.LandingOnGroundStandUp()
+				Character.LandingOnGroundResetState()
+			}
+		}
+		else if (char.state == char.state.TEFUCKINGDIED)
+		{
+			s16 speed = ((char.rotation > 0x20) ? 0x40 : 0xa0)
+			if (char.groundspeed > 0)
+				char.groundspeed = max(char.groundspeed - speed, 0)
+			else
+				char.groundspeed = min(char.groundspeed + speed, 0)
+			
+			char.flags &= ~char.flag.IN_AIR
 		}
 		else
-		{	
-			Character.LandingOnGroundStandUp()
-			Character.LandingOnGroundResetState()
+		{
+			base.Character.LandingOnGround()
 		}
-	}
-	else if (char.state == char.state.TEFUCKINGDIED)
-	{
-		char.groundspeed = 0
-		char.velocity.x = 0
 	}
 	else
 	{
@@ -1084,6 +1118,7 @@ function void fn018b3e()
 	{
 		A2 = A1
 		
+		// top 10 most hacked in checks ever NUMBER ONNNEEEE
 		bool isRunning = (u8[A2 + 0x20] == char.state.RUNNING || u8[A2 + 0x20] == char.state.RUNNING2) && ((u8[A2 + 0x26] < 0x40) || (u8[A2 + 0x26] > 0xc0)) && ((u8[A2 + 0x2a] & char.flag.IN_AIR) == 0) && (u8[A2 + 0x2e] & control_flag.DISABLE_UPDATE) == 0 && abs(s16[A2 + 0x1c]) > 0x80
 
 		if (!isRunning)
@@ -1095,6 +1130,9 @@ function void fn018b3e()
 			u8[A0 + 0x38] = 4
 			if ((u8[A2 + 0x2a] & char.flag.UNDERWATER) == 0 && !super.active && u8[A2 + 0x2a] != char.flag.PUSHING)
 			{
+				if (u8[A2 + 0x2d] != 0)
+					return
+			
 				if (allocDynamicObjectStd())
 				{
 					// Spawn skidding dust
@@ -1345,6 +1383,17 @@ function bool Character.performSuperTransformation()
 	}
 	
 	return base.Character.performSuperTransformation()
+}
+
+function void Character.cancelSuperTransformation()
+{
+	if (TESonic.isTESonic(A0))
+	{
+		if (char.state == char.state.TEFUCKINGDIED)
+			return
+	}
+	
+	base.Character.cancelSuperTransformation()
 }
 
 //# address-hook(0x08160a) end(0x081676)

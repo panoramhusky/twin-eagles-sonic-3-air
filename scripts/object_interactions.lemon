@@ -359,11 +359,11 @@ function void fn025d9c()
 					bool onLeft = (objA1.position.x.u16 < objA0.position.x.u16)
 					
 					u8[A1 + 0x05] = base_state.NORMAL
-					objA1.velocity.x = (onLeft ? -0x200 : 0x200)
-					objA1.velocity.y = -0x300
+					objA1.velocity.x = (onLeft ? -0x300 : 0x300)
+					objA1.velocity.y = -0x480
 					objA1.flags2a |= (char.flag.IN_AIR)
 					objA1.flags2a &= ~char.flag.ON_OBJECT
-					objA1.state = char.state.GOT_HURT_PANIC
+					objA1.state = char.state.TEFUCKINGDIED
 				}
 			}
 		}
@@ -494,6 +494,38 @@ function void fn02a58e()
 	else
 	{
 		base.fn02a58e()
+	}
+}
+
+// bumper
+//# address-hook(0x032f56) end(0x032fee)
+function void fn032f56()
+{
+	base.fn032f56()
+	
+	A1 = 0xffffb000
+	if (TESonic.isTESonic(A1))
+	{
+		if (objA1.state == char.state.TEKICK || objA1.state == char.state.TEAIRSLASH)
+		{
+			if (super.active)
+			{
+				objA0.update_address = addressof(SmallExplosion.BaseUpdate)
+				objA0.base_state = 0x02
+				u8[A0 + 0x28] = 0
+				u8[A0 + 0x29] = 0
+			}
+		
+			A2 = A0
+			A0 = A1
+			Character.LandingOnGroundNoSpindash()
+			char.flags |= char.flag.IN_AIR
+			char.groundspeed = 0
+			char.state = char.state.TEFUCKINGDIED
+			playSound(0x35)
+			playSound(0x49)
+			A0 = A2
+		}
 	}
 }
 
@@ -731,12 +763,20 @@ function bool fn08ac80()
 					objA0.flags2a &= ~bit
 					objA0.flags38 |= 0x01
 					
-					objA1.hitbox_extends.x = char.hitbox.x.ROLLING
-					objA1.hitbox_extends.y = char.hitbox.y.ROLLING
-					objA1.state = char.state.ROLLING
-					objA1.flags2a |= char.flag.ROLLING
-					objA1.velocity.x = (onLeft ? 0xa00 : -0xa00)
-					objA1.groundspeed = objA1.velocity.x
+					if (superSlash)
+					{
+						objA1.hitbox_extends.x = char.hitbox.x.ROLLING
+						objA1.hitbox_extends.y = char.hitbox.y.ROLLING
+						objA1.state = char.state.ROLLING
+						objA1.flags2a |= char.flag.ROLLING
+						objA1.velocity.x = (onLeft ? 0xa00 : -0xa00)
+						objA1.groundspeed = objA1.velocity.x
+					}
+					else
+					{
+						objA1.velocity.x = (onLeft ? -0x200 : 0x200)
+						objA0.position.x.u16 += (onLeft ? 0x08 : -0x08)
+					}
 
 					// "spawnChildObjects(0x08aaea)" replaced by:
 					spawnChildObject(0x08a8dc, 0x00, -12, -8)
@@ -967,6 +1007,12 @@ function void fn071f30()
 				objA1.velocity.y = -0x300
 				objA1.flags2a |= (char.flag.IN_AIR)
 				objA1.flags2a &= ~char.flag.ON_OBJECT
+				
+				if (objA1.state == char.state.TEAIRSLASH)
+				{
+					objA1.state = char.state.ROLLING
+					objA1.groundspeed = 0x800
+				}
 			}
 		}
 	}
@@ -1044,13 +1090,41 @@ function void fn027424()
 		{
 			A4 = 0x027718
 			objA1.position.x.u16 -= 4
-			objA1.velocity.x = -0x200
+			
+			if (objA1.state != char.state.TEAIRSLASH)
+				objA1.velocity.x = -0x200
+			else
+			{
+				objA1.velocity.x = 0x800
+				objA1.velocity.x = ((objA1.velocity.x * 3) / 2)
+				
+				bool isHyperSonic = (super.active & 0x80)			// Hyper Sonic active
+				if (!isHyperSonic)
+				{
+					// Reduce dash speed for Super Sonic
+					objA1.velocity.x = (objA1.velocity.x > 0) ? (objA1.velocity.x - 0x200) : (objA1.velocity.x < 0) ? (objA1.velocity.x + 0x200) : 0
+				}
+			}
 		}
 		else
 		{
 			A4 = 0x0276d8
 			objA1.position.x.u16 += 4
-			objA1.velocity.x = 0x200
+			
+			if (objA1.state != char.state.TEAIRSLASH)
+				objA1.velocity.x = 0x200
+			else
+			{
+				objA1.velocity.x = -0x800
+				objA1.velocity.x = ((objA1.velocity.x * 3) / 2)
+				
+				bool isHyperSonic = (super.active & 0x80)			// Hyper Sonic active
+				if (!isHyperSonic)
+				{
+					// Reduce dash speed for Super Sonic
+					objA1.velocity.x = (objA1.velocity.x > 0) ? (objA1.velocity.x - 0x200) : (objA1.velocity.x < 0) ? (objA1.velocity.x + 0x200) : 0
+				}
+			}
 		}
 
 		objA1.groundspeed = objA1.velocity.x
