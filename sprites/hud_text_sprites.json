@@ -1,0 +1,6 @@
+{
+	"hud_bonus_icon_blue":   { "File": "hud_text_sprites.png", "Rect":  "0,61,12,19" },
+
+	// Continue icons
+	"continue_icon_sonic":    { "File": "hud_text_sprites.png", "Rect": "0,82,20,24",  "Center": "12,24" },
+}

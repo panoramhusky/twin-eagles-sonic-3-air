@@ -1107,6 +1107,99 @@ function void Character.updateUprightOnGround()
 	}
 }
 
+function bool Character.updateSuperPeelout()
+{
+	// update on solid ground
+	if (TESonic.isTESonic(A0))
+	{
+		u8 input_state   = control.player1.state
+		u8 input_pressed = control.player1.pressed
+
+		if (char.spindash == 0)
+		{
+			bool canStartPeelout = (char.state == char.state.LOOKING_UP) && (input_pressed & CONTROL_ABC) && (player1.control_override == 0)	// Last check is needed in cutscenes (e.g. end of MHZ 2)
+			if (!canStartPeelout)
+			{
+				// Nothing to see here
+				return false
+			}
+
+			char.state = char.state.RUNNING
+			char.spindash = 0x80
+			char.spindash_charge = 0
+			playSound(0x5a)
+		}
+		else if (char.spindash == 0x80)
+		{
+			A4 = addressof(global.move.speedcap)	// Address: 0xfffff760 = Base address of speed caps & acceleration/deceleration
+		
+			if (input_state & CONTROL_UP || char.spindash_charge < 0x280)
+			{
+				// Charge up
+				char.spindash_charge = clamp(char.spindash_charge + u16[A4 + 2], 0, 0x280)
+				if (char.flags & char.flag.UNDERWATER)
+				{
+					char.groundspeed = 0x300 + ((super.active) ? (char.spindash_charge) : (char.spindash_charge * 3/4))
+				}
+				else
+				{
+					char.groundspeed = 0x400 + ((super.active) ? (char.spindash_charge * 3/2) : (char.spindash_charge))
+				}
+
+				char.flags &= ~char.flag.PUSHING
+				if (abs(char.groundspeed) >= 0x0a00)
+					sonic.fastrunanim.timer = 30
+
+			#if STANDALONE
+				Input.setControllerRumbleByAddress(A0, 0.0f, 0.25f, 100)
+			#endif
+			}
+			else
+			{
+				releaseSuperPeelout()
+			}
+
+			// Center camera y-offset again
+			centerCameraYOffset()
+		}
+
+		Character.CheckAgainstMoveBorders()
+		Character.UpdateRotationOnGround()
+		partialUpdateCharacterOnGround()
+
+		return true
+	}
+	else
+	{
+		return base.Character.updateSuperPeelout()
+	}
+}
+
+function void releaseSuperPeelout()
+{
+	// Release the Super Peel-Out!
+	if (TESonic.isTESonic(A0))
+	{
+		char.state = char.state.RUNNING
+		char.spindash = 0
+
+		D0.u16 = max(char.groundspeed - 0x800, 0) * 2
+		D0.u16 = 0x2000 - (D0.u16 & 0x1f00)
+		
+		if (char.flags & char.flag.FACING_LEFT)
+		{
+			char.groundspeed = -char.groundspeed
+		}
+
+		playSound(SFX_SPINDASH_RELEASE)
+		Input.setControllerRumbleByAddress(A0, 0.0f, 1.0f, 150)
+	}
+	else
+	{
+		base.releaseSuperPeelout()
+	}
+}
+
 
 //# address-hook(0x018b3e) end(0x018b48)
 function void fn018b3e()
