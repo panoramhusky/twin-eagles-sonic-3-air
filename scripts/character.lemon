@@ -742,7 +742,7 @@ function void Character.OnCollisionWithDynamicObject()
 			if (!attacking)
 			{
 				bool isThreat = false
-				if (char.character == CHARACTER_SONIC || char.double_jump_state == 0 || (char.flags & char.flag.UNDERWATER))
+				if (char.double_jump_state == 0 || (char.flags & char.flag.UNDERWATER))
 				{
 					// No real special conditions for Sonic besides the drop dash
 					isThreat = true

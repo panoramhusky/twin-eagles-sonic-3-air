@@ -13,5 +13,5 @@
 	"te_lostheart":	{ "File": "health_lostheart.ogg", "Type": "Sound", "Channel": "05" },
 	"te_1up":	{ "File": "1up.ogg", "Type": "Sound" },
 	
-	"supertheme_sonic2": { "Name": "Sonic 2 Super Theme", "File": "te_supermusic.ogg", "Type": "Music", "LoopStart": "163977" },
+	"supertheme_te": { "Name": "Twin Eagles Super Theme", "File": "te_supermusic.ogg", "Type": "Music", "LoopStart": "163977" },
 }

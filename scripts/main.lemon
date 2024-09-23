@@ -16,6 +16,10 @@ global u8 tesonic.palette
 global u8 tesonic.color_scheme
 global u8 tesonic.game_rng
 
+constant u8 CHARS_TESONIC = 1 // for global.characters
+
+constant u8 CHARACTER_TESONIC = 0 // for checks
+
 function void Init()
 {
 	tesonic.game_rng = 0 + (System.rand() % 0xff)
@@ -43,22 +47,22 @@ function void FAKE_DUST_CLOUD_BECAUSE_REGULAR_DUST_CLOUD_CODE_SUCKS()
 	}
 }
 
-//# address-hook(0x028c80) end(0x028db6)
-function void fn028c80()
+//# address-hook(0x0011ca) end(0x0012cc)
+function void fn0011ca()
 {
-	if (global.game_mode != 0x88 && competition_mode.active == 0 && global.characters == CHARS_SONIC_AND_TAILS)
+	if (global.characters == CHARS_SONIC_AND_TAILS || levelselect.characters == CHARS_SONIC_AND_TAILS)
 	{
 		// no partner tails for you lol
-		levelselect.characters = CHARS_SONIC_ALONE
-		global.characters = CHARS_SONIC_ALONE
+		levelselect.characters = CHARS_TESONIC
+		global.characters = CHARS_TESONIC
 	}
-	base.fn028c80()
+	base.fn0011ca()
 }
 
 function string getCharacterPaletteKey(u8 character)
 {
 	A1 = 0xffffb000
-	if (character == CHARACTER_SONIC)
+	if (character == CHARACTER_TESONIC)
 	{
 		if (tesonic.palette != 0xff)
 			return TESonic.getPaletteType(tesonic.palette)
@@ -117,22 +121,32 @@ function u64 Standalone.getModdedSoundKey(u64 soundKey, u8 sfxId, u8 soundRegTyp
 {
 	s64 backup = A1 // backing up and restoring A1 is necessary otherwise the game explodes
 	A1 = 0xffffb000
+	
 	if (TESonic.isTESonic(A1))
 	{
 		A1 = backup
+		
 		if (objA0.update_address == 0x010a94)
 		{
 			if (sfxId == SFX_BRAKE)
-				return "te_skid"
+				soundKey = "te_skid"
 			else if (sfxId == 0x35)
-				return "te_hurt"
+				soundKey = "te_hurt"
 			else if (sfxId == SFX_JUMP)
-				return "te_jump"
+				soundKey = "te_jump"
 		}
-		else if (sfxId == MUSIC_DDZ && levelselect.characters == CHARS_SONIC_ALONE)
+		else if (sfxId == MUSIC_SUPER && levelselect.characters == CHARS_TESONIC)
 		{
-			return "supertheme_sonic2"
+			u8 configOption = Game.getSetting(SETTING_AUDIO_SUPER_THEME)
+			if (configOption >= 2)
+				soundKey = "supertheme_te"
 		}
+		else if (sfxId == MUSIC_DDZ && levelselect.characters == CHARS_TESONIC)
+		{
+			soundKey = "supertheme_te"
+		}
+		
+		return soundKey
 	}
 	
 	A1 = backup
@@ -142,7 +156,7 @@ function u64 Standalone.getModdedSoundKey(u64 soundKey, u8 sfxId, u8 soundRegTyp
 
 function bool TESonic.isTESonic(u32 address)
 {
-	if (u8[address + 0x38] == CHARACTER_SONIC && global.characters == CHARS_SONIC_ALONE)
+	if (u8[address + 0x38] == CHARACTER_TESONIC && global.characters == CHARS_TESONIC)
 		return true
 	else
 		return false
