@@ -1,5 +1,5 @@
 {
-	"result_nameplate_sonic": { "File": "result_sprites.png", "Rect": "8,8,72,16", "Center": "-1,0" },
-	"result_nameplate_sonic_super": { "File": "result_sprites.png", "Rect": "88,8,80,16" },
-	"result_nameplate_sonic_hyper": { "File": "result_sprites.png", "Rect": "176,8,80,16" },
+	"result_nameplate_sonic":  { "File": "result_sprites.png", "Rect": "0,2,56,16", "Center": "-8,0" },
+	"result_nameplate_sonic_super":  { "File": "result_sprites.png", "Rect": "58,2,56,16", "Center": "-8,0" },
+	"result_nameplate_sonic_hyper":  { "File": "result_sprites.png", "Rect": "116,2,56,16", "Center": "-8,0" }
 }
