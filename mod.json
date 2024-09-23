@@ -24,6 +24,7 @@
 					"0x02": "Sonic 6 (GB)",
 					"0x03": "Sonic 3D Blast 5 (NES/FC)",
 					"0x04": "Sonic Jam 6 (GEN/MD)",
+					"0xff": "Random",
                 }
             },
 			
