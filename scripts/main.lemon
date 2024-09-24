@@ -135,15 +135,20 @@ function u64 Standalone.getModdedSoundKey(u64 soundKey, u8 sfxId, u8 soundRegTyp
 			else if (sfxId == SFX_JUMP)
 				soundKey = "te_jump"
 		}
-		else if (sfxId == MUSIC_SUPER && levelselect.characters == CHARS_TESONIC)
+		
+		if (levelselect.characters == CHARS_TESONIC)
 		{
-			u8 configOption = Game.getSetting(SETTING_AUDIO_SUPER_THEME)
-			if (configOption >= 2)
+			if (sfxId == MUSIC_SUPER)
+			{
+				u8 configOption = Game.getSetting(SETTING_AUDIO_SUPER_THEME)
+				if (configOption >= 2)
+					soundKey = "supertheme_te"
+			}
+			
+			if (sfxId == MUSIC_DDZ)
+			{
 				soundKey = "supertheme_te"
-		}
-		else if (sfxId == MUSIC_DDZ && levelselect.characters == CHARS_TESONIC)
-		{
-			soundKey = "supertheme_te"
+			}
 		}
 		
 		return soundKey
