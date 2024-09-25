@@ -1,0 +1,127 @@
+//# address-hook(0x05c684) end(0x05c6b0)
+function void fn05c684()
+{
+	base.fn05c684()
+	
+	if (TESonic.isTESonic(A0))
+		objA0.position.y.u16 -= getScreenHeight()
+}
+
+//# address-hook(0x05c6b6) end(0x05c6de)
+function void fn05c6b6()
+{
+	if (TESonic.isTESonic(A0))
+	{
+		A1 = 0xffff0000 + u16[0xfffffaa4]
+		if ((u8[A1 + 0x38] & 0x04) == 0)
+		{
+			UpdateSonicAnimation()
+			if (char.position.y.u16 < 0x0120)
+			{
+				char.state = char.state.LIFTED
+				char.velocity.y = 0x300
+				UpdateMovementStraightSimple()
+			}
+			else
+			{
+				char.position.y.u16 = 0x0120
+				char.state = char.state.TEFUCKINGDIED
+				if (char.animation.timer > 120)
+					char.animation.timer = 120
+			}
+			return
+		}
+	}
+	
+	base.fn05c6b6()
+	
+	if (TESonic.isTESonic(A0))
+	{
+		A1 = 0xffff0000 + u16[0xfffffaa4]
+		if ((u8[A1 + 0x38] & 0x04) != 0)
+			char.animation.sprite = 0xc2
+	}
+}
+
+//# address-hook(0x05c6e0) end(0x05c6f2)
+function void fn05c6e0()
+{
+	
+	base.fn05c6e0()
+	
+	if (TESonic.isTESonic(A0))
+	{
+		u8 frame
+		if (objA0.countdown_value > 5)
+			frame = 0xc2
+		else if (objA0.countdown_value > 2)
+			frame = 0xc1
+		else
+			frame = 0xba
+
+		char.animation.sprite = frame
+		
+		if (objA0.countdown_value < 0)
+		{
+			char.state = char.state.RUNNING
+			char.animation.sprite = 3
+			char.groundspeed = 0x10
+			Audio.playAudio("te_sonic")
+		}
+	}
+}
+
+//# address-hook(0x05c6f4) end(0x05c716)
+function void fn05c6f4()
+{
+	base.fn05c6f4()
+	
+	if (TESonic.isTESonic(A0))
+	{
+		UpdateSonicAnimation()
+		char.position.x.u16 -= 3
+		
+		--u8[A0 + 0x40]
+		if (s8[A0 + 0x40] < 0)
+		{
+			u8[A0 + 0x40] = 4
+			
+			if (allocDynamicObjectStd())
+			{
+				// Spawn skidding dust
+				objA1.update_address = 0x2302fa
+				objA1.render_flags = objA0.render_flags
+
+				u8[A1 + 0x05] += 0x02
+				objA1.box_size.x = 0x04
+				objA1.sprite_priority = 0x80
+				objA1.sprite_attributes = (objA0.sprite_attributes & ~sprite_attribute.PRIORITY) | (u16[A0 + 0x0a] & sprite_attribute.PRIORITY)
+				u16[A1 + 0x10] = u16[A0 + 0x10]
+				u16[A1 + 0x14] = u16[A0 + 0x14] + 0x0c
+				u8[A1 + 0x20] = 0x03
+				u8[A1 + 0x2a] = 0
+			}
+		}
+		
+		
+		
+	}
+}
+
+//# address-hook(0x05c4e6) end(0x05c528)
+function void fn05c4e6()
+{
+	A1 = 0xffffb000
+	if (TESonic.isTESonic(A1))
+	{
+		if (objA1.position.y.u16 != 0x0120)
+		{
+			u8[0xfffffa84] = 9
+			fn05caae()
+			return
+		}
+	}
+
+	base.fn05c4e6()
+}
+

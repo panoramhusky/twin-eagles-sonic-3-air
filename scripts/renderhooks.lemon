@@ -79,12 +79,34 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 			u64 key = stringformat("tesonic_dust_0x%02x", objA0.animation.sprite)
 			u8 flags = ((objA0.render_flags & render_flag.FLIP_Y) ? SPRITE_FLAG_FLIP_Y : 0) | (prioFlag ? SPRITE_FLAG_PRIO : 0)
 
+			if (global.game_mode == 0x14)
+				TESonic.UpdateContinueDustAnimation()
+
 			Renderer.drawSpriteTinted(key, px, py, 0, flags, renderQueue, 0, 0xffffffff, 0x10000, 0x10000)
 			return true
 		}
 	}
 	
 	return base.Standalone.onWriteToSpriteTable(px, py, renderQueue)
+}
+
+function void TESonic.UpdateContinueDustAnimation()
+{
+	// gotta do some quantam physics type shit because s3k code sucks ass!!
+	++objA0.animation.timer
+	if (objA0.animation.timer > 3)
+	{
+		if (objA0.animation.sprite < 3)
+			++objA0.animation.sprite
+		else
+		{
+			UnloadObject()
+			return
+		}
+			
+		objA0.animation.timer = 0
+	}
+	
 }
 
 function string TESonic.getBrother(u8 type)

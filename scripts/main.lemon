@@ -9,6 +9,7 @@ include object_interactions
 include jump_off
 include mario
 include badniks
+include continue
 
 include outro
 
@@ -28,7 +29,7 @@ function void Init()
 
 //# address-hook(0x2302fa)
 function void FAKE_DUST_CLOUD_BECAUSE_REGULAR_DUST_CLOUD_CODE_SUCKS()
-{
+{	
 	objA0.position.x.u16 -= u16[0xffffeebc]
 	DrawObject()
 	UpdateMovementStraightSimple()

@@ -10,6 +10,10 @@ function bool Character.CheckStartJump()
 	if (TESonic.isTESonic(A0))
 	{
 		u8 input_pressed = control.player1.pressed
+		
+		//if (Input.buttonPressed(BUTTON_Y))
+			//global.game_mode = 0x14
+		
 		if ((input_pressed & CONTROL_A) == 0 && (input_pressed & CONTROL_C) == 0)
 			return false
 			
@@ -244,6 +248,7 @@ function void Character.UpdateMovement()
 				playSound(0x48)
 		
 			UpdateMovementStraightSimple()
+			
 			return
 		}
 	}
@@ -287,7 +292,11 @@ function void Character.UpdateControlInAir()
 			// Center camera y-offset again
 			centerCameraYOffset()
 			
-			if (char.velocity.x == 0 && char.velocity.y == 0)
+			u16 velocity = ((0x800 * 3) / 2)
+			
+			bool validSpeed = (abs(char.velocity.x) == velocity || abs(char.velocity.y) == velocity)
+			
+			if (!validSpeed)
 				char.spindash_charge = 0
 			
 			if (char.spindash_charge == 0)
@@ -760,6 +769,10 @@ function void Character.OnCollisionWithDynamicObject()
 				char.velocity.x = -char.velocity.x
 				char.velocity.y = -char.velocity.y
 				char.groundspeed = -char.groundspeed
+				
+				if (char.state == char.state.TEAIRSLASH)
+					char.spindash_charge = 0
+				
 				u8[A1 + 0x1c] = A0.u8
 				u8[A1 + 0x25] = u8[A1 + 0x28]
 				u8[A1 + 0x28] = 0

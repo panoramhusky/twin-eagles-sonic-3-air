@@ -1145,6 +1145,7 @@ function void fn033ade()
 		u8[A1 + 0x26] = 0
 		u8[A1 + 0x2a] &= ~char.flag.ROLLING
 		TESonic.JumpOffObject()
+		objA1.state = char.state.GRABBED // bob flying
 		u8[A1 + 0x2a] &= ~char.flag.ON_OBJECT
 		objA0.flags2a &= ~bit
 		u8[A1 + 0x2e] &= ~(control_flag.DISABLE_WALLS | control_flag.DISABLE_ANIMATION | control_flag.DISABLE_UPDATE)
@@ -1315,6 +1316,7 @@ function void fn0338c4()
 		u8[A1 + 0x26] = 0
 		u8[A1 + 0x2a] &= ~char.flag.ROLLING
 		TESonic.JumpOffObject()
+		objA1.state = char.state.GRABBED // bob flying (2!)
 		u8[A1 + 0x2a] &= ~char.flag.ON_OBJECT
 		objA0.flags2a &= ~bit
 		u8[A1 + 0x2e] &= ~(control_flag.DISABLE_WALLS | control_flag.DISABLE_ANIMATION | control_flag.DISABLE_UPDATE)
@@ -1364,6 +1366,7 @@ function void fn053a4c()
 					player1.control_override = 0
 					objA1.velocity.y = -0x600
 					TESonic.JumpOffObject()
+					objA1.state = char.state.TRANSFORMING
 				}
 			}
 		}
@@ -2577,7 +2580,7 @@ function void fn03c068()
 		objA1.velocity.x = (D1 & 0x0400) ? -0x1000 : 0x1000		// CONTROL_LEFT held
 		objA1.velocity.y = -0x100
 		TESonic.JumpOffObject()
-		objA1.state = char.state.GRABBED
+		objA1.state = char.state.GRABBED // bob flying (3 & Knuckles)
 		objA1.animation.timer = 0
 		objA1.animation.frame = 0
 
@@ -2791,7 +2794,7 @@ function void fn04aac8()
 	}
 }
 
-// even more soz zipline (now with restored air functionality!)
+// even more soz zipline (now with restored air functionality!) // nvm
 //# address-hook(0x04af80) end(0x04b088)
 function void fn04af80()
 {
@@ -2808,7 +2811,8 @@ function void fn04af80()
 		
 		objA1.flags2a |= char.flag.IN_AIR
 		objA1.flags2a &= ~char.flag.ON_OBJECT
-
+		
+		/*
 		// allow jumping off early
 		bool jumpPressed = (control.player1.pressed & CONTROL_ABC) != 0
 		
@@ -2845,6 +2849,7 @@ function void fn04af80()
 			fn04ad32()
 			return
 		}
+		*/
 
 		if (s8[A2] > 0)
 		{
@@ -2917,6 +2922,7 @@ function void fn04af80()
 	}
 }
 
+/*
 // soz zipline more
 //# address-hook(0x04af0a) end(0x04af6a)
 function void fn04af0a()
@@ -2974,6 +2980,7 @@ function void fn04aa80()
 		
 	base.fn04aa80()
 }
+*/
 
 // soz quicksand
 //# address-hook(0x0400f0) end(0x040274)
