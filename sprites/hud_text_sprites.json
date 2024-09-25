@@ -1,6 +1,12 @@
 {
-	"hud_bonus_icon_blue":   { "File": "hud_text_sprites.png", "Rect":  "0,61,12,19" },
-
-	// Continue icons
-	"continue_icon_sonic":    { "File": "hud_text_sprites.png", "Rect": "0,82,20,24",  "Center": "12,24" },
+	"hud_bonus_icon_blue":  { "File": "hud_text_sprites.png", "Rect": "0,61,12,19", "Center": "0,0" },
+	"continue_icon_sonic":  { "File": "hud_text_sprites.png", "Rect": "0,82,16,24", "Center": "10,24" },
+	"hud_bonus_icon_blue_s2":  { "File": "hud_text_sprites.png", "Rect": "16,61,12,19", "Center": "0,0" },
+	"continue_icon_sonic_s2":  { "File": "hud_text_sprites.png", "Rect": "16,82,16,24", "Center": "10,24" },
+	"hud_bonus_icon_blue_s3d5":  { "File": "hud_text_sprites.png", "Rect": "32,61,12,19", "Center": "0,0" },
+	"continue_icon_sonic_s3d5":  { "File": "hud_text_sprites.png", "Rect": "32,82,16,24", "Center": "10,24" },
+	"hud_bonus_icon_blue_s6":  { "File": "hud_text_sprites.png", "Rect": "48,61,12,19", "Center": "0,0" },
+	"continue_icon_sonic_s6":  { "File": "hud_text_sprites.png", "Rect": "48,82,16,24", "Center": "10,24" },
+	"hud_bonus_icon_blue_sj6":  { "File": "hud_text_sprites.png", "Rect": "64,61,12,19", "Center": "0,0" },
+	"continue_icon_sonic_sj6":  { "File": "hud_text_sprites.png", "Rect": "64,82,16,24", "Center": "10,24" }
 }
