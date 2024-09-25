@@ -1,5 +1,17 @@
 {
-	"result_nameplate_sonic":  { "File": "result_sprites.png", "Rect": "0,2,56,16", "Center": "-8,0" },
-	"result_nameplate_sonic_super":  { "File": "result_sprites.png", "Rect": "58,2,56,16", "Center": "-8,0" },
-	"result_nameplate_sonic_hyper":  { "File": "result_sprites.png", "Rect": "116,2,56,16", "Center": "-8,0" }
+	"result_nameplate_sonic":  { "File": "result_sprites.png", "Rect": "0,0,56,16", "Center": "-8,0" },
+	"result_nameplate_sonic_super":  { "File": "result_sprites.png", "Rect": "56,0,56,16", "Center": "-8,0" },
+	"result_nameplate_sonic_hyper":  { "File": "result_sprites.png", "Rect": "112,0,56,16", "Center": "-8,0" },
+	"result_nameplate_sonic_s2":  { "File": "result_sprites.png", "Rect": "0,16,56,16", "Center": "-8,0" },
+	"result_nameplate_sonic_super_s2":  { "File": "result_sprites.png", "Rect": "56,16,56,16", "Center": "-8,0" },
+	"result_nameplate_sonic_hyper_s2":  { "File": "result_sprites.png", "Rect": "112,16,56,16", "Center": "-8,0" },
+	"result_nameplate_sonic_s3d5":  { "File": "result_sprites.png", "Rect": "0,32,56,16", "Center": "-8,0" },
+	"result_nameplate_sonic_super_s3d5":  { "File": "result_sprites.png", "Rect": "56,32,56,16", "Center": "-8,0" },
+	"result_nameplate_sonic_hyper_s3d5":  { "File": "result_sprites.png", "Rect": "112,32,56,16", "Center": "-8,0" },
+	"result_nameplate_sonic_s6":  { "File": "result_sprites.png", "Rect": "0,48,56,16", "Center": "-8,0" },
+	"result_nameplate_sonic_super_s6":  { "File": "result_sprites.png", "Rect": "56,48,56,16", "Center": "-8,0" },
+	"result_nameplate_sonic_hyper_s6":  { "File": "result_sprites.png", "Rect": "112,48,56,16", "Center": "-8,0" },
+	"result_nameplate_sonic_sj6":  { "File": "result_sprites.png", "Rect": "0,64,56,16", "Center": "-8,0" },
+	"result_nameplate_sonic_super_sj6":  { "File": "result_sprites.png", "Rect": "56,64,56,16", "Center": "-8,0" },
+	"result_nameplate_sonic_hyper_sj6":  { "File": "result_sprites.png", "Rect": "112,64,56,16", "Center": "-8,0" }
 }
