@@ -51,13 +51,136 @@ function void FAKE_DUST_CLOUD_BECAUSE_REGULAR_DUST_CLOUD_CODE_SUCKS()
 //# address-hook(0x0011ca) end(0x0012cc)
 function void fn0011ca()
 {
-	if (global.characters == CHARS_SONIC_AND_TAILS || levelselect.characters == CHARS_SONIC_AND_TAILS)
+	if (levelselect.characters == CHARS_SONIC_AND_TAILS)
 	{
 		// no partner tails for you lol
 		levelselect.characters = CHARS_TESONIC
 		global.characters = CHARS_TESONIC
 	}
 	base.fn0011ca()
+}
+
+function string getCharacterLivesIcon(u8 character)
+{
+	s64 backup = A1 // backing up and restoring A1 is necessary otherwise the game may implode
+	A1 = 0xffffb000
+	
+	if (TESonic.isTESonic(A1))
+	{
+		A1 = backup
+		u8 palette = tesonic.palette
+		
+		if (palette == 0xff)
+			palette = (tesonic.game_rng % 4)
+		
+		// this probably could have been done better but idgaf rn
+		if (palette == 0x00)
+		{
+			return "hud_lives_icon_tesonic"
+		}
+		else if (palette == 0x01)
+		{
+			return "hud_lives_icon_tesonic_s2"
+		}
+		else if (palette == 0x02)
+		{
+			return "hud_lives_icon_tesonic_s6"
+		}
+		else if (palette == 0x03)
+		{
+			return "hud_lives_icon_tesonic_s3d5"
+		}
+		else if (palette == 0x04)
+		{
+			return "hud_lives_icon_tesonic_sj6"
+		}
+		else //Failsafe
+			return "hud_lives_icon_tesonic_sj6"
+	}
+	
+	return base.getCharacterLivesIcon(character)
+}
+
+function string getCharacterBonusTextIcon(u8 character)
+{
+	s64 backup = A1 // backing up and restoring A1 is necessary otherwise the game may implode
+	A1 = 0xffffb000
+	
+	if (TESonic.isTESonic(A1))
+	{
+		A1 = backup
+		u8 palette = tesonic.palette
+		
+		if (palette == 0xff)
+			palette = (tesonic.game_rng % 4)
+		
+		// this probably could have been done better but idgaf rn
+		if (palette == 0x00)
+		{
+			return "hud_bonus_icon_teblue"
+		}
+		else if (palette == 0x01)
+		{
+			return "hud_bonus_icon_teblue_s2"
+		}
+		else if (palette == 0x02)
+		{
+			return "hud_bonus_icon_teblue_s6"
+		}
+		else if (palette == 0x03)
+		{
+			return "hud_bonus_icon_teblue_s3d5"
+		}
+		else if (palette == 0x04)
+		{
+			return "hud_bonus_icon_teblue_sj6"
+		}
+		else //Failsafe
+			return "hud_bonus_icon_teblue_s6"
+	}
+	
+	return base.getCharacterBonusTextIcon(character)
+}
+
+function string getCharacterContinueIcon(u8 character)
+{
+	s64 backup = A1 // backing up and restoring A1 is necessary otherwise the game may implode
+	A1 = 0xffffb000
+	
+	if (TESonic.isTESonic(A1))
+	{
+		A1 = backup
+		u8 palette = tesonic.palette
+		
+		if (palette == 0xff)
+			palette = (tesonic.game_rng % 4)
+		
+		// this probably could have been done better but idgaf rn
+		if (palette == 0x00)
+		{
+			return "continue_icon_tesonic"
+		}
+		else if (palette == 0x01)
+		{
+			return "continue_icon_tesonic_s2"
+		}
+		else if (palette == 0x02)
+		{
+			return "continue_icon_tesonic_s6"
+		}
+		else if (palette == 0x03)
+		{
+			return "continue_icon_tesonic_s3d5"
+		}
+		else if (palette == 0x04)
+		{
+			return "continue_icon_tesonic_sj6"
+		}
+		else //Failsafe
+			return "continue_icon_tesonic_s3d5"
+	}
+	
+	return base.getCharacterContinueIcon(character)
 }
 
 function string getCharacterPaletteKey(u8 character)

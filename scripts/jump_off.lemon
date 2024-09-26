@@ -89,6 +89,7 @@ function void fn0220c2()
 	}
 	else
 	{
+		A1 = backup
 		base.fn0220c2()
 	}
 }
@@ -118,6 +119,7 @@ function void fn01f8b4()
 	}
 	else
 	{
+		A1 = backup
 		base.fn01f8b4()
 	}
 }
@@ -202,6 +204,7 @@ function void fn030cf8()
 	}
 	else
 	{
+		A1 = backup
 		base.fn030cf8()
 	}
 }
@@ -337,6 +340,7 @@ function void fn031226()
 	}
 	else
 	{
+		A1 = backup
 		base.fn031226()
 	}
 }
@@ -451,6 +455,7 @@ function void fn032784()
 	}
 	else
 	{
+		A1 = backup
 		base.fn032784()
 	}
 }
@@ -531,6 +536,7 @@ function void fn03857e()
 	}
 	else
 	{
+		A1 = backup
 		base.fn03857e()
 	}
 }
@@ -681,6 +687,7 @@ function void fn034fbc()
 	}
 	else
 	{
+		A1 = backup
 		base.fn034fbc()
 	}
 }
@@ -783,6 +790,7 @@ function void fn0349ba()
 	}
 	else
 	{
+		A1 = backup
 		base.fn0349ba()
 	}
 }
@@ -810,6 +818,7 @@ function void Tails.CheckDropSonic()
 	}
 	else
 	{
+		A1 = backup
 		base.Tails.CheckDropSonic()
 	}
 }
@@ -949,6 +958,7 @@ function void Tails.UpdateCarrySonic()
 	}
 	else
 	{
+		A1 = backup
 		base.Tails.UpdateCarrySonic()
 	}
 }
@@ -1074,6 +1084,7 @@ function void fn0324c0()
 	}
 	else
 	{
+		A1 = backup
 		base.fn0324c0()
 	}
 }
@@ -1154,6 +1165,7 @@ function void fn033ade()
 	}
 	else
 	{
+		A1 = backup
 		base.fn033ade()
 	}
 }
@@ -1325,6 +1337,7 @@ function void fn0338c4()
 	}
 	else
 	{
+		A1 = backup
 		base.fn0338c4()
 	}
 }
@@ -1373,6 +1386,7 @@ function void fn053a4c()
 	}
 	else
 	{
+		A1 = backup
 		base.fn053a4c()
 	}
 }
@@ -1478,6 +1492,7 @@ function void fn026eda()
 	}
 	else
 	{
+		A1 = backup
 		base.fn026eda()
 	}
 }
@@ -1555,6 +1570,7 @@ function void fn0290f2()
 	}
 	else
 	{
+		A1 = backup
 		base.fn0290f2()
 	}
 }
@@ -1624,7 +1640,35 @@ function void fn0266b0()
 	}
 	else
 	{
+		A1 = backup
 		base.fn0266b0()
+	}
+}
+
+// lbz boss ship
+//# address-hook(0x08d47c) end(0x08d4c6)
+function void fn08d47c()
+{
+	base.fn08d47c()
+	
+	u32 backup = A1
+	A1 = 0xffffb000
+	if (TESonic.isTESonic(A1))
+	{
+		A1 = backup
+		if (objA0.position.x.u16 >= 0x4440)
+		{
+			Audio.stopChannel(SFX_JUMP)
+			// Character jumps out of the mobile
+			objA0.update_address = 0x08d4cc
+			camera.screenshake.state = 0
+
+			A1 = 0xffffb000
+			objA1.velocity.x = -0x100
+			objA1.velocity.y = -0x600
+			TESonic.JumpOffObject()
+			u8[A1 + 0x40] = 0
+		}
 	}
 }
 
@@ -1688,6 +1732,7 @@ function void fn03e508()
 	}
 	else
 	{
+		A1 = backup
 		base.fn03e508()
 	}
 }
@@ -1860,6 +1905,7 @@ function void fn03ed6e()
 	}
 	else
 	{
+		A1 = backup
 		base.fn03ed6e()
 	}
 }
@@ -1941,6 +1987,7 @@ function void fn03f5c2()
 	}
 	else
 	{
+		A1 = backup
 		base.fn03f5c2()
 	}
 }
@@ -2028,6 +2075,7 @@ function void fn02291a()
 	}
 	else
 	{
+		A1 = backup
 		base.fn02291a()
 	}
 }
@@ -2050,6 +2098,7 @@ function void fn03f17a()
 	}
 	else
 	{
+		A1 = backup
 		base.fn03f17a()
 	}
 }
@@ -2297,6 +2346,7 @@ function void fn03d4c2()
 	}
 	else
 	{
+		A1 = backup
 		base.fn03d4c2()
 	}
 }
@@ -2427,6 +2477,7 @@ function void fn03a8b8()
 	}
 	else
 	{
+		A1 = backup
 		base.fn03a8b8()
 	}
 }
@@ -2564,6 +2615,7 @@ function void fn03aa7e()
 	}
 	else
 	{
+		A1 = backup
 		base.fn03aa7e()
 	}
 }
@@ -2588,6 +2640,7 @@ function void fn03c068()
 	}
 	else
 	{
+		A1 = backup
 		base.fn03c068()
 	}
 }
@@ -2596,97 +2649,108 @@ function void fn03c068()
 //# address-hook(0x040f52) end(0x04108e)
 function void fn040f52()
 {
-	if (u8[A2] != 0)
+	u32 backup = A1
+	A1 = 0xffffb000
+	if (TESonic.isTESonic(A1))
 	{
-		if ((objA1.render_flags & render_flag.VISIBLE) && u8[A1 + 0x05] < base_state.HURT)
+		A1 = backup
+		if (u8[A2] != 0)
 		{
-			// Check if jump button pressed
-			D0.u8 &= CONTROL_ABC
-			if (D0.u8 == 0)
+			if ((objA1.render_flags & render_flag.VISIBLE) && u8[A1 + 0x05] < base_state.HURT)
 			{
-				bool goto040fd8 = false
-				if (s8[A0 + 0x2c] < 0)
+				// Check if jump button pressed
+				D0.u8 &= CONTROL_ABC
+				if (D0.u8 == 0)
 				{
-					push(A2)
-					push(A1)
-					fn00f8ea()
-					A1 = pop()
-					A2 = pop()
+					bool goto040fd8 = false
+					if (s8[A0 + 0x2c] < 0)
+					{
+						push(A2)
+						push(A1)
+						fn00f8ea()
+						A1 = pop()
+						A2 = pop()
 
-					goto040fd8 = (D1.s16 <= 0)
+						goto040fd8 = (D1.s16 <= 0)
+					}
+
+					if (!goto040fd8)
+					{
+						objA1.position.y.u16 = objA0.velocity.y + 0x30
+						return
+					}
 				}
-
-				if (!goto040fd8)
+				else
 				{
-					objA1.position.y.u16 = objA0.velocity.y + 0x30
+					u8[A1 + 0x2e] = 0
+					u8[A2] = 0
+					u8[A2+2] = 0x12
+
+					if (D0.u16 & 0x0f00)		// Any direction held?
+					{
+						u8[A2+2] = 0x3c
+					}
+
+					if (D0.u16 & 0x0800)		// CONTROL_RIGHT held
+					{
+						objA1.velocity.x = 0x200
+					}
+					else if (D0.u16 & 0x0400)		// CONTROL_LEFT held
+					{
+						objA1.velocity.x = -0x200
+					}
+
+					objA1.velocity.y = -0x380
+					TESonic.JumpOffObject()
+					u8[A1 + 0x27] = 0
 					return
 				}
 			}
-			else
+
+			u8[A1 + 0x2e] = 0
+			u8[A2] = 0
+			u8[A2+2] = 0x3c
+		}
+		else
+		{
+			if (u8[A2+2] != 0)
 			{
-				u8[A1 + 0x2e] = 0
-				u8[A2] = 0
-				u8[A2+2] = 0x12
+				--u8[A2+2]
+				if (u8[A2+2] != 0)
+					return
+			}
 
-				if (D0.u16 & 0x0f00)		// Any direction held?
-				{
-					u8[A2+2] = 0x3c
-				}
+			#if STANDALONE
+				// Don't react for any of the two if Tails is carrying the other character
+				if (tails.carrying)
+					return
+			#endif
 
-				if (D0.u16 & 0x0800)		// CONTROL_RIGHT held
+			u16 dx = objA1.position.x.u16 - objA0.position.x.u16 + 0x10
+			u16 dy = objA1.position.y.u16 - objA0.velocity.y - 0x30
+			if (dx < 0x20 && dy < 0x18)
+			{
+				if (s8[A1 + 0x2e] >= 0 && u8[A1 + 0x05] < base_state.HURT && debug_mode.state == 0)
 				{
-					objA1.velocity.x = 0x200
-				}
-				else if (D0.u16 & 0x0400)		// CONTROL_LEFT held
-				{
-					objA1.velocity.x = -0x200
-				}
+					objA1.velocity.x = 0
+					objA1.velocity.y = 0
+					objA1.groundspeed = 0
+					objA1.position.x.u16 = objA0.position.x.u16
+					objA1.position.y.u16 = objA0.velocity.y + 0x30
+					objA1.state = char.state.HANGING
+					u8[A1 + 0x2e] = 1
 
-				objA1.velocity.y = -0x380
-				TESonic.JumpOffObject()
-				u8[A1 + 0x27] = 0
-				return
+					u8[A2] = 1
+
+					playSound(SFX_CLICK)
+				}
 			}
 		}
-
-		u8[A1 + 0x2e] = 0
-		u8[A2] = 0
-		u8[A2+2] = 0x3c
 	}
 	else
 	{
-		if (u8[A2+2] != 0)
-		{
-			--u8[A2+2]
-			if (u8[A2+2] != 0)
-				return
-		}
-
-		#if STANDALONE
-			// Don't react for any of the two if Tails is carrying the other character
-			if (tails.carrying)
-				return
-		#endif
-
-		u16 dx = objA1.position.x.u16 - objA0.position.x.u16 + 0x10
-		u16 dy = objA1.position.y.u16 - objA0.velocity.y - 0x30
-		if (dx < 0x20 && dy < 0x18)
-		{
-			if (s8[A1 + 0x2e] >= 0 && u8[A1 + 0x05] < base_state.HURT && debug_mode.state == 0)
-			{
-				objA1.velocity.x = 0
-				objA1.velocity.y = 0
-				objA1.groundspeed = 0
-				objA1.position.x.u16 = objA0.position.x.u16
-				objA1.position.y.u16 = objA0.velocity.y + 0x30
-				objA1.state = char.state.HANGING
-				u8[A1 + 0x2e] = 1
-
-				u8[A2] = 1
-
-				playSound(SFX_CLICK)
-			}
-		}
+		A1 = backup
+		base.fn040f52()
 	}
 }
 
@@ -2790,6 +2854,7 @@ function void fn04aac8()
 	}
 	else
 	{
+		A1 = backup
 		base.fn04aac8()
 	}
 }
@@ -2918,6 +2983,7 @@ function void fn04af80()
 	}
 	else
 	{
+		A1 = backup
 		base.fn04af80()
 	}
 }
@@ -2955,6 +3021,7 @@ function void fn04af0a()
 		}
 	}
 	
+	A1 = backup
 	base.fn04af0a()
 }
 
@@ -2977,7 +3044,8 @@ function void fn04aa80()
 	{
 		base.fn04aa80()
 	}
-		
+	
+	A1 = backup
 	base.fn04aa80()
 }
 */
@@ -3078,6 +3146,7 @@ function void fn0400f0()
 	}
 	else
 	{
+		A1 = backup
 		base.fn0400f0()
 	}
 }
@@ -3169,6 +3238,7 @@ function void fn03fd4e()
 	}
 	else
 	{
+		A1 = backup
 		base.fn03fd4e()
 	}
 }
@@ -3261,6 +3331,7 @@ function void fn03fe70()
 	}
 	else
 	{
+		A1 = backup
 		base.fn03fe70()
 	}
 }
@@ -3356,6 +3427,7 @@ function void fn0453e6()
 	}
 	else
 	{
+		A1 = backup
 		base.fn0453e6()
 	}
 }
@@ -3427,6 +3499,7 @@ function void fn045e6e()
 	}
 	else
 	{
+		A1 = backup
 		base.fn045e6e()
 	}
 }
@@ -3551,6 +3624,7 @@ function void fn045f74()
 	}
 	else
 	{
+		A1 = backup
 		base.fn045f74()
 	}
 }
@@ -3649,6 +3723,7 @@ function void fn046324()
 	}
 	else
 	{
+		A1 = backup
 		base.fn046324()
 	}
 }
@@ -3739,6 +3814,7 @@ function void fn04703e()
 	}
 	else
 	{
+		A1 = backup
 		base.fn04703e()
 	}
 }

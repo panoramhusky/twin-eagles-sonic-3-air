@@ -1111,12 +1111,68 @@ function void Character.updateUprightOnGround()
 
 		Character.UpdateUprightSlopeEffect()
 		Character.updateUprightOnGroundInner()
+		Character.CheckForStartRolling()
 
 		Character.sharedUpdateOnGround()
 	}
 	else
 	{
 		base.Character.updateUprightOnGround()
+	}
+}
+
+//# address-hook(0x01174a) end(0x0117d8)
+//# address-hook(0x014f74) end(0x015000)
+function void Character.CheckForStartRolling()
+{
+	if (TESonic.isTESonic(A0))
+	{
+		u8 input_state = control.player1.state
+
+		if ((char.bonus_effect & char.bonus.INFINITE_INERTIA) == 0)
+		{
+			if ((input_state & (CONTROL_LEFT | CONTROL_RIGHT)) == 0)	// No left or right pressed
+			{
+				if (input_state & CONTROL_DOWN)
+				{
+					if ((char.flags & char.flag.ON_OBJECT) == 0 && abs(char.groundspeed) < 0x100)
+					{
+						char.state = char.state.COWERING
+					#if STANDALONE
+						// Also slow down a little
+						if (char.groundspeed <= -4)
+							char.groundspeed += 4
+						else if (char.groundspeed >= 4)
+							char.groundspeed -= 4
+					#endif
+					}
+				}
+				else
+				{
+					// Stop crouching
+					if (char.state == char.state.COWERING)
+						char.state = char.state.RUNNING
+
+				#if STANDALONE
+					// Allow for starting the Super Peel-Out even if still moving slowly, just like handling for the spindash
+					//  (this logic here is active even if the Peel-Out is not enabled)
+					//   (this is also literally a NECESSITY for TE Sonic, especially in areas like the HCZ wall chase)
+					if ((input_state & CONTROL_UP) && abs(char.groundspeed) < 0x100 && (char.flags & char.flag.ON_OBJECT) == 0)
+					{
+						char.state = char.state.LOOKING_UP
+						if (char.groundspeed <= -4)
+							char.groundspeed += 4
+						else if (char.groundspeed >= 4)
+							char.groundspeed -= 4
+					}
+				#endif
+				}
+			}
+		}
+	}
+	else
+	{
+		base.Character.CheckForStartRolling()
 	}
 }
 
@@ -1146,22 +1202,21 @@ function bool Character.updateSuperPeelout()
 		{
 			A4 = addressof(global.move.speedcap)	// Address: 0xfffff760 = Base address of speed caps & acceleration/deceleration
 		
-			if (input_state & CONTROL_UP || char.spindash_charge < 0x280)
+			if (input_state & CONTROL_UP || char.spindash_charge < 0x480)
 			{
 				// Charge up
-				char.spindash_charge = clamp(char.spindash_charge + u16[A4 + 2], 0, 0x280)
+				char.spindash_charge = clamp(char.spindash_charge + u16[A4 + 2] + 10, 0, 0x480)
 				if (char.flags & char.flag.UNDERWATER)
 				{
-					char.groundspeed = 0x300 + ((super.active) ? (char.spindash_charge) : (char.spindash_charge * 3/4))
+					char.groundspeed = 0x480 + ((super.active) ? (char.spindash_charge) : (char.spindash_charge * 3/4))
 				}
 				else
 				{
-					char.groundspeed = 0x400 + ((super.active) ? (char.spindash_charge * 3/2) : (char.spindash_charge))
+					char.groundspeed = 0x480 + ((super.active) ? (char.spindash_charge * 3/2) : (char.spindash_charge))
 				}
 
 				char.flags &= ~char.flag.PUSHING
-				if (abs(char.groundspeed) >= 0x0a00)
-					sonic.fastrunanim.timer = 30
+
 
 			#if STANDALONE
 				Input.setControllerRumbleByAddress(A0, 0.0f, 0.25f, 100)
@@ -1477,11 +1532,16 @@ function bool Character.performSuperTransformation()
 		
 		bool max_health = (TESonic.health >= 3 && TESonic.maxhealth >= 3)
 
-		if (!max_health)
-			return false
+		
 
 		if (!super.active && ring_counter >= 50 && hud.dirty.timer && char.control_flags == 0 && possibleSuperForm != 0)
-		{		
+		{
+			if (!max_health)
+			{
+				playSound(0xb2)
+				return false
+			}
+		
 			Audio.playAudio("te_sonic")
 			TESonic.health = 5
 			TESonic.maxhealth = 5

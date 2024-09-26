@@ -21,9 +21,11 @@ function bool TESonic.checkIfKickFacingObject()
 // signpost
 function void fn083a70()
 {
+	u32 backup = A1
 	A1 = 0xffffb000
 	if (TESonic.isTESonic(A1))
 	{
+		A1 = backup
 		A1 = 0xffff0000 + D0.u16
 		if (u8[A1 + 0x20] != char.state.TEKICK)
 			return
@@ -54,6 +56,7 @@ function void fn083a70()
 	}
 	else
 	{
+		A1 = backup
 		base.fn083a70()
 	}
 }
@@ -90,147 +93,169 @@ function void DamageCharacter()
 //# address-hook(0x01fd08) end(0x01ff1a)
 function void fn01fd08()
 {
-	u16[A0 + 0x30] = u16[0xffffb000 + 0x18]
-	u16[A0 + 0x36] = u16[0xffffb04a + 0x18]
-
-	D1 = objA0.box_size.x + 11
-	D2 = objA0.box_size.y
-	D3.u16 = D2.u16 + 1
-	D4.u16 = objA0.position.x.u16
-	fn01dc56()
-
-	D6 = (D6 << 16) + (D6 >> 16)
-	if (D6.u16 & 0x03)
+	u32 backup = A1
+	A1 = 0xffffb000
+	if (TESonic.isTESonic(A1))
 	{
-		bool canBreakWall = false
+		A1 = backup
+		u16[A0 + 0x30] = u16[0xffffb000 + 0x18]
+		u16[A0 + 0x36] = u16[0xffffb04a + 0x18]
 
-		A1 = 0xffffb000
-		D1.u16 = u16[A0 + 0x30]
-		if (D6.u16 & 0x01)
+		D1 = objA0.box_size.x + 11
+		D2 = objA0.box_size.y
+		D3.u16 = D2.u16 + 1
+		D4.u16 = objA0.position.x.u16
+		fn01dc56()
+
+		D6 = (D6 << 16) + (D6 >> 16)
+		if (D6.u16 & 0x03)
 		{
-			if ((objA0.subtype2c & 0x80) == 0)	// Special Knuckles-only wall?
-			{
-				if (super.active || (TESonic.isTESonic(A1) && objA1.state == char.state.TEKICK && TESonic.checkIfKickFacingObject()))
-				{
-					// Super form breaks walls even when going slow
-					canBreakWall = true
-				}
-				else if ((objA0.flags2a & object.flag.P1_PUSHING))
-				{
-					// Normal Sonic and Tails need to quickly roll into a wall to break it (this includes the fire shield attack)
-					canBreakWall = (objA1.state == char.state.ROLLING && abs(D1.s16) >= 0x480)
-				}
-			}
+			bool canBreakWall = false
 
-			if (canBreakWall)
+			A1 = 0xffffb000
+			D1.u16 = u16[A0 + 0x30]
+			if (D6.u16 & 0x01)
 			{
-				objA0.flags2a &= ~object.flag.P1_PUSHING
-				Rocks.BreakWall()
+				if ((objA0.subtype2c & 0x80) == 0)	// Special Knuckles-only wall?
+				{
+					if (super.active || (TESonic.isTESonic(A1) && objA1.state == char.state.TEKICK && TESonic.checkIfKickFacingObject()))
+					{
+						// Super form breaks walls even when going slow
+						canBreakWall = true
+					}
+					else if ((objA0.flags2a & object.flag.P1_PUSHING))
+					{
+						// Normal Sonic and Tails need to quickly roll into a wall to break it (this includes the fire shield attack)
+						canBreakWall = (objA1.state == char.state.ROLLING && abs(D1.s16) >= 0x480)
+					}
+				}
+
+				if (canBreakWall)
+				{
+					objA0.flags2a &= ~object.flag.P1_PUSHING
+					Rocks.BreakWall()
+				}
 			}
 		}
-	}
 
-	if (competition_mode.active == 0)
-	{
-		if (checkForUnloadObjectAtPosition(objA0.countdown_value))
-			return
+		if (competition_mode.active == 0)
+		{
+			if (checkForUnloadObjectAtPosition(objA0.countdown_value))
+				return
+		}
+		DrawObject()
 	}
-	DrawObject()
+	else
+	{
+		A1 = backup
+		base.fn01fd08()
+	}
 }
 
 // breakable wall
 //# address-hook(0x021568) end(0x021690)
 function void fn021568()
 {
-	u16[A0 + 0x30] = u16[0xffffb000 + 0x18]
-	objA0.value32 = u16[0xffffb04a + 0x18]
-
-	D1 = objA0.box_size.x + 11
-	D2 = objA0.box_size.y
-	D3.u16 = D2.u16 + 1
-	D4.u16 = objA0.position.x.u16
-	fn01dc56()
-
-	if (u8[A0 + 0x2c] & 0x80)
-	{
-		if (level.trigger00 == 0)
-		{
-			DrawOrUnloadObject()
-		}
-		else
-		{
-			UnloadObject()
-		}
-		return
-	}
-
-	D6 = (D6 << 16) + (D6 >> 16)
-	D6.u16 &= 0x03
-	if (D6.u16 == 0)
-	{
-		DrawOrUnloadObject()
-		return
-	}
-
+	u32 backup = A1
 	A1 = 0xffffb000
-	D1.u16 = u16[A0 + 0x30]
-	if (D6.u16 & 0x01)
+	if (TESonic.isTESonic(A1))
 	{
-		bool canBreakWall = false
-		if (super.active || (TESonic.isTESonic(A1) && objA1.state == char.state.TEKICK && TESonic.checkIfKickFacingObject()))
+		A1 = backup
+		u16[A0 + 0x30] = u16[0xffffb000 + 0x18]
+		objA0.value32 = u16[0xffffb04a + 0x18]
+
+		D1 = objA0.box_size.x + 11
+		D2 = objA0.box_size.y
+		D3.u16 = D2.u16 + 1
+		D4.u16 = objA0.position.x.u16
+		fn01dc56()
+
+		if (u8[A0 + 0x2c] & 0x80)
 		{
-			// Super/Hyper forms can break walls, and Knuckles can
-			canBreakWall = true
-		}
-		else
-		{
-			// Does this wall allow for rolling into the wall? Otherwise the fire shield will do
-			if ((objA0.flags2a & object.flag.P1_PUSHING))
+			if (level.trigger00 == 0)
 			{
-				canBreakWall = (objA1.state == char.state.ROLLING && abs(D1.s16) >= 0x0480)
+				DrawOrUnloadObject()
 			}
+			else
+			{
+				UnloadObject()
+			}
+			return
 		}
 
-		if (canBreakWall)
+		D6 = (D6 << 16) + (D6 >> 16)
+		D6.u16 &= 0x03
+		if (D6.u16 == 0)
 		{
-			objA0.flags2a &= ~object.flag.P1_PUSHING
-			fn02165a()
-
 			DrawOrUnloadObject()
 			return
 		}
-	}
 
-	A1 = 0xffffb04a
-	D1.u16 = objA0.value32
-	if ((objA0.flags2a & object.flag.P2_PUSHING) && objA1.state == char.state.ROLLING && abs(D1.s16) >= 0x0480)
-	{
-		objA0.flags2a &= ~object.flag.P2_PUSHING
-		fn02165a()
-
-	#if STANDALONE
-		if (Game.getSetting(SETTING_FIX_GLITCHES) >= 2)
+		A1 = 0xffffb000
+		D1.u16 = u16[A0 + 0x30]
+		if (D6.u16 & 0x01)
 		{
-			// Prevent slope glitch here for player 1
-			if ((u8[0xffffb000 + 0x2a] & char.flag.ON_OBJECT) && u16[0xffffb000 + 0x42] == A0.u16)
+			bool canBreakWall = false
+			if (super.active || (TESonic.isTESonic(A1) && objA1.state == char.state.TEKICK && TESonic.checkIfKickFacingObject()))
 			{
-				u8[0xffffb000 + 0x2a] &= ~char.flag.ON_OBJECT
-				u8[0xffffb000 + 0x2a] |= char.flag.IN_AIR
+				// Super/Hyper forms can break walls, and Knuckles can
+				canBreakWall = true
+			}
+			else
+			{
+				// Does this wall allow for rolling into the wall? Otherwise the fire shield will do
+				if ((objA0.flags2a & object.flag.P1_PUSHING))
+				{
+					canBreakWall = (objA1.state == char.state.ROLLING && abs(D1.s16) >= 0x0480)
+				}
+			}
+
+			if (canBreakWall)
+			{
+				objA0.flags2a &= ~object.flag.P1_PUSHING
+				fn02165a()
+
+				DrawOrUnloadObject()
+				return
 			}
 		}
+
+		A1 = 0xffffb04a
+		D1.u16 = objA0.value32
+		if ((objA0.flags2a & object.flag.P2_PUSHING) && objA1.state == char.state.ROLLING && abs(D1.s16) >= 0x0480)
+		{
+			objA0.flags2a &= ~object.flag.P2_PUSHING
+			fn02165a()
+
+		#if STANDALONE
+			if (Game.getSetting(SETTING_FIX_GLITCHES) >= 2)
+			{
+				// Prevent slope glitch here for player 1
+				if ((u8[0xffffb000 + 0x2a] & char.flag.ON_OBJECT) && u16[0xffffb000 + 0x42] == A0.u16)
+				{
+					u8[0xffffb000 + 0x2a] &= ~char.flag.ON_OBJECT
+					u8[0xffffb000 + 0x2a] |= char.flag.IN_AIR
+				}
+			}
+		#endif
+		}
+	#if STANDALONE
+		else if (global.zone == 0x02)
+		{
+			// In MGZ, make all normal breakable walls also breakable by spinning top
+			D6 = (D6 << 16) + (D6 >> 16)
+			fn021758()
+		}
 	#endif
+		else
+		{
+			DrawOrUnloadObject()
+		}
 	}
-#if STANDALONE
-	else if (global.zone == 0x02)
-	{
-		// In MGZ, make all normal breakable walls also breakable by spinning top
-		D6 = (D6 << 16) + (D6 >> 16)
-		fn021758()
-	}
-#endif
 	else
 	{
-		DrawOrUnloadObject()
+		A1 = backup
+		base.fn021568()
 	}
 }
 
@@ -238,13 +263,16 @@ function void fn021568()
 //# address-hook(0x01faf2) end(0x01fb4a)
 function void Rocks.Update()
 {
+	u32 backup = A1
 	A1 = 0xffffb000
 	if (TESonic.isTESonic(A1) && objA0.subtype2c & 0x01)
 	{
+		A1 = backup
 		objA0.update_address = 0x01fd08
 	}
 	else
 	{
+		A1 = backup
 		base.Rocks.Update()
 	}
 }
@@ -327,9 +355,11 @@ function void fn06b734()
 //# address-hook(0x025d9c) end(0x025ea0)
 function void fn025d9c()
 {
+	u32 backup = A1
 	A1 = 0xffffb000
 	if (TESonic.isTESonic(A1))
 	{
+		A1 = backup
 		D1.u16 = 0x1b
 		D2.u16 = 0x10
 		D4.u16 = objA0.position.x.u16
@@ -359,8 +389,8 @@ function void fn025d9c()
 					bool onLeft = (objA1.position.x.u16 < objA0.position.x.u16)
 					
 					u8[A1 + 0x05] = base_state.NORMAL
-					objA1.velocity.x = (onLeft ? -0x300 : 0x300)
-					objA1.velocity.y = -0x480
+					objA1.velocity.x = (onLeft ? -0x200 : 0x200)
+					objA1.velocity.y = -0x380
 					objA1.flags2a |= (char.flag.IN_AIR)
 					objA1.flags2a &= ~char.flag.ON_OBJECT
 					objA1.state = char.state.TEFUCKINGDIED
@@ -402,6 +432,7 @@ function void fn025d9c()
 	}
 	else
 	{
+		A1 = backup
 		base.fn025d9c()
 	}
 }
@@ -410,9 +441,11 @@ function void fn025d9c()
 //# address-hook(0x02a502) end(0x02a586)
 function void fn02a502()
 {
+	u32 backup = A1
 	A1 = 0xffffb000
 	if (TESonic.isTESonic(A1))
 	{
+		A1 = backup
 		u16[A0 + 0x38] = score.bonus_counter
 		u8[A0 + 0x34] = u8[0xffffb000 + 0x20]
 		u8[A0 + 0x36] = u8[0xffffb04a + 0x20]
@@ -469,6 +502,7 @@ function void fn02a502()
 	}
 	else
 	{
+		A1 = backup
 		base.fn02a502()
 	}
 }
@@ -477,6 +511,7 @@ function void fn02a502()
 //# address-hook(0x02a58e)
 function void fn02a58e()
 {
+	u32 backup = A1
 	A1 = 0xffffb000
 	if (TESonic.isTESonic(A1) && (objA1.state == char.state.TEJUMP || objA1.state == char.state.TEAIRSLASH || objA1.state == char.state.ROLLING))
 	{
@@ -493,6 +528,7 @@ function void fn02a58e()
 	}
 	else
 	{
+		A1 = backup
 		base.fn02a58e()
 	}
 }
@@ -585,6 +621,7 @@ function void Button.checkIfPressed()
 //# address-hook(0x06e8a2) end(0x06e8b0)
 function void fn06e8a2()
 {
+	u32 backup = A1
 	A1 = 0xffffb000
 	if (TESonic.isTESonic(A1))
 	{
@@ -642,6 +679,7 @@ function void fn06e8a2()
 		}
 	}
 
+	A1 = backup
 	base.fn06e8a2()
 }
 
@@ -649,6 +687,7 @@ function void fn06e8a2()
 //# address-hook(0x06e8e8) end(0x06e8fc)
 function void fn06e8e8()
 {
+	u32 backup = A1
 	A1 = 0xffffb000
 	if (TESonic.isTESonic(A1))
 	{
@@ -687,6 +726,7 @@ function void fn06e8e8()
 		}
 	}
 
+	A1 = backup
 	base.fn06e8e8()
 }
 
@@ -695,11 +735,17 @@ function void fn06e8e8()
 function void fn06e8fe()
 {
 	base.fn06e8fe()
-	A1 = 0xffff0000 + u16[A0 + 0x46]
-	if (u8[A1 + 0x38] & 0x08)
-		return
+	
+	u32 backup = A1
+	A1 = 0xffffb000
+	if (TESonic.isTESonic(A1))
+	{
+		A1 = 0xffff0000 + u16[A0 + 0x46]
+		if (u8[A1 + 0x38] & 0x08)
+			return
 
-	objA0.value3b = 0 // reset kicking state
+		objA0.value3b = 0 // reset kicking state
+	}
 }
 
 function bool TESonic.CheckForCNZBallKick()
@@ -932,9 +978,11 @@ function void fn08b3aa()
 //# translated(0x02a7e2) end(0x02a848)
 function void fn02a6d4()
 {
+	u32 backup = A1
 	A1 = 0xffffb000
 	if (TESonic.isTESonic(A1))
 	{
+		A1 = backup
 		// quite frankly, idgaf about these, im just turning them into that one unused object instead
 		objA0.update_address = 0x02a502
 		if (objA0.subtype2c != 0)
@@ -957,6 +1005,7 @@ function void fn02a6d4()
 	}
 	else
 	{
+		A1 = backup
 		base.fn02a6d4()
 	}
 }
@@ -1027,6 +1076,9 @@ function void fn025d2c()
 	{
 		objA1.velocity.x = -objA1.velocity.x
 		objA1.velocity.y = -objA1.velocity.y
+		if (objA1.state == char.state.TEAIRSLASH)
+			u16[A1 + 0x3e] = 0
+		
 		u8[A3] ^= (1 << D3.u8)
 		objA0.update_address = addressof(SmallExplosion.BaseUpdate)
 		objA0.base_state = 0x02
@@ -1039,9 +1091,11 @@ function void fn025d2c()
 //# address-hook(0x027424) end(0x027590)
 function void fn027424()
 {
+	u32 backup = A1
 	A1 = 0xffffb000
 	if (TESonic.isTESonic(A1))
 	{
+		A1 = backup
 		u16[A0 + 0x30] = u16[0xffffb000 + 0x18]
 		objA0.value32 = u16[0xffffb04a + 0x18]
 		
@@ -1073,8 +1127,6 @@ function void fn027424()
 			DrawOrUnloadObject()
 			return
 		}
-		
-		
 
 		A1 = 0xffffb000
 
@@ -1180,6 +1232,7 @@ function void fn027424()
 	}
 	else
 	{
+		A1 = backup
 		base.fn027424()
 	}
 }
@@ -1190,7 +1243,6 @@ function void fn070c3c()
 {
 	base.fn070c3c()
 
-	u32 A1backup = A1
 	A1 = 0xffffb000
 	if (TESonic.isTESonic(A1))
 	{
@@ -1235,11 +1287,11 @@ function void fn070c3c()
 //# address-hook(0x01e896)
 function void fn01e896()
 {
-	u32 A1backup = A1
+	u32 backup = A1
 	A1 = 0xffffb000
 	if (TESonic.isTESonic(A1))
 	{
-		A1 = A1backup
+		A1 = backup
 		
 		// unload this specific instance of the autospin
 		if (global.zone_act.apparent == 0x0401 && level.results_done == 0xff)
@@ -1248,6 +1300,8 @@ function void fn01e896()
 			return
 		}
 	}
+	
+	A1 = backup
 	
 	base.fn01e896()
 }
@@ -1337,6 +1391,9 @@ function void fn041d5c()
 
 		objA1.velocity.x = -objA1.velocity.x
 		objA1.velocity.y = -objA1.velocity.y
+		if (objA1.state == char.state.TEAIRSLASH)
+			u16[A1 + 0x3e] = 0
+		
 		D4.u16 = (objA0.subtype2c & 0x7f) << 4
 		D5.u16 = D4.u16
 		D3.u16 = objA0.position.y.u16 - 0x90
@@ -1431,6 +1488,8 @@ function void fn042ec0()
 	{
 		objA1.velocity.x = -objA1.velocity.x
 		objA1.velocity.y = -objA1.velocity.y
+		if (objA1.state == char.state.TEAIRSLASH)
+			u16[A1 + 0x3e] = 0
 		u8[A3] |= (1 << D3.u8)
 		objA0.update_address = addressof(SmallExplosion.BaseUpdate)
 		objA0.base_state = 0x02
@@ -1516,6 +1575,7 @@ function void fn07aeb0()
 //# address-hook(0x07f900) end(0x07f9a6)
 function void fn07f900()
 {
+	u32 backup = A1
 	A1 = 0xffffb000
 	if (TESonic.isTESonic(A1))
 	{
@@ -1548,6 +1608,7 @@ function void fn07f900()
 	}
 	else
 	{
+		A1 = backup
 		base.fn07f900()
 	}
 }
@@ -1556,9 +1617,11 @@ function void fn07f900()
 //# address-hook(0x086770) end(0x0867be)
 function void fn086770()
 {
+	u32 backup = A1
 	A1 = 0xffffb000
 	if (TESonic.isTESonic(A1))
 	{
+		A1 = backup
 		MoveWithParent()
 		fn086a54()
 
@@ -1596,6 +1659,7 @@ function void fn086770()
 	}
 	else
 	{
+		A1 = backup
 		base.fn086770()
 	}
 }
