@@ -1,11 +1,16 @@
 ==HAZEL==
 -Fix SSZ Mecha shit
+-Code in palette corrected heart sprites when sprites are added
+-Change transform animation
+-Fix no kick after jumping off hcz ropes
+-change speed cap on mgz tops
 -Add achievements menu over competition menu
 -Fix any issues with Super/Hyper
 -Change title screen?
 
 
 ==OWEN==
+-Add palette corrected heart sprites
 -Implement Super/Hyper end pose
 
 
