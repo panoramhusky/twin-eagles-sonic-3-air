@@ -1,0 +1,247 @@
+//# address-hook(0x06429e) end(0x0642ea)
+function void fn06429e()
+{
+	u32 backup = A1
+	A1 = 0xffffb000
+	if (TESonic.isTESonic(A1))
+	{
+		TESonic.fuckingKillThatBastard()
+	}
+	else
+	{
+		A1 = backup
+		base.fn06429e()
+	}
+}
+
+//# address-hook(0x0660a6) end(0x0660b8)
+function void fn0660a6()
+{
+	u32 backup = A1
+	A1 = 0xffffb000
+	if (TESonic.isTESonic(A1))
+	{
+		A1 = backup
+		// Check against "char.invuln.countdown" and invincibility
+		if (u8[A1 + 0x34] == 0 && (u8[A1 + 0x2b] & char.bonus.INVINCIBLE) == 0)
+		{
+			TESonic.fuckingKillThatBastard()
+		}
+	}
+	else
+	{
+		A1 = backup
+		base.fn0660a6()
+	}
+}
+
+//# address-hook(0x0660ae)
+function void fn0660ae()
+{
+	u32 backup = A1
+	A1 = 0xffffb000
+	if (TESonic.isTESonic(A1))
+	{
+		A1 = backup
+		// Only check against invincibility, but not invulnerability frames
+		if ((u8[A1 + 0x2b] & char.bonus.INVINCIBLE) == 0)
+		{
+			TESonic.fuckingKillThatBastard()
+		}
+	}
+	else
+	{
+		A1 = backup
+		base.fn0660ae()
+	}
+}
+
+function void TESonic.fuckingKillThatBastard()
+{
+	objA1.velocity.x = -0x200
+	objA1.velocity.y = -0x400
+	if (objA1.position.x.u16 >= objA0.position.x.u16)
+	{
+		objA1.velocity.x = -objA1.velocity.x
+	}
+	
+	objA1.groundspeed = 0
+	objA1.state = char.state.TEFUCKINGDIED
+	objA1.flags2a |= char.flag.IN_AIR
+	u8[A1 + 0x2e] = 0
+	Audio.playAudio("te_hurt")
+	
+	objA0.position.y.u16 -= 0x08
+	
+	objA0.base_state = 0x18
+	hud.dirty.timer = 0
+	u16[A0 + 0x44] = 2
+	objA0.mapping_offset = 0x066f36
+	objA0.animation.sprite = 2
+	objA0.flags38 |= 0x10
+	
+	objA0.animation.sprite = 0
+	objA0.animation.frame = 0
+	objA0.animation.timer = 0
+	objA0.flags38 |= 0x01
+	
+	CheckGroundCollision()
+	if (D1.s16 < 9)
+	{
+		objA0.velocity.y = -0x600
+		playSound(SFX_JUMP)
+	}
+
+
+	u16[A0 + 0x44] = 0
+	objA0.animation.sprite = 0x9a
+	Object.ResetAnimationProgress(0x0667c1)		// Boss Knuckles rolling animation data
+
+}
+
+//# address-hook(0x0642f0) end(0x06430e)
+function void fn0642f0()
+{
+	u32 backup = A1
+	A1 = 0xffffb000
+	if (TESonic.isTESonic(A1))
+	{
+		A1 = backup
+		CheckGroundCollision()
+		if (D1.s16 >= 0)
+		{
+			Object.AnimationProgressByLocalA1.CheckEnd()
+			UpdateMovementSimple()
+			TESonic.health = 1
+		}
+		else
+		{
+			objA0.base_state = 0x1a
+			objA0.countdown_callback = 0x0643a4
+			objA0.render_flags ^= render_flag.FLIP_X
+			objA0.position.y.u16 += D1.u16
+			u16[A0 + 0x44] = 0x02
+			objA0.animation.sprite = 0x0e
+		}
+	}
+	else
+	{
+		A1 = backup
+		base.fn0642f0()
+	}
+}
+
+//# address-hook(0x064350) end(0x064350)
+function void fn064350()
+{
+	u32 backup = A1
+	A1 = 0xffffb000
+	if (TESonic.isTESonic(A1))
+	{
+		A1 = backup
+		++objA0.animation.timer
+		if (objA0.animation.timer > 8)
+		{
+			if (objA0.animation.sprite < 0x11)
+			{
+				++objA0.animation.sprite
+				objA0.animation.timer = 0
+			}
+			else
+			{
+				
+				if (objA0.animation.timer > 60)
+				{
+					call objA0.countdown_callback
+					u16[A0 + 0x44] = 0x00
+					Object.ResetAnimationProgress(0x066771)		// Boss Knuckles fighting pose animation data
+					objA0.render_flags &= ~render_flag.FLIP_X
+					objA0.animation.sprite = 0xd7
+					objA0.animation.frame = 0
+					objA0.animation.timer = 0
+				}
+			}
+		}
+	}
+	else
+	{
+		A1 = backup
+		base.fn064350()
+	}
+}
+
+//# address-hook(0x06438a) end(0x0643a2)
+function void fn06438a()
+{
+	base.fn06438a()
+	
+	u32 backup = A1
+	A1 = 0xffffb000
+	if (TESonic.isTESonic(A1))
+		Object.AnimationProgressByLocalA1.CheckEnd_DistinctTimer()
+}
+
+//# address-hook(0x0643be) end(0x0643c4)
+function void fn0643be()
+{
+	base.fn0643be()
+	
+	u32 backup = A1
+	A1 = 0xffffb000
+	if (TESonic.isTESonic(A1))
+		Object.AnimationProgressByLocalA1.CheckEnd_DistinctTimer()
+}
+
+//# address-hook(0x0643c6) end(0x0643e8)
+function void fn0643c6()
+{
+	u32 backup = A1
+	A1 = 0xffffb000
+	if (TESonic.isTESonic(A1))
+	{
+		A1 = backup
+		objA0.base_state = 0x1e
+		objA0.countdown_value = 0x0f
+
+		// "spawnSimpleChildObjects(0x066644)" replaced by:
+		spawnSimpleChildObjects(0x06563a, 1)
+		if (_equal())
+		{
+			u8[A1 + 0x2c] = 0xff
+		}
+		
+		Object.AnimationProgressByLocalA1.CheckEnd_DistinctTimer()
+		
+		level.default_music.u8 = MUSIC_LRZ2
+
+		if (allocDynamicObjectStd())
+		{
+			// Create the object that fades out the Knuckles theme and starts level music afterwards
+			objA1.update_address = 0x085b30
+			u8[A1 + 0x2c] = MUSIC_LRZ2
+		}
+	}
+	else
+	{
+		A1 = backup
+		base.fn0643c6()
+	}
+}
+
+
+//# address-hook(0x06563a) end(0x06565e)
+function void fn06563a()
+{
+	u32 backup = A1
+	A1 = 0xffffb000
+	if (TESonic.isTESonic(A1))
+	{
+		A1 = backup
+		UnloadObject()
+	}
+	else
+	{
+		A1 = backup
+		base.fn06563a()
+	}
+}

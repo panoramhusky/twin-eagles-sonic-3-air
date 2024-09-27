@@ -1,4 +1,5 @@
 ==HAZEL==
+-Fix SSZ Mecha shit
 -Add achievements menu over competition menu
 -Fix any issues with Super/Hyper
 -Change title screen?

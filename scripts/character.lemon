@@ -1127,6 +1127,9 @@ function void Character.CheckForStartRolling()
 {
 	if (TESonic.isTESonic(A0))
 	{
+		if (char.state == char.state.TEFUCKINGDIED)
+			return
+		
 		u8 input_state = control.player1.state
 
 		if ((char.bonus_effect & char.bonus.INFINITE_INERTIA) == 0)
@@ -1555,7 +1558,7 @@ function void Character.cancelSuperTransformation()
 {
 	if (TESonic.isTESonic(A0))
 	{
-		if (char.state == char.state.TEFUCKINGDIED)
+		if (char.state == char.state.TEFUCKINGDIED && hud.dirty.timer)
 			return
 	}
 	
