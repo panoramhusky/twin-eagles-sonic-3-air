@@ -4,6 +4,7 @@
 -Change transform animation
 -Fix no kick after jumping off hcz ropes
 -change speed cap on mgz tops
+-lbz snail kick collision
 -Add achievements menu over competition menu
 -Fix any issues with Super/Hyper
 -Change title screen?

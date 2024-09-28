@@ -72,7 +72,7 @@ function string getCharacterLivesIcon(u8 character)
 		u8 palette = tesonic.palette
 		
 		if (palette == 0xff)
-			palette = (tesonic.game_rng % 4)
+			palette = (tesonic.game_rng % 5)
 		
 		// this probably could have been done better but idgaf rn
 		if (palette == 0x00)
@@ -113,7 +113,7 @@ function string getCharacterBonusTextIcon(u8 character)
 		u8 palette = tesonic.palette
 		
 		if (palette == 0xff)
-			palette = (tesonic.game_rng % 4)
+			palette = (tesonic.game_rng % 5)
 		
 		// this probably could have been done better but idgaf rn
 		if (palette == 0x00)
@@ -154,7 +154,7 @@ function string getCharacterContinueIcon(u8 character)
 		u8 palette = tesonic.palette
 		
 		if (palette == 0xff)
-			palette = (tesonic.game_rng % 4)
+			palette = (tesonic.game_rng % 5)
 		
 		// this probably could have been done better but idgaf rn
 		if (palette == 0x00)
@@ -184,6 +184,47 @@ function string getCharacterContinueIcon(u8 character)
 	return base.getCharacterContinueIcon(character)
 }
 
+function string getCharacterResultsNameplate(u8 character)
+{
+	s64 backup = A1 // backing up and restoring A1 is necessary otherwise the game may implode
+	A1 = 0xffffb000
+	
+	if (TESonic.isTESonic(A1))
+	{
+		A1 = backup
+		u8 palette = tesonic.palette
+		
+		if (palette == 0xff)
+			palette = (tesonic.game_rng % 5)
+		
+		// this probably could have been done better but idgaf rn
+		if (palette == 0x00)
+		{
+			return "result_nameplate_tesonic"
+		}
+		else if (palette == 0x01)
+		{
+			return "result_nameplate_tesonic_s2"
+		}
+		else if (palette == 0x02)
+		{
+			return "result_nameplate_tesonic_s6"
+		}
+		else if (palette == 0x03)
+		{
+			return "result_nameplate_tesonic_s3d5"
+		}
+		else if (palette == 0x04)
+		{
+			return "result_nameplate_tesonic_sj6"
+		}
+		else //Failsafe
+			return ""
+	}
+	
+	return base.getCharacterResultsNameplate(character)
+}
+
 function string getCharacterPaletteKey(u8 character)
 {
 	A1 = 0xffffb000
@@ -193,7 +234,7 @@ function string getCharacterPaletteKey(u8 character)
 			return TESonic.getPaletteType(tesonic.palette)
 		else
 		{
-			u8 random = (tesonic.game_rng % 4)
+			u8 random = (tesonic.game_rng % 5)
 			return TESonic.getPaletteType(random)
 		}
 
