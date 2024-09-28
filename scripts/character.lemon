@@ -292,7 +292,8 @@ function void Character.UpdateControlInAir()
 			// Center camera y-offset again
 			centerCameraYOffset()
 			
-			u16 velocity = ((0x800 * 3) / 2)
+			bool isHyper = (super.active == 0xff)
+			u16 velocity = (isHyper ? 0xc00 : 0xa00)
 			
 			bool validSpeed = (abs(char.velocity.x) == velocity || abs(char.velocity.y) == velocity)
 			

@@ -1,4 +1,5 @@
 ==HAZEL==
+-Add TE Jump to SSZ Cutscene
 -Fix SSZ Mecha shit
 -Code in palette corrected heart sprites when sprites are added
 -Change transform animation

@@ -99,6 +99,8 @@ function string getCharacterLivesIcon(u8 character)
 			return "hud_lives_icon_tesonic_sj6"
 	}
 	
+	A1 = backup
+	
 	return base.getCharacterLivesIcon(character)
 }
 
@@ -140,6 +142,8 @@ function string getCharacterBonusTextIcon(u8 character)
 			return "hud_bonus_icon_teblue_s6"
 	}
 	
+	A1 = backup
+	
 	return base.getCharacterBonusTextIcon(character)
 }
 
@@ -180,6 +184,8 @@ function string getCharacterContinueIcon(u8 character)
 		else //Failsafe
 			return "continue_icon_tesonic_s3d5"
 	}
+	
+	A1 = backup
 	
 	return base.getCharacterContinueIcon(character)
 }
@@ -227,9 +233,11 @@ function string getCharacterResultsNameplate(u8 character)
 
 function string getCharacterPaletteKey(u8 character)
 {
+	s64 backup = A1 // backing up and restoring A1 is necessary otherwise the game may implode
 	A1 = 0xffffb000
 	if (character == CHARACTER_TESONIC)
 	{
+		A1 = backup
 		if (tesonic.palette != 0xff)
 			return TESonic.getPaletteType(tesonic.palette)
 		else
@@ -239,6 +247,8 @@ function string getCharacterPaletteKey(u8 character)
 		}
 
 	}
+	
+	A1 = backup
 
 	return base.getCharacterPaletteKey(character)
 }
@@ -281,6 +291,182 @@ function string TESonic.getPaletteType(u8 palette)
 	}
 	else //Failsafe, might end up making this the broken s4 results palette for shits and giggles later
 		return "character_palette_sonic_s4_r"
+}
+
+
+
+function void UpdatePaletteEffects.SuperForm.moddingVersion(u8 characterVersion)
+{
+	s64 backup = A1 // backing up and restoring A1 is necessary otherwise the game may implode
+	A1 = 0xffffb000
+	if (isMainCharacter(CHARACTER_TESONIC))
+	{
+		A1 = backup
+		TESonic.updateHyperPalette(characterVersion) // oh jesus
+	}
+	else
+	{
+		A1 = backup
+		base.UpdatePaletteEffects.SuperForm.moddingVersion(CHARACTER_TESONIC)
+	}
+}
+
+function void TESonic.updateHyperPalette(u8 characterVersion)
+{
+	if (super.palettefx.state & 0x80)
+	{
+		// Update ongoing palette effect
+		u8 character = CHARACTER_TESONIC
+		bool isHyperEffect = (super.active == 0xff)
+		u16 nextFrame = (super.palettefx.frame + 6) % (isHyperEffect ? 108 : 18)
+		u16 blendFactor = super.palettefx.timer * 0x100 / (isHyperEffect ? 0x07 : 0x0f)
+
+		if (nextFrame % 18 == 0)
+			blendFactor = 0x100 - blendFactor
+		else if (nextFrame % 18 == 12)
+			blendFactor = 0
+
+		if ((super.palettefx.timer % 4) == 0)
+		{
+			for (u8 underwater = 0; underwater < (level.water_present ? 2 : 1); ++underwater)
+			{
+				u32 offset = character * 0x40 + (underwater ? 0x300 : 0)
+				u32 source = 0x802180 + offset
+				u32 dest   = 0x802000 + offset
+
+				// Load modded Super palette
+				u8 line = getModdedPaletteLine(character, isHyperEffect, underwater)
+
+				zeroMemory(dest, 0x40)
+				u16 numColors = System.loadExternalPaletteData(getCharacterPaletteKey(character), line, 0x800000, 0x20)
+				for (u16 i = 0; i < numColors; ++i)
+				{
+					u32 rgba = u32[0x800000 + i * 4]
+					u16[dest + i * 2] = (rgba & 0xff000000) ? packColorExt(rgba) : 0
+				}
+
+				for (u8 k = 0; k < 0x40; k += 2)
+				{
+					if (u16[dest + k] == 0)
+					{
+						// Use original color as fallback
+						u16[dest + k] = u16[source + k]
+					}
+					else
+					{
+						// Apply flash effect
+						u16[dest + k] = blendColorsPacked(u16[dest + k], 0x0eee, blendFactor)
+					}
+				}
+			}
+		}
+
+		--super.palettefx.timer
+		if (super.palettefx.timer < 0)
+		{
+			super.palettefx.timer = isHyperEffect ? 0x07 : 0x0f
+			super.palettefx.frame = nextFrame
+		}
+	}
+	else if (super.palettefx.state == 1)
+	{
+		// Fade in
+		u8 character = CHARACTER_TESONIC
+		bool isHyperEffect = (super.active == 0xff)
+		
+		// Fix here for Tails and Knuckles #contributed by 3Pills (its for sonic too??)
+		--super.palettefx.timer
+		if (super.palettefx.timer >= 0)
+			return
+
+		// Fade in effect
+		super.palettefx.frame += 6
+		super.palettefx.timer = 1
+
+		for (u8 underwater = 0; underwater < (level.water_present ? 2 : 1); ++underwater)
+		{
+			u16 blendFactor = clamp((super.palettefx.frame + (1 - super.palettefx.timer) * 6 / 2) * 0x100 / 0x24, 0, 0x100)
+
+			u32 offset = character * 0x40 + (underwater ? 0x300 : 0)
+			u32 source = 0x802180 + offset
+			u32 dest   = 0x802000 + offset
+
+			// Load modded Super palette
+			u8 line = getModdedPaletteLine(character, isHyperEffect, underwater)
+
+			zeroMemory(dest, 0x40)
+			u16 numColors = System.loadExternalPaletteData(getCharacterPaletteKey(character), line, 0x800000, 0x20)
+			for (u16 i = 0; i < numColors; ++i)
+			{
+				u32 rgba = u32[0x800000 + i * 4]
+				u16[dest + i * 2] = (rgba & 0xff000000) ? packColorExt(rgba) : 0
+			}
+
+			for (u8 k = 0; k < 0x40; k += 2)
+			{
+				if (u16[dest + k] == 0)
+				{
+					// Use original color as fallback
+					u16[dest + k] = u16[source + k]
+				}
+				else
+				{
+					// Apply flash effect
+					u16[dest + k] = blendColorsPacked(u16[source + k], u16[dest + k], blendFactor)
+				}
+			}
+		}
+
+		if (super.palettefx.frame < 36) && (characterVersion <= 1)
+			return
+
+		// Fully faded in
+		super.palettefx.state = 0xff
+		u8[0xffffb000 + 0x2e] = 0		// Reset "char.control_flags"
+	}
+	else  // (super.palettefx.state == 2)
+	{
+		// Fade out
+		if (super.palettefx.frame >= 30)
+		{
+			// This is the first frame, set everything so that only the timer is used
+			super.palettefx.frame = 0
+			super.palettefx.frame.tails = 0
+			super.palettefx.timer = 0x11
+		}
+
+		u16 blendFactor = clamp(u16(super.palettefx.timer) * 0x100 / 0x12, 0, 0x100)
+		for (u8 underwater = 0; underwater < (level.water_present ? 2 : 1); ++underwater)
+		{
+			u32 offset = getMainCharacter() * 0x40 + (underwater ? 0x300 : 0)
+			u32 source = 0x802180 + offset
+			u32 dest   = 0x802000 + offset
+
+			for (u8 k = 0; k < 0x40; k += 2)
+			{
+				if (u16[dest + k] == 0)
+				{
+					// Use original color as fallback
+					u16[dest + k] = u16[source + k]
+				}
+				else
+				{
+					// Apply flash effect
+					u16[dest + k] = blendColorsPacked(u16[source + k], u16[dest + k], blendFactor)
+				}
+			}
+		}
+
+		if (super.palettefx.timer == 0)
+		{
+			// Fully faded out
+			super.palettefx.state = 0
+		}
+		else
+		{
+			--super.palettefx.timer
+		}
+	}
 }
 
 function u64 Standalone.getModdedSoundKey(u64 soundKey, u8 sfxId, u8 soundRegType)
