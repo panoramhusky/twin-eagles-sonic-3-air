@@ -1498,6 +1498,24 @@ function void fn042ec0()
 	}
 }
 
+// ssz boss 2 behavior
+//# address-hook(0x07ac06) end(0x07ac78)
+function void fn07ac06()
+{
+	s16 move_backup = s16[0xfffffaf8]
+	base.fn07ac06()
+	
+	// this is needed otherwise the boss stops moving after taking a hit during the laser phase
+	A1 = 0xffffb000
+	if (TESonic.isTESonic(A1))
+	{
+		if (u8[A0 + 0x1c] == 0x1f && u8[A0 + 0x3c] == 0)
+		{
+			s16[0xfffffaf8] = move_backup
+		}
+	}
+}
+
 
 // ssz mecha balloon
 //# address-hook(0x07aeb0) end(0x07af58)
@@ -1542,6 +1560,16 @@ function void fn07aeb0()
 			u8[A1 + 0x32] = 0
 			objA1.flags2e &= ~0x40
 			u8[A1 + 0x33] = 0
+			
+			A2 = A0
+			A0 = A1
+			fn07a8da()
+			A0 = A2
+		}
+		else
+		{
+			objA1.value26 = 0x0a
+			s16[0xfffffafa] = -0x180
 		}
 
 		objA0.base_state += 2

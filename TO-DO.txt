@@ -1,6 +1,4 @@
 ==HAZEL==
--Add TE Jump to SSZ Cutscene
--Fix SSZ Mecha shit
 -Code in palette corrected heart sprites when sprites are added
 -Change transform animation
 -Fix no kick after jumping off hcz ropes
@@ -29,3 +27,5 @@
 -Fix MGZ2 boss fake death
 -Implement custom dust object
 -Add signpost sprite (probably the one rosie did)
+-Add TE Jump to SSZ Cutscene
+-Fix SSZ Mecha shit
