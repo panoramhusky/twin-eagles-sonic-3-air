@@ -501,6 +501,12 @@ function u64 Standalone.getModdedSoundKey(u64 soundKey, u8 sfxId, u8 soundRegTyp
 			{
 				soundKey = "supertheme_te"
 			}
+			
+			if ((sfxId == MUSIC_GAMEOVER || sfxId == MUSIC_CONTINUE) && (global.game_mode == 0x0c || global.game_mode == 0x14))
+			{
+				sfxId = MUSIC_CONTINUE
+				soundKey = "gameover_te"
+			}
 		}
 		
 		return soundKey

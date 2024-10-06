@@ -4,7 +4,9 @@ function void fn05c684()
 	base.fn05c684()
 	
 	if (TESonic.isTESonic(A0))
+	{
 		objA0.position.y.u16 -= getScreenHeight()
+	}
 }
 
 //# address-hook(0x05c6b6) end(0x05c6de)
@@ -67,6 +69,9 @@ function void fn05c6e0()
 			char.animation.sprite = 3
 			char.groundspeed = 0x10
 			Audio.playAudio("te_sonic")
+			
+			TESonic.health = 3
+			TESonic.maxhealth = 3
 		}
 	}
 }
@@ -120,8 +125,37 @@ function void fn05c4e6()
 			fn05caae()
 			return
 		}
+		
+		if ((control.pad1.pressed & CONTROL_START) || (control.pad2.pressed & CONTROL_START))
+		{
+			objA0.update_address = 0x05c528
+			objA0.flags38 |= 0x08
+		}
+		else
+		{
+			--u16[0xfffffa82]
+			if (s16[0xfffffa82] < 0)
+			{
+				u16[0xfffffa82] = 118	// 60 frames per seconds, but double it
+
+				// Countdown from 10 to 0
+				D0.s8 = u8[0xfffffa84] - 1
+				if (D0.s8 < 0)
+				{
+					// Time up
+					u8[0xfffffaa9] = 2
+				}
+				else
+				{
+					u8[0xfffffa84] = D0.u8
+					fn05caae()
+				}
+			}
+		}
+		return
 	}
 
+	
 	base.fn05c4e6()
 }
 
