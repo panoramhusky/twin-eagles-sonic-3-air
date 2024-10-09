@@ -277,11 +277,18 @@ function void fn031226()
 
 			u8[A2] = 0
 			u8[A2+2] = (u8[A1 + 0x2a] & char.flag.UNDERWATER) ? 0x5a : 0x3c
+			
 
 			objA1.state = char.state.TEJUMP
 			objA1.flags2a |= char.flag.IN_AIR
+			
+			objA1.hitbox_extends.x = char.hitbox.x.UPRIGHT
+			objA1.hitbox_extends.y = char.hitbox.y.UPRIGHT
+			u8[A1 + 0x40] = 1
+			u8[A1 + 0x30] = 0
+			
 			u8[A1 + 0x27] = 0
-			objA1.flags2a &= ~char.flag.CONTROL_LOCK
+			objA1.flags2a &= ~(char.flag.CONTROL_LOCK | char.flag.ON_OBJECT)
 			u8[A1 + 0x2e] &= ~(control_flag.DISABLE_ANIMATION | control_flag.DISABLE_UPDATE)
 			return
 		}

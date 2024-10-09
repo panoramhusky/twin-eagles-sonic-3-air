@@ -433,6 +433,8 @@ function void Character.DoTEKick()
 	// check if in corkscrew state
 	if (char.rotation.x.count != 0)
 		validState = false
+		
+	
 	
 	if (char.state != char.state.TEKICK && char.control_flags == 0 && validState)
 	{

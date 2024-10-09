@@ -1,7 +1,7 @@
 ==HAZEL==
 -Code in palette corrected heart sprites when sprites are added
 -Change transform animation
--Fix no kick after jumping off hcz ropes
+-Fix Mario checkpoint
 -change speed cap on mgz tops
 -lbz snail kick collision
 -Add achievements menu over competition menu
@@ -29,3 +29,4 @@
 -Add signpost sprite (probably the one rosie did)
 -Add TE Jump to SSZ Cutscene
 -Fix SSZ Mecha shit
+-Fix no kick after jumping off hcz ropes
