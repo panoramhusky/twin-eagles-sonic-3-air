@@ -13,6 +13,7 @@
 	"te_lostheart":	{ "File": "health_lostheart.ogg", "Type": "Sound", "Channel": "05" },
 	"te_1up":	{ "File": "1up.ogg", "Type": "Sound" },
 	
+	"finalboss_te": { "Name": "Twin Eagles Final Boss", "File": "te_finalboss.ogg", "Type": "Music", "LoopStart": "1354749" },
 	"supertheme_te": { "Name": "Twin Eagles Super Theme", "File": "te_supermusic.ogg", "Type": "Music", "LoopStart": "163977" },
 	"gameover_te": { "Name": "Twin Eagles Game Over", "File": "te_gameover.ogg", "Type": "Music", "LoopStart": "755963" },
 }

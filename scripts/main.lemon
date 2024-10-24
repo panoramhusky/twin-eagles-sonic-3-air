@@ -490,6 +490,9 @@ function u64 Standalone.getModdedSoundKey(u64 soundKey, u8 sfxId, u8 soundRegTyp
 		
 		if (levelselect.characters == CHARS_TESONIC)
 		{
+			if (sfxId == MUSIC_BIGARMS)
+				soundKey = "finalboss_te"
+		
 			if (sfxId == MUSIC_SUPER)
 			{
 				u8 configOption = Game.getSetting(SETTING_AUDIO_SUPER_THEME)
