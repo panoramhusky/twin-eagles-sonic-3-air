@@ -167,7 +167,7 @@ function void Character.updateUprightOnGroundInner()
 {
 	if (TESonic.isTESonic(A0))
 	{
-		if (char.state != char.state.TEKICK && char.state != char.state.TEFUCKINGDIED)
+		if (char.state != char.state.TEKICK && char.state != char.state.TEFUCKINGDIED && char.state != char.state.TEZAPPED && char.state != char.state.TEBURNT)
 		{
 			base.Character.updateUprightOnGroundInner()
 		}
@@ -259,6 +259,9 @@ function void Character.UpdateMovement()
 //# address-hook(0x011036) end(0x01105e)
 function void Character.UpdateSonicRollingInAir()
 {
+	if (char.state == char.state.TEZAPPED && TESonic.isTESonic(A0))
+		return
+	
 	base.Character.UpdateSonicRollingInAir()
 
 	// s3k jank moment
@@ -295,7 +298,7 @@ function void Character.UpdateControlInAir()
 		}
 		*/
 	
-		if (char.state == char.state.TEFUCKINGDIED)
+		if (char.state == char.state.TEFUCKINGDIED || char.state == char.state.TEZAPPED)
 			return
 	
 		if (super.active && char.state == char.state.TEAIRSLASH && char.spindash_charge > 0)
@@ -436,7 +439,7 @@ function void Character.DoTEKick()
 		
 	
 	
-	if (char.state != char.state.TEKICK && char.control_flags == 0 && validState)
+	if (char.state != char.state.TEKICK && char.state != char.state.TEZAPPED && char.state != char.state.TEBURNT && char.control_flags == 0 && validState)
 	{
 		char.double_jump_state = 1
 		char.flags2d = 0
@@ -752,6 +755,8 @@ function void Character.OnCollisionWithDynamicObject()
 		//  - 0x8f		 = Wrecking ball
 		//  - 0x98, 0x9b = Projectile
 		//  - 0xd8		 = Thrown mushroom, stars over starpost
+		
+		D1.u8 = objA1.flags2b
 
 		D1.u8 = (objA1.collision_attributes & collision_attributes.flags)
 		if (D1.u8 == 0)
@@ -874,6 +879,43 @@ function void Character.OnCollisionWithDynamicObject()
 	{
 		base.Character.OnCollisionWithDynamicObject()
 	}
+}
+
+//# address-hook(0x01028a) end(0x010392)
+function void Character.OnThreatCollisionInner()
+{
+	if (TESonic.isTESonic(A0))
+	{
+		if (objA1.flags2b & char.bonus.SHIELD_LIGHTNING && char.invuln.countdown == 0)
+		{
+			TESonic.ZaptheFucker()
+			return
+		}
+	}
+	
+	base.Character.OnThreatCollisionInner()
+}
+
+function void TESonic.ZaptheFucker()
+{
+	//debugLog("fuck")
+	char.state = char.state.TEZAPPED
+	char.animation.sprite = 1
+	char.flags |= (char.flag.IN_AIR)
+	char.control_flags = control_flag.DISABLE_INTERACTION
+}
+
+function void TESonic.BurntheFucker()
+{
+	char.animation.sprite = 1
+	TESonic.health = 0
+	char.flags |= (char.flag.IN_AIR)
+	char.control_flags = (control_flag.DISABLE_INTERACTION | control_flag.DISABLE_UPDATE)
+	char.state = char.state.TEBURNT
+	char.groundspeed = 0
+	char.velocity.x = 0
+	char.velocity.y = 0
+	playSound(0x83)
 }
 
 function void Character.OnKickCollisionWithDynamicObject()
@@ -1013,7 +1055,7 @@ function void Character.LandingOnGround()
 			
 			char.flags &= ~char.flag.IN_AIR
 		}
-		else
+		else if (char.state != char.state.TEZAPPED && char.state != char.state.TEBURNT)
 		{
 			base.Character.LandingOnGround()
 		}
@@ -1322,8 +1364,13 @@ function void fn018b3e()
 					objA1.box_size.x = 0x04
 					objA1.sprite_priority = 0x80
 					objA1.sprite_attributes = (objA0.sprite_attributes & ~sprite_attribute.PRIORITY) | (u16[A2 + 0x0a] & sprite_attribute.PRIORITY)
+					
+					D1.s16 = 0x0c
+					if (global.inv_gravity)
+						D1.s16 = -D1.s16
+					
 					u16[A1 + 0x10] = u16[A2 + 0x10]
-					u16[A1 + 0x14] = u16[A2 + 0x14] + 0x0c
+					u16[A1 + 0x14] = u16[A2 + 0x14] + D1.s16
 					u8[A1 + 0x20] = 0x03
 					u8[A1 + 0x2a] = 0
 					

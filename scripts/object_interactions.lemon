@@ -89,6 +89,106 @@ function void DamageCharacter()
 	}
 }
 
+// electric floor/lava
+//# address-hook(0x01f58c) end(0x01f59e)
+function void BlockerElement.DoDamage()
+{
+	if (TESonic.isTESonic(A1))
+	{
+		D0.u8 = objA0.flags2b & (char.bonus.ALL_SHIELDS | char.bonus.INVINCIBLE)
+		if ((D0.u8 & u8[A1 + 0x2b]) == 0 && u8[A1 + 0x34] == 0)
+		{
+			if (objA0.flags2b & char.bonus.SHIELD_LIGHTNING)
+			{
+				TESonic.health = 0
+				A1 = A0
+				A0 = 0xffffb000
+				TESonic.ZaptheFucker()
+				A0 = A1
+			}
+			else if (objA0.flags2b & char.bonus.SHIELD_FIRE)
+			{
+				TESonic.health = 0
+				A1 = A0
+				A0 = 0xffffb000
+				TESonic.BurntheFucker()
+				A0 = A1
+				
+				TESonic.SpawnSmoke()
+			}
+			return
+		}
+	}
+	
+	base.BlockerElement.DoDamage()
+}
+
+function void TESonic.SpawnSmoke()
+{
+	A2 = 0xffffb000
+	u16 pos_x = u16[A2 + 0x10]
+	u16 pos_y = u16[A2 + 0x14]
+	if (allocDynamicObjectStd())
+	{
+		// Spawn skidding dust
+		objA1.update_address = 0x2302fa
+		objA1.render_flags = objA0.render_flags
+		u8[A1 + 0x05] += 0x02
+		objA1.box_size.x = 0x04
+		objA1.sprite_priority = 0x80
+		objA1.sprite_attributes = (u16[A0 + 0x0a] & sprite_attribute.PRIORITY)
+		objA1.position.x.u16 = pos_x
+		objA1.position.y.u16 = pos_y
+		objA1.velocity.x = 0x100
+		objA1.velocity.y = 0x100
+	}
+	
+	if (allocDynamicObjectStd())
+	{
+		// Spawn skidding dust
+		objA1.update_address = 0x2302fa
+		objA1.render_flags = objA0.render_flags
+		u8[A1 + 0x05] += 0x02
+		objA1.box_size.x = 0x04
+		objA1.sprite_priority = 0x80
+		objA1.sprite_attributes = (u16[A0 + 0x0a] & sprite_attribute.PRIORITY)
+		objA1.position.x.u16 = pos_x
+		objA1.position.y.u16 = pos_y
+		objA1.velocity.x = -0x100
+		objA1.velocity.y = 0x100
+	}
+	
+	if (allocDynamicObjectStd())
+	{
+		// Spawn skidding dust
+		objA1.update_address = 0x2302fa
+		objA1.render_flags = objA0.render_flags
+		u8[A1 + 0x05] += 0x02
+		objA1.box_size.x = 0x04
+		objA1.sprite_priority = 0x80
+		objA1.sprite_attributes = (u16[A0 + 0x0a] & sprite_attribute.PRIORITY)
+		objA1.position.x.u16 = pos_x
+		objA1.position.y.u16 = pos_y
+		objA1.velocity.x = -0x100
+		objA1.velocity.y = -0x100
+	}
+	
+	if (allocDynamicObjectStd())
+	{
+		// Spawn skidding dust
+		objA1.update_address = 0x2302fa
+		objA1.render_flags = objA0.render_flags
+		u8[A1 + 0x05] += 0x02
+		objA1.box_size.x = 0x04
+		objA1.sprite_priority = 0x80
+		objA1.sprite_attributes = (u16[A0 + 0x0a] & sprite_attribute.PRIORITY)
+		objA1.position.x.u16 = pos_x
+		objA1.position.y.u16 = pos_y
+		objA1.velocity.x = 0x100
+		objA1.velocity.y = -0x100
+	}
+}
+
 // rocks
 //# address-hook(0x01fd08) end(0x01ff1a)
 function void fn01fd08()
