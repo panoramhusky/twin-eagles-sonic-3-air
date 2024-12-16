@@ -28,6 +28,52 @@ function void Init()
 	base.Init()
 }
 
+function void ActSelect.DrawMenu(u8 selectedEntry, u8 selectedZone, u8 selectedAct, s16 anchorX)
+{
+	if (levelselect.characters <= 1)
+	{
+		if (global.characters != levelselect.characters)
+		{
+			tesonic.game_rng = 0 + (System.rand() % 0xff)
+			global.characters = levelselect.characters
+		}
+		
+		s16 px = max(anchorX - 125, 52)		// Move to the right in 4:3
+		
+		SpriteHandle sonic = Renderer.addSpriteHandle(ActSelect.GetCharacterCombinationSprite(levelselect.characters), px, 156, 0xf005)
+		sonic.setFlags(0)
+		sonic.setPalette(getCharacterPaletteKey(0), 0)
+		//debugLog("test")
+	}
+	
+	base.ActSelect.DrawMenu(selectedEntry, selectedZone, selectedAct, anchorX)
+}
+
+function void LevelSelect.init()
+{
+	loadCharacterPalette(CHARACTER_SONIC,    0x802180, 0)
+	loadCharacterPalette(CHARACTER_SONIC,    0x802000, 0)
+	base.LevelSelect.init()
+}
+
+function string ActSelect.GetCharacterCombinationSprite(u8 index)
+{
+	if (index <= 1)
+		return "menu_characters_sonic"
+		
+	return base.ActSelect.GetCharacterCombinationSprite(index)
+}
+
+function string ActSelect.GetCharacterCombinationName(u8 index)
+{
+	if (index == 0)
+		return "Twin Eagles Sonic"
+	else if (index == 1)
+		return "Twin Eagles Sonic\n        (again)"
+
+	return base.ActSelect.GetCharacterCombinationName(index)
+}
+
 //# address-hook(0x2302fa)
 function void FAKE_DUST_CLOUD_BECAUSE_REGULAR_DUST_CLOUD_CODE_SUCKS()
 {	
@@ -235,7 +281,7 @@ function string getCharacterPaletteKey(u8 character)
 {
 	s64 backup = A1 // backing up and restoring A1 is necessary otherwise the game may implode
 	A1 = 0xffffb000
-	if (character == CHARACTER_TESONIC)
+	if (character == CHARACTER_TESONIC && global.characters <= 1)
 	{
 		A1 = backup
 		if (tesonic.palette != 0xff)

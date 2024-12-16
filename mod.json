@@ -48,7 +48,7 @@
 		{
 			"DisplayName": "Amy Galore",
 			"IsRequired": "0",
-			"Priority": "Higher"
+			"Priority": "Lower"
 		},
 	},
 }
