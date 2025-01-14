@@ -72,6 +72,16 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 			}
 		}
 		
+		// end pose (just to fix priority and box size)
+		// Big character sprites after credits
+		if (objA0.update_address == 0x05e18a || objA0.update_address == 0x05f4e4)
+		{
+			objA0.box_size.x = 255
+			objA0.box_size.y = 255
+			objA0.sprite_attributes |= sprite_attribute.PRIORITY
+			objA0.sprite_priority = 0
+		}
+		
 		
 		if (objA0.update_address == 0x2302fa)
 		{

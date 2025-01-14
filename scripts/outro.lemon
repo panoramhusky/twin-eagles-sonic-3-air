@@ -145,3 +145,24 @@ function void fn05e1c2()
 		playMusic(MUSIC_CTRL_STOP)
 	}
 }
+
+//# address-hook(0x05e45a) end(0x05e472)
+function void fn05e45a()
+{
+	A1 = 0xffffb000
+	if (TESonic.isTESonic(A1))
+	{
+		// Fly out of the screen
+		objA0.position.x.u16 += 4
+		if (objA0.position.x.u16 >= 0x0230 + getScreenExtend() * 2)
+		{
+			objA0.base_state = 0x0e
+			objA0.countdown_value = 0x1f
+			objA0.position.y.u16 += 0x10
+		}
+	}
+	else
+	{
+		base.fn05e1c2()
+	}
+}
