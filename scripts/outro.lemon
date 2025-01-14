@@ -163,6 +163,6 @@ function void fn05e45a()
 	}
 	else
 	{
-		base.fn05e1c2()
+		base.fn05e45a()
 	}
 }
