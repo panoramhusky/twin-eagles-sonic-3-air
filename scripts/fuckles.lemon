@@ -113,6 +113,8 @@ function void fn0642f0()
 			Object.AnimationProgressByLocalA1.CheckEnd()
 			UpdateMovementSimple()
 			TESonic.health = 1
+			
+			fn06615a()
 		}
 		else
 		{

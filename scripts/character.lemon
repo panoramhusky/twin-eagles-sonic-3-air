@@ -886,10 +886,18 @@ function void Character.OnThreatCollisionInner()
 {
 	if (TESonic.isTESonic(A0))
 	{
-		if (objA1.flags2b & char.bonus.SHIELD_LIGHTNING && char.invuln.countdown == 0)
+		if (char.invuln.countdown == 0)
 		{
-			TESonic.ZaptheFucker()
-			return
+			if (objA1.flags2b & char.bonus.SHIELD_LIGHTNING)
+			{
+				TESonic.ZaptheFucker()
+				return
+			}
+			else if (objA1.flags2b & char.bonus.SHIELD_FIRE && TESonic.health <= 1)
+			{
+				TESonic.BurntheFucker()
+				return
+			}
 		}
 	}
 	
@@ -1641,6 +1649,56 @@ function void fn08160a()
 		Audio.playAudio("te_sonic")
 		TESonic.health = 5
 		TESonic.maxhealth = 5
+	}
+}
+
+//# address-hook(0x0067ee) end(0x0069b6)
+function void fn0067ee()
+{
+	base.fn0067ee()
+	
+	A1 = 0xffffb000
+	if (TESonic.isTESonic(A1))
+	{
+		if (checkpoint.number != 0 || global.stage_type != 0)
+			return
+		
+		if (global.zone_act == 0x0100 || global.zone_act == 0x0900)
+		{
+			A2 = A0
+			A0 = A1
+			Character.LandingOnGroundNoSpindash()
+			char.flags |= char.flag.IN_AIR
+			char.groundspeed = 0
+			char.state = char.state.TEFUCKINGDIED
+			
+			if (global.zone_act == 0x0900)
+				char.position.x.u16 += 0x20
+			
+			A0 = A2
+		}
+	}
+}
+
+//# address-hook(0x064964) end(0x06497e)
+function void fn064964()
+{
+	base.fn064964()
+		
+	A1 = 0xffffb000
+	if (TESonic.isTESonic(A1))
+	{
+		A2 = A0
+		A0 = A1
+		Character.LandingOnGroundNoSpindash()
+		char.flags |= char.flag.IN_AIR
+		char.groundspeed = 0
+		char.state = char.state.TEFUCKINGDIED
+		
+		if (global.zone_act == 0x0900)
+			char.position.x.u16 += 0x20
+		
+		A0 = A2
 	}
 }
 
