@@ -915,15 +915,19 @@ function void TESonic.ZaptheFucker()
 
 function void TESonic.BurntheFucker()
 {
+	char.bonus_effect = 0
+	char.protection_flag = 0
 	char.animation.sprite = 1
 	TESonic.health = 0
-	char.flags |= (char.flag.IN_AIR)
-	char.control_flags = (control_flag.DISABLE_INTERACTION | control_flag.DISABLE_UPDATE)
+	char.flags = (char.flag.IN_AIR)
 	char.state = char.state.TEBURNT
 	char.groundspeed = 0
 	char.velocity.x = 0
 	char.velocity.y = 0
 	playSound(0x83)
+	
+	debug_mode.backup.sprite_attributes = char.sprite_attributes
+	u8[A0 + 0x0a] |= 0x80
 }
 
 function void Character.OnKickCollisionWithDynamicObject()

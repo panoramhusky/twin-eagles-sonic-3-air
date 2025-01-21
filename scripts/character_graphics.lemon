@@ -144,6 +144,8 @@ function void UpdateSonicAnimation()
 				5, 5, 5, 5, 5, 5,
 			}
 			
+			// this needs to be set here instead of the burn fucker function otherwise getting burnt by pushing will not work ig
+			char.control_flags = (control_flag.DISABLE_INTERACTION | control_flag.DISABLE_UPDATE | control_flag.DISABLE_WALLS)
 			
 			if (char.animation.timer < 33)
 			{
