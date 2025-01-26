@@ -25,7 +25,7 @@ function void fn05b204()
 		u16 px = camera.position.x.u16 + (getScreenWidth() / 2)
 		u16 py = camera.position.y.u16.player2
 		
-		if (py <= 0xe7c0 && py > 0x1000)
+		if (py <= 0xe7a0 && py > 0x1000)
 		{
 			fn05b29e()
 		}
@@ -115,6 +115,9 @@ function void fn05b204()
 		py += getScreenHeight() + 16
 		
 		Renderer.drawText(TESonic.CREDITS_FONT, px, py, "PANORAMHUSKY", color, 5, 0, 0xffff, true)
+		py += 24
+		
+		Renderer.drawText(TESonic.CREDITS_FONT, px, py, "ROSIE_ECLAIRS", color, 5, 0, 0xffff, true)
 		py += getScreenHeight() + 16
 		
 		Renderer.drawText(TESonic.CREDITS_FONT, px, py, "Voice", color, 5, 0, 0xffff, true)
