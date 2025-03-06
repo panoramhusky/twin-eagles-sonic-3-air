@@ -1,3 +1,4 @@
 {
-	"signpost_tesonic": { "File": "signpost_sonic.bmp", "Rect": "0,0,48,32", "Center": "24,16" }
+	"signpost_tesonic": { "File": "signpost_sonic.bmp", "Rect": "0,0,48,32", "Center": "24,16" },
+	"maniainsp_signpost_sonic":  { "File": "maniasignpost_sonic.bmp", "Rect": "0,0,48,32", "Center": "24,16" },
 }

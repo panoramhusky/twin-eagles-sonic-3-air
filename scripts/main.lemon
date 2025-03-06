@@ -141,6 +141,10 @@ function string getCharacterLivesIcon(u8 character)
 		{
 			return "hud_lives_icon_tesonic_sj6"
 		}
+		else if (palette == 0x05)
+		{
+			return "hud_lives_icon_tesonic_scc"
+		}
 		else //Failsafe
 			return "hud_lives_icon_tesonic_sj6"
 	}
@@ -183,6 +187,10 @@ function string getCharacterBonusTextIcon(u8 character)
 		else if (palette == 0x04)
 		{
 			return "hud_bonus_icon_teblue_sj6"
+		}
+		else if (palette == 0x05)
+		{
+			return "hud_bonus_icon_teblue_scc"
 		}
 		else //Failsafe
 			return "hud_bonus_icon_teblue_s6"
@@ -227,6 +235,10 @@ function string getCharacterContinueIcon(u8 character)
 		{
 			return "continue_icon_tesonic_sj6"
 		}
+		else if (palette == 0x05)
+		{
+			return "continue_icon_tesonic_scc"
+		}
 		else //Failsafe
 			return "continue_icon_tesonic_s3d5"
 	}
@@ -269,6 +281,10 @@ function string getCharacterResultsNameplate(u8 character)
 		else if (palette == 0x04)
 		{
 			return "result_nameplate_tesonic_sj6"
+		}
+		else if (palette == 0x05)
+		{
+			return "result_nameplate_tesonic_scc"
 		}
 		else //Failsafe
 			return ""
@@ -334,6 +350,13 @@ function string TESonic.getPaletteType(u8 palette)
 	{
 		// we don't need a rendered check here because the palette is already a genesis palette! :D
 			return "character_palette_sonic_sj6"
+	}
+	else if (palette == 0x05)
+	{
+		if (tesonic.color_scheme == 0)
+			return "character_palette_sonic_classic_r"
+		else
+			return "character_palette_sonic_classic"
 	}
 	else //Failsafe, might end up making this the broken s4 results palette for shits and giggles later
 		return "character_palette_sonic_s4_r"
@@ -633,4 +656,14 @@ function bool TESonic.checkIfBallCollidingWithBoss()
 	
 	bool colliding = checkBoxOverlap(px1, py1, bx1, by1, px2, py2, bx2, by2)
 	return colliding
+}
+
+
+// mania signpost compat
+function u16 getManiaInspSignpostSprAtex(string key)
+{
+	if (key == "maniainsp_signpost_sonic")
+		return 0
+		
+	return base.getManiaInspSignpostSprAtex(key)
 }

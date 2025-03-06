@@ -13,5 +13,8 @@
 	"result_nameplate_tesonic_s6_hyper":  { "File": "result_sprites.png", "Rect": "112,48,56,16", "Center": "-8,0" },
 	"result_nameplate_tesonic_sj6":  { "File": "result_sprites.png", "Rect": "0,64,56,16", "Center": "-8,0" },
 	"result_nameplate_tesonic_sj6_super":  { "File": "result_sprites.png", "Rect": "56,64,56,16", "Center": "-8,0" },
-	"result_nameplate_tesonic_sj6_hyper":  { "File": "result_sprites.png", "Rect": "112,64,56,16", "Center": "-8,0" }
+	"result_nameplate_tesonic_sj6_hyper":  { "File": "result_sprites.png", "Rect": "112,64,56,16", "Center": "-8,0" },
+	"result_nameplate_tesonic_scc":  { "File": "result_sprites.png", "Rect": "0,80,56,16", "Center": "-8,0" },
+	"result_nameplate_tesonic_scc_super":  { "File": "result_sprites.png", "Rect": "56,64,56,16", "Center": "-8,0" },
+	"result_nameplate_tesonic_scc_hyper":  { "File": "result_sprites.png", "Rect": "112,80,56,16", "Center": "-8,0" }
 }

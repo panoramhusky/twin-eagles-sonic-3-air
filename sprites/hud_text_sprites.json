@@ -8,5 +8,7 @@
 	"hud_bonus_icon_teblue_s6":  { "File": "hud_text_sprites.png", "Rect": "48,61,12,19", "Center": "0,0" },
 	"continue_icon_tesonic_s6":  { "File": "hud_text_sprites.png", "Rect": "48,82,16,24", "Center": "10,24" },
 	"hud_bonus_icon_teblue_sj6":  { "File": "hud_text_sprites.png", "Rect": "64,61,12,19", "Center": "0,0" },
-	"continue_icon_tesonic_sj6":  { "File": "hud_text_sprites.png", "Rect": "64,82,16,24", "Center": "10,24" }
+	"continue_icon_tesonic_sj6":  { "File": "hud_text_sprites.png", "Rect": "64,82,16,24", "Center": "10,24" },
+	"hud_bonus_icon_teblue_scc":  { "File": "hud_text_sprites.png", "Rect": "80,61,12,19", "Center": "0,0" },
+	"continue_icon_tesonic_scc":  { "File": "hud_text_sprites.png", "Rect": "80,82,16,24", "Center": "10,24" }
 }

@@ -6,5 +6,6 @@
 	"hud_lives_icon_tesonic_s2":  { "File": "hud_life_sprites.png", "Rect": "0,0,48,16", "Center": "0,0" },
 	"hud_lives_icon_tesonic_s3d5":  { "File": "hud_life_sprites.png", "Rect": "0,48,48,16", "Center": "0,0" },
 	"hud_lives_icon_tesonic_s6":  { "File": "hud_life_sprites.png", "Rect": "0,64,48,16", "Center": "0,0" },
-	"hud_lives_icon_tesonic_sj6":  { "File": "hud_life_sprites.png", "Rect": "0,80,48,16", "Center": "0,0" }
+	"hud_lives_icon_tesonic_sj6":  { "File": "hud_life_sprites.png", "Rect": "0,80,56,16", "Center": "0,0" },
+	"hud_lives_icon_tesonic_scc":  { "File": "hud_life_sprites.png", "Rect": "0,96,48,16", "Center": "0,0" }
 }
