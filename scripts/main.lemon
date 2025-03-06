@@ -315,6 +315,20 @@ function string getCharacterPaletteKey(u8 character)
 	return base.getCharacterPaletteKey(character)
 }
 
+function string getCharacterBluespherePaletteKey(u8 character)
+{
+	s64 backup = A1 // backing up and restoring A1 is necessary otherwise the game may implode
+	A1 = 0xffffb000
+	if (character == CHARACTER_TESONIC && global.characters <= 1)
+	{
+		return getCharacterPaletteKey(character)
+	}
+	
+	A1 = backup
+	
+	return base.getCharacterBluespherePaletteKey(character)
+}
+
 function string TESonic.getPaletteType(u8 palette)
 {
 	// this probably could have been done better with a stringformat but idgaf rn

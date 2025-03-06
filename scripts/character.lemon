@@ -441,6 +441,7 @@ function void Character.DoTEKick()
 	
 	if (char.state != char.state.TEKICK && char.state != char.state.TEZAPPED && char.state != char.state.TEBURNT && char.control_flags == 0 && validState)
 	{
+		char.flags &= ~char.flag.PUSHING
 		char.double_jump_state = 1
 		char.flags2d = 0
 		
