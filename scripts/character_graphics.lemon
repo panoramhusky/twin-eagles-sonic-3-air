@@ -5,12 +5,23 @@ constant u8 char.state.TEFUCKINGDIED = 0x43
 constant u8 char.state.TEZAPPED = 0x44
 constant u8 char.state.TEBURNT = 0x45
 
+global u8 TESonic.deathType = 0
+
 //# address-hook(0x012600) end(0x01286c)
 //# translated(0x012a2a) end(0x012a6e)
 function void UpdateSonicAnimation()
 {
 	if (TESonic.isTESonic(A0))
 	{
+		if (TESonic.deathType == 1)
+		{
+			char.state = char.state.TEZAPPED
+		}
+		else if (TESonic.deathType == 2)
+		{
+			char.state = char.state.TEBURNT
+		}
+	
 		if (char.state != char.state.former)
 		{
 			char.state.former = char.state
@@ -101,6 +112,7 @@ function void UpdateSonicAnimation()
 			
 			if (char.animation.timer > 0x60)
 			{
+				TESonic.deathType = 0
 				if (TESonic.health == 0)
 				{
 					A1 = A0
@@ -157,6 +169,7 @@ function void UpdateSonicAnimation()
 				char.state = char.state.DISAPPEARED
 				char.animation.sprite = 0
 				char.base_state = base_state.DIED
+				TESonic.deathType = 0
 			}
 		}
 		else if (char.state == char.state.TEFUCKINGDIED)

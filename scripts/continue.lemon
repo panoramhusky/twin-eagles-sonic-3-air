@@ -48,7 +48,6 @@ function void fn05c6b6()
 //# address-hook(0x05c6e0) end(0x05c6f2)
 function void fn05c6e0()
 {
-	
 	base.fn05c6e0()
 	
 	if (TESonic.isTESonic(A0))

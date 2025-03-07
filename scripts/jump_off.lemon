@@ -1674,6 +1674,8 @@ function void fn08d47c()
 			objA1.velocity.x = -0x100
 			objA1.velocity.y = -0x600
 			TESonic.JumpOffObject()
+			objA1.flags2e = 0 // i guess i need this? this wasn't an issue before
+			player1.control_override = 0
 			u8[A1 + 0x40] = 0
 		}
 	}

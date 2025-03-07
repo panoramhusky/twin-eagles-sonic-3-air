@@ -913,7 +913,7 @@ function void Character.OnThreatCollisionInner()
 function void TESonic.ZaptheFucker()
 {
 	//debugLog("fuck")
-	char.state = char.state.TEZAPPED
+	TESonic.deathType = 1
 	char.animation.sprite = 1
 	char.flags |= (char.flag.IN_AIR)
 	char.control_flags = control_flag.DISABLE_INTERACTION
@@ -926,7 +926,7 @@ function void TESonic.BurntheFucker()
 	char.animation.sprite = 1
 	TESonic.health = 0
 	char.flags = (char.flag.IN_AIR)
-	char.state = char.state.TEBURNT
+	TESonic.deathType = 2
 	char.groundspeed = 0
 	char.velocity.x = 0
 	char.velocity.y = 0

@@ -1,3 +1,6 @@
+global u16 TESonic.islandNukeState = 0
+global u32 TESonic.nukedAddress
+
 // some code related to hcz blastoid
 //# address-hook(0x0857c2) end(0x0857e6)
 function void fn0857c2()
@@ -43,5 +46,275 @@ function void fn08ee3a()
 				}
 			}
 		}
+	}
+}
+
+
+// lrz iwamodoki
+//# address-hook(0x08faec) end(0x08fb36)
+//# alias(fn08faec) deprecated
+function void Iwamodoki.BaseUpdate()
+{
+	A1 = 0xffffb000
+	if (TESonic.isTESonic(A1))
+	{
+		if (TESonic.islandNukeState != 0 && A0 == TESonic.nukedAddress)
+		{
+			if (TESonic.islandNukeState == 1)
+			{
+				--objA0.countdown_value
+				if (objA0.countdown_value < 0)
+				{
+					level.backup.zone_act = global.zone_act
+					TESonic.islandNukeState = 2 // cut to island
+					level.palettefx.state = 0xff
+					MainMenuBG.scrollOffset = -56 - getScreenExtend()
+					Audio.stopContext(0)
+					Audio.stopContext(1)
+					objA0.countdown_value = 0x50
+				}
+				
+				objA0.animation.sprite = ((level.framecounter & 1) ? 4 : 3)
+			}
+			DrawObject()
+			return
+		}
+		else
+		{
+			u16 charpos_x = objA1.position.x.u16
+			u16 charpos_y = objA1.position.y.u16
+			
+			u16 offset_x = objA0.box_size.x
+			u16 offset_y = 16
+			
+			u16 blockpos_x = objA0.position.x.u16
+			u16 blockpos_y = objA0.position.y.u16
+			
+			bool inBoundLeft = (charpos_x > blockpos_x - offset_x - 20)
+			bool inBoundRight = (charpos_x < blockpos_x + offset_x + 20)
+			bool inBoundTop = (charpos_y > blockpos_y - offset_y - 10)
+			bool inBoundBottom = (charpos_y < blockpos_y + offset_y + 10)
+
+			if ((inBoundLeft && inBoundRight && inBoundTop && inBoundBottom) && (objA1.state == char.state.TEKICK || objA1.state == char.state.TEAIRSLASH) && TESonic.checkIfKickFacingObject())
+			{
+				TESonic.islandNukeState = 1
+				
+				A1 = 0xffffb000
+				bool onLeft = (objA1.position.x.u16 < objA0.position.x.u16)
+				objA1.velocity.x = (onLeft ? -0x800 : 0x800)
+				objA1.velocity.y = -0x400
+				objA1.flags2a |= (char.flag.IN_AIR)
+				objA1.flags2a &= ~char.flag.ON_OBJECT
+				objA1.state = char.state.TEFUCKINGDIED
+				
+				player1.camera_lock = 0xff
+				camera.screenshake.state.hi = 0xff
+				hud.dirty.timer = 0
+				
+				playSound(0x4e)
+				
+				addPatternLoadingCue(0x083d64)		// Boss explosion sprites
+				for (u8 i = 0; i < 4; ++i)
+				{
+					// "spawnSimpleChildObjects(0x083fee)" replaced by:
+					spawnSimpleChildObjects(0x083d84, 1)		// Boss explosion generator
+					if (_equal())
+					{
+						u8[A1 + 0x2c] = (i < 2) ? 0x16 : 0x18
+					}
+					objA1.position.x.u16 = camera.position.x.u16
+					objA1.position.y.u16 = camera.position.y.u16
+				}
+				
+				objA0.countdown_value = 0x30
+				
+				TESonic.nukedAddress = A0
+			}
+		}
+	}
+	
+	base.Iwamodoki.BaseUpdate()
+}
+
+function void updateGameObjectLoop()
+{
+	if (TESonic.islandNukeState > 1)
+	{
+		TESonic.nukeCutsceneUpdate()
+		
+		
+		if (TESonic.islandNukeState >= 1000)
+		{
+			global.game_mode = 0x14		// Initialization/Continue Screen
+			if (continues_counter == 0)
+			{
+				continues_counter = 1
+			}
+			
+			TESonic.islandNukeState = 0
+		}
+		return
+	}
+	
+	base.updateGameObjectLoop()
+}
+
+function void TESonic.nukeCutsceneUpdate()
+{
+	VDP.setupVRAMWrite(0)
+	VDP.zeroVRAM(0xffff)
+
+	global.zone_act = 0x0d01
+	// Load the required level patterns for the outro
+	//  -> This is essentially the same as "fn007812", but without the call to "waitForNextFrame", and hard-coded 0x1cfb44 to simplify things
+	{
+		A4 = MainGame.getLevelDataPointer()
+		A1 = 0x1cfb44
+		D4.u16 = u16[A1]
+		Kosinski.addToDMAQueue(A1, 0x0000)
+
+		while (true)
+		{
+			global.frame_state = 0x0c
+			Kosinski.ProcessDecompressionQueue()
+
+			LoadRequiredSpritePatterns()
+			Kosinski.ProcessModules()
+			if (kosinski.waiting_modules == 0)
+				break
+		}
+	}
+
+	// Load level chunks and stuff
+	fn01c2b0()
+
+	// Load plane contents
+	camera.foreground.x.u16 = 0x0280
+	camera.foreground.y.u16 = 0
+	camera.background.x.u16 = 0
+	camera.background.y.u16 = 0x0800
+	fillPlane_DefaultUncropped(0xc000, camera.foreground.x.u16, camera.foreground.y.u16, 512, getScreenHeight())
+	fillPlane_DefaultUncropped(0xe000, camera.background.x.u16, camera.background.y.u16, 512, getScreenHeight())
+	camera.foreground.x.u16 += 22		// Move camera a few pixels to the right by default
+	u16 cameraForegroundX = camera.foreground.x.u16
+	u16 cameraBackgroundX = camera.background.x.u16
+
+	// Flip the right half of certain lines in plane B, to make the ocean waves look more seamless
+	constant array<u16> LINE_VRAM_ADDRESS =
+	{
+		0xec40, 0xecc0, 0xedc0
+	}
+	for (u16 lineIndex = 0; lineIndex < 3; ++lineIndex)
+	{
+		u16 addr = LINE_VRAM_ADDRESS[lineIndex]
+		for (u16 i = 0; i < 0x20; i += 2)
+		{
+			u16 pattern1 = getVRAM(addr + i)
+			u16 pattern2 = getVRAM(addr + 0x3e - i)
+			setVRAM(addr + i, pattern2 ^ 0x800)
+			setVRAM(addr + 0x3e - i, pattern1 ^ 0x800)
+		}
+	}
+
+	// Write vertical scroll offsets to VSRAM
+	VDP.setupVSRAMWrite(0)
+	VDP.writeData16(0x4c)								// Foreground vertical scroll offset (Angel Island)
+	VDP.writeData16(camera.background.y.u16 & 0xff)		// Background vertical scroll offset (sky & ocean)
+
+	// Setup palette
+	copyPaletteDataFromTable(0x03, 0xfc00)
+	copyMemory(0xfffffc20, 0x05b16e, 0x20)
+	copyMemory(0xfffffc40, 0x0a97bc, 0x20)
+	copyMemory(0xfffffc60, 0x0a983c, 0x20)
+
+	u32[0xffffa800] = 0x00738000		// Basically a timer for the animation; don't start at 0, that doesn't look all that nice
+
+	while (true)
+	{
+		TESonic.nukeCutsceneUpdateInner(cameraForegroundX, cameraBackgroundX)
+		
+		if (TESonic.islandNukeState >= 230)
+			break
+		
+		yieldExecution()
+	}
+	
+	Audio.stopContext(0)
+	Audio.stopContext(1)
+	global.zone_act = level.backup.zone_act
+	
+	TESonic.islandNukeState = 1000
+	
+}
+
+function void TESonic.nukeCutsceneUpdateInner(u16 cameraForegroundX, u16 cameraBackgroundX)
+{
+	++TESonic.islandNukeState
+	if (TESonic.islandNukeState == 80)
+		playSound(0x4e)
+
+	Renderer.resetSprites()
+
+	// Ocean palette effect
+	fn05928c()
+	VDP.copyToCRAMbyDMA(0xfffffc00, 0x0000, 0x80)
+
+	// Scrolling for water and clouds
+	{
+		camera.foreground.x.u16 = cameraForegroundX + MainMenuBG.scrollOffset
+		u16[0xffffee98] = cameraBackgroundX + MainMenuBG.scrollOffset
+
+		fn05b0a8()
+		u32[0xffffa800] -= 0x0200	// Partially undo the scrolling progress, to make it slightly slower
+
+		A4 = 0x05b15a
+		A5 = 0xffffa804
+		A1 = 0xffffe000		// Location of linewise scroll offsets
+		D0.u16 = 0x0300		// camera.background.y.u16 - 0x0500
+		D1.u16 = getScreenHeight() - 1
+		D3.u16 = camera.foreground.x.u16
+		fn04f0de()
+
+		VDP.copyToVRAMbyDMA(0xffffe000, 0xf000, getScreenHeight() * 4)
+	}
+	
+	if (TESonic.islandNukeState >= 80)
+	{
+		if (TESonic.islandNukeState < 200)
+		{
+			A2 = A0
+			FadePaletteToWhite()
+			A0 = A2
+		}
+		else
+		{
+			A2 = A0
+			FadeOutPalette()
+			A0 = A2
+		}
+	
+		if (spilled_rings.animframe < 4)
+		{
+			++spilled_rings.progress
+			if (spilled_rings.progress > 8)
+			{
+				++spilled_rings.animframe
+				spilled_rings.progress = 0
+			}
+		}
+		
+		if (spilled_rings.animframe >= 4)
+			return
+	
+		float scale = (TESonic.islandNukeState - 80.0)
+		
+		string key = stringformat("tesonic_dust_0x%02x", spilled_rings.animframe)
+		
+		float explosion_fade = (TESonic.islandNukeState / 320.0)
+	
+		SpriteHandle explosion = Renderer.addSpriteHandle(key, getScreenCenterX(), getScreenCenterY() - 16, 0xa000)
+		explosion.setFlags(0x40)
+		explosion.setScale(scale)
+		explosion.setTintColor(0.9 + explosion_fade, 0.2 + explosion_fade, 0 + explosion_fade, 1.0 - explosion_fade)
 	}
 }

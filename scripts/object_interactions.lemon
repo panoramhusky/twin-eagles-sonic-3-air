@@ -96,7 +96,7 @@ function void BlockerElement.DoDamage()
 	if (TESonic.isTESonic(A1))
 	{
 		D0.u8 = objA0.flags2b & (char.bonus.ALL_SHIELDS | char.bonus.INVINCIBLE)
-		if ((D0.u8 & u8[A1 + 0x2b]) == 0 && u8[A1 + 0x34] == 0)
+		if ((D0.u8 & u8[A1 + 0x2b]) == 0 && u8[A1 + 0x34] == 0 && !super.active)
 		{
 			if (objA0.flags2b & char.bonus.SHIELD_LIGHTNING)
 			{
