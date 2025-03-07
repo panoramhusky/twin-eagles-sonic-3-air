@@ -118,7 +118,7 @@ function string getCharacterLivesIcon(u8 character)
 		u8 palette = tesonic.palette
 		
 		if (palette == 0xff)
-			palette = (tesonic.game_rng % 5)
+			palette = (tesonic.game_rng % 6)
 		
 		// this probably could have been done better but idgaf rn
 		if (palette == 0x00)
@@ -165,7 +165,7 @@ function string getCharacterBonusTextIcon(u8 character)
 		u8 palette = tesonic.palette
 		
 		if (palette == 0xff)
-			palette = (tesonic.game_rng % 5)
+			palette = (tesonic.game_rng % 6)
 		
 		// this probably could have been done better but idgaf rn
 		if (palette == 0x00)
@@ -212,7 +212,7 @@ function string getCharacterContinueIcon(u8 character)
 		u8 palette = tesonic.palette
 		
 		if (palette == 0xff)
-			palette = (tesonic.game_rng % 5)
+			palette = (tesonic.game_rng % 6)
 		
 		// this probably could have been done better but idgaf rn
 		if (palette == 0x00)
@@ -259,7 +259,7 @@ function string getCharacterResultsNameplate(u8 character)
 		u8 palette = tesonic.palette
 		
 		if (palette == 0xff)
-			palette = (tesonic.game_rng % 5)
+			palette = (tesonic.game_rng % 6)
 		
 		// this probably could have been done better but idgaf rn
 		if (palette == 0x00)
@@ -304,7 +304,7 @@ function string getCharacterPaletteKey(u8 character)
 			return TESonic.getPaletteType(tesonic.palette)
 		else
 		{
-			u8 random = (tesonic.game_rng % 5)
+			u8 random = (tesonic.game_rng % 6)
 			return TESonic.getPaletteType(random)
 		}
 
