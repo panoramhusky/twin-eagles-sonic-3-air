@@ -250,6 +250,13 @@ function void TESonic.nukeCutsceneUpdate()
 function void TESonic.nukeCutsceneUpdateInner(u16 cameraForegroundX, u16 cameraBackgroundX)
 {
 	++TESonic.islandNukeState
+	
+	if (TESonic.islandNukeState < 80)
+	{
+		Audio.stopContext(0)
+		Audio.stopContext(1)
+	}
+	
 	if (TESonic.islandNukeState == 80)
 		playSound(0x4e)
 
