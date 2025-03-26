@@ -25,6 +25,7 @@ constant u8 CHARACTER_TESONIC = 0 // for checks
 function void Init()
 {
 	tesonic.game_rng = 0 + (System.rand() % 0xff)
+	System.setGlobalVariableValueByName("MFT_ContinueFont", 0)
 	base.Init()
 }
 
@@ -76,7 +77,7 @@ function string ActSelect.GetCharacterCombinationName(u8 index)
 
 //# address-hook(0x2302fa)
 function void FAKE_DUST_CLOUD_BECAUSE_REGULAR_DUST_CLOUD_CODE_SUCKS()
-{	
+{
 	objA0.position.x.u16 -= u16[0xffffeebc]
 	DrawObject()
 	UpdateMovementStraightSimple()
