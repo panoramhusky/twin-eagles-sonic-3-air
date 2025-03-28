@@ -1,6 +1,0 @@
-hcz 1 - ID 3
-mgz 1 - ID 1
-mgz 2 - ID 3
-mhz 1 - ID 2
-fbz 2 - ID 3
-soz 2 - ID 2 (maybe)

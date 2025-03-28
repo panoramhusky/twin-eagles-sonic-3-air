@@ -1,6 +1,0 @@
-==HARD MODE IDEAS==
-	
--floating platforms fly up immediately if you try to stand on them
--cracked rhinobot
--screwy spike traps
--lives icon takes away player's head
