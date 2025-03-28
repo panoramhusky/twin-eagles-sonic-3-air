@@ -21,6 +21,10 @@ function void UpdateSonicAnimation()
 		{
 			char.state = char.state.TEBURNT
 		}
+		else if (TESonic.deathType == 3)
+		{
+			char.state = char.state.TEFUCKINGDIED
+		}
 	
 		if (char.state != char.state.former)
 		{

@@ -106,6 +106,9 @@ function void Iwamodoki.BaseUpdate()
 				objA1.flags2a |= (char.flag.IN_AIR)
 				objA1.flags2a &= ~char.flag.ON_OBJECT
 				objA1.state = char.state.TEFUCKINGDIED
+				TESonic.deathType = 3
+				
+				objA1.flags2e = (control_flag.DISABLE_WALLS | control_flag.DISABLE_INTERACTION)
 				
 				player1.camera_lock = 0xff
 				camera.screenshake.state.hi = 0xff
@@ -198,6 +201,10 @@ function void TESonic.nukeCutsceneUpdate()
 	camera.foreground.x.u16 += 22		// Move camera a few pixels to the right by default
 	u16 cameraForegroundX = camera.foreground.x.u16
 	u16 cameraBackgroundX = camera.background.x.u16
+	
+	spilled_rings.animframe = 0
+	spilled_rings.progress = 0
+	TESonic.deathType = 0
 
 	// Flip the right half of certain lines in plane B, to make the ocean waves look more seamless
 	constant array<u16> LINE_VRAM_ADDRESS =
@@ -255,6 +262,7 @@ function void TESonic.nukeCutsceneUpdateInner(u16 cameraForegroundX, u16 cameraB
 	{
 		Audio.stopContext(0)
 		Audio.stopContext(1)
+		palette_fade.range = 0x003f
 	}
 	
 	if (TESonic.islandNukeState == 80)
@@ -289,9 +297,15 @@ function void TESonic.nukeCutsceneUpdateInner(u16 cameraForegroundX, u16 cameraB
 	{
 		if (TESonic.islandNukeState < 200)
 		{
-			A2 = A0
-			FadePaletteToWhite()
-			A0 = A2
+			if (TESonic.islandNukeState > 90)
+			{
+				if ((TESonic.islandNukeState % 2) == 0)
+				{
+					A2 = A0
+					FadePaletteToWhite()
+					A0 = A2
+				}
+			}
 		}
 		else
 		{
@@ -300,28 +314,27 @@ function void TESonic.nukeCutsceneUpdateInner(u16 cameraForegroundX, u16 cameraB
 			A0 = A2
 		}
 	
-		if (spilled_rings.animframe < 4)
+		if (spilled_rings.animframe < 9)
 		{
 			++spilled_rings.progress
-			if (spilled_rings.progress > 8)
+			if (spilled_rings.progress > 3)
 			{
 				++spilled_rings.animframe
 				spilled_rings.progress = 0
 			}
 		}
 		
-		if (spilled_rings.animframe >= 4)
+		if (spilled_rings.animframe >= 9)
 			return
 	
-		float scale = (TESonic.islandNukeState - 80.0)
+		float scale = (TESonic.islandNukeState / 60.0)
 		
-		string key = stringformat("tesonic_dust_0x%02x", spilled_rings.animframe)
+		string key = stringformat("tesonic_explosion_0x%02x", spilled_rings.animframe)
 		
-		float explosion_fade = (TESonic.islandNukeState / 320.0)
+		float explosion_fade = (TESonic.islandNukeState / 160.0) - 0.5
 	
 		SpriteHandle explosion = Renderer.addSpriteHandle(key, getScreenCenterX(), getScreenCenterY() - 16, 0xa000)
 		explosion.setFlags(0x40)
 		explosion.setScale(scale)
-		explosion.setTintColor(0.9 + explosion_fade, 0.2 + explosion_fade, 0 + explosion_fade, 1.0 - explosion_fade)
 	}
 }

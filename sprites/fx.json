@@ -1,0 +1,16 @@
+{
+	"tesonic_dust_0x00":  { "File": "dust.bmp", "Rect": "0,0,16,16", "Center": "8,8" },
+	"tesonic_dust_0x01":  { "File": "dust.bmp", "Rect": "16,0,16,16", "Center": "8,8" },
+	"tesonic_dust_0x02":  { "File": "dust.bmp", "Rect": "32,0,16,16", "Center": "8,8" },
+	"tesonic_dust_0x03":  { "File": "dust.bmp", "Rect": "48,0,16,16", "Center": "8,8" },
+	
+	"tesonic_explosion_0x00":  { "File": "explosion.bmp", "Rect": "0,0,96,96", "Center": "48,48" },
+	"tesonic_explosion_0x01":  { "File": "explosion.bmp", "Rect": "100,0,96,96", "Center": "48,48" },
+	"tesonic_explosion_0x02":  { "File": "explosion.bmp", "Rect": "200,0,96,96", "Center": "48,48" },
+	"tesonic_explosion_0x03":  { "File": "explosion.bmp", "Rect": "300,0,96,96", "Center": "48,48" },
+	"tesonic_explosion_0x04":  { "File": "explosion.bmp", "Rect": "400,0,96,96", "Center": "48,48" },
+	"tesonic_explosion_0x05":  { "File": "explosion.bmp", "Rect": "500,0,96,96", "Center": "48,48" },
+	"tesonic_explosion_0x06":  { "File": "explosion.bmp", "Rect": "600,0,96,96", "Center": "48,48" },
+	"tesonic_explosion_0x07":  { "File": "explosion.bmp", "Rect": "700,0,96,96", "Center": "48,48" },
+	"tesonic_explosion_0x08":  { "File": "explosion.bmp", "Rect": "800,0,96,96", "Center": "48,48" },
+}
