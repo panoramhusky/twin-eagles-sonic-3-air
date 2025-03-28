@@ -2,7 +2,7 @@
 	"Metadata":
 	{
 		"Name": "Twin Eagles Sonic",
-		"UniqueID": "twin-eagles-sonic",
+		"UniqueID": "panoramichazel-twin-eagles-sonic",
 		"Author": "panoramhusky, HazelSpooder",
 		"Description": "slopper nintendo",
 		"ModVersion": "1.0"
@@ -45,9 +45,58 @@
 	
 	"OtherMods":
 	{
-		"AmyGaloreMISC":
+		"wonder-power-fixes-tweaks":
 		{
-			"DisplayName": "Amy Galore",
+			"DisplayName": "Wonder Power's Micro-Mods",
+			"IsRequired": "0",
+			"Priority": "Lower"
+		},
+		
+		"agent-stone-sonic-3-hazelspooder":
+		{
+			"DisplayName": "Stone 3 A.I.R.",
+			"IsRequired": "0",
+			"Priority": "Lower"
+		},
+		
+		"Origins Parity Galore":
+		{
+			"DisplayName": "Origins Parity Galore",
+			"IsRequired": "0",
+			"Priority": "Lower"
+		},
+		
+		"mrgrassman14-misc-fixes-and-tweaks-compatibility":
+		{
+			"DisplayName": "MF&T Compatibility Add-on",
+			"IsRequired": "0",
+			"Priority": "Lower"
+		},
+		
+		"Minor Sonic 3 Tweaks":
+		{
+			"DisplayName": "Minor Sonic 3 Tweaks",
+			"IsRequired": "0",
+			"Priority": "Lower"
+		},
+		
+		"Origins AIZ Intros":
+		{
+			"DisplayName": "Origins AIZ Intros",
+			"IsRequired": "0",
+			"Priority": "Lower"
+		},
+		
+		"extra-character-slots-unlimited":
+		{
+			"DisplayName": "Extra Character Slots",
+			"IsRequired": "0",
+			"Priority": "Lower"
+		},
+		
+		"DynamicLemons-maniainspiredsignpost":
+		{
+			"DisplayName": "Mania Inspired Signpost Animation",
 			"IsRequired": "0",
 			"Priority": "Lower"
 		},
