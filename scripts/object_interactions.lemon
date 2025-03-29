@@ -1792,6 +1792,31 @@ function void fn086770()
 	}
 }
 
+// master laser
+//# address-hook(0x080fa6) end(0x080ff0)
+function void fn080fa6()
+{
+	if (objA0.animation.sprite == 0x1e)
+	{
+		A1 = 0x080ff2
+		fn0858f8()
+
+		u32 backupD0 = D0
+		if (D0.u16 != 0)
+		{
+			A1 = 0xffff0000 + D0.u16
+			if (u8[A1 + 0x34] == 0 && (u8[A1 + 0x2b] & char.bonus.INVINCIBLE) == 0)
+			{
+				TESonic.health = 0
+				A1 = A0
+				A0 = 0xffffb000
+				TESonic.ZaptheFuckerToDeath()
+				A0 = A1
+			}
+		}
+	}
+	base.fn080fa6()
+}
 
 
 // stone compat? maybe!

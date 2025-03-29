@@ -25,6 +25,10 @@ function void UpdateSonicAnimation()
 		{
 			char.state = char.state.TEFUCKINGDIED
 		}
+		else if (TESonic.deathType == 4)
+		{
+			char.state = char.state.TEZAPPED
+		}
 	
 		if (char.state != char.state.former)
 		{
@@ -94,6 +98,7 @@ function void UpdateSonicAnimation()
 		}
 		else if (char.state == char.state.TEZAPPED)
 		{
+			char.invuln.countdown = 0
 			constant array<u8> ZAP =
 			{
 				1, 1, 1, 1, 1,
@@ -116,6 +121,13 @@ function void UpdateSonicAnimation()
 			
 			if (char.animation.timer > 0x60)
 			{
+				if (TESonic.deathType == 4)
+				{
+					TESonic.BurntheFucker()
+					TESonic.SpawnSmoke()
+					return
+				}
+			
 				TESonic.deathType = 0
 				if (TESonic.health == 0)
 				{
@@ -150,6 +162,7 @@ function void UpdateSonicAnimation()
 		}
 		else if (char.state == char.state.TEBURNT)
 		{
+			char.invuln.countdown = 0
 			constant array<u8> BURNT =
 			{
 				1, 1, 1, 1,

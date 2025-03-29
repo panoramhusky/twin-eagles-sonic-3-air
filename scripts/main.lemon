@@ -99,7 +99,7 @@ function void FAKE_DUST_CLOUD_BECAUSE_REGULAR_DUST_CLOUD_CODE_SUCKS()
 //# address-hook(0x0011ca) end(0x0012cc)
 function void fn0011ca()
 {
-	if (levelselect.characters == CHARS_SONIC_AND_TAILS)
+	if (levelselect.characters == CHARS_SONIC_AND_TAILS && u8[0xffffe654] == 0)
 	{
 		// no partner tails for you lol
 		levelselect.characters = CHARS_TESONIC
@@ -298,7 +298,7 @@ function string getCharacterPaletteKey(u8 character)
 {
 	s64 backup = A1 // backing up and restoring A1 is necessary otherwise the game may implode
 	A1 = 0xffffb000
-	if (character == CHARACTER_TESONIC && global.characters <= 1)
+	if (character == CHARACTER_TESONIC && global.characters <= 1 && u8[0xffffe654] == 0)
 	{
 		A1 = backup
 		if (tesonic.palette != 0xff)
@@ -320,7 +320,7 @@ function string getCharacterBluespherePaletteKey(u8 character)
 {
 	s64 backup = A1 // backing up and restoring A1 is necessary otherwise the game may implode
 	A1 = 0xffffb000
-	if (character == CHARACTER_TESONIC && global.characters <= 1)
+	if (character == CHARACTER_TESONIC && global.characters <= 1 && u8[0xffffe654] == 0)
 	{
 		return getCharacterPaletteKey(character)
 	}
@@ -383,7 +383,7 @@ function void UpdatePaletteEffects.SuperForm.moddingVersion(u8 characterVersion)
 {
 	s64 backup = A1 // backing up and restoring A1 is necessary otherwise the game may implode
 	A1 = 0xffffb000
-	if (isMainCharacter(CHARACTER_TESONIC))
+	if (isMainCharacter(CHARACTER_TESONIC) && u8[0xffffe654] == 0)
 	{
 		A1 = backup
 		TESonic.updateHyperPalette(characterVersion) // oh jesus
@@ -607,7 +607,7 @@ function u64 Standalone.getModdedSoundKey(u64 soundKey, u8 sfxId, u8 soundRegTyp
 
 function bool TESonic.isTESonic(u32 address)
 {
-	if (u8[address + 0x38] == CHARACTER_TESONIC && global.characters == CHARS_TESONIC)
+	if (u8[address + 0x38] == CHARACTER_TESONIC && global.characters == CHARS_TESONIC && u8[0xffffe654] == 0)
 		return true
 	else
 		return false
