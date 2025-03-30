@@ -83,7 +83,7 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 		}
 		
 		
-		if (objA0.update_address == 0x2302fa)
+		if (objA0.update_address == 0x2332fa)
 		{
 			// fake dust cloud
 			u64 key = stringformat("tesonic_dust_0x%02x", objA0.animation.sprite)

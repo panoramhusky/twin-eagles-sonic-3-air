@@ -1391,7 +1391,7 @@ function void fn018b3e()
 				if (allocDynamicObjectStd())
 				{
 					// Spawn skidding dust
-					objA1.update_address = 0x2302fa
+					objA1.update_address = 0x2332fa
 					objA1.render_flags = objA0.render_flags
 
 					u8[A1 + 0x05] += 0x02

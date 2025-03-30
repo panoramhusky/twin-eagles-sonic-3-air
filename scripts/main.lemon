@@ -75,7 +75,7 @@ function string ActSelect.GetCharacterCombinationName(u8 index)
 	return base.ActSelect.GetCharacterCombinationName(index)
 }
 
-//# address-hook(0x2302fa)
+//# address-hook(0x2332fa)
 function void FAKE_DUST_CLOUD_BECAUSE_REGULAR_DUST_CLOUD_CODE_SUCKS()
 {
 	objA0.position.x.u16 -= u16[0xffffeebc]
