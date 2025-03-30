@@ -1796,26 +1796,173 @@ function void fn086770()
 //# address-hook(0x080fa6) end(0x080ff0)
 function void fn080fa6()
 {
-	if (objA0.animation.sprite == 0x1e)
+	u32 backup = A1
+	A1 = 0xffffb000
+	if (TESonic.isTESonic(A1))
 	{
-		A1 = 0x080ff2
-		fn0858f8()
-
-		u32 backupD0 = D0
-		if (D0.u16 != 0)
+		if (objA0.animation.sprite == 0x1e)
 		{
-			A1 = 0xffff0000 + D0.u16
-			if (u8[A1 + 0x34] == 0 && (u8[A1 + 0x2b] & char.bonus.INVINCIBLE) == 0)
+			A1 = 0x080ff2
+			fn0858f8()
+
+			u32 backupD0 = D0
+			if (D0.u16 != 0)
 			{
-				TESonic.health = 0
-				A1 = A0
-				A0 = 0xffffb000
-				TESonic.ZaptheFuckerToDeath()
-				A0 = A1
+				A1 = 0xffff0000 + D0.u16
+				if (u8[A1 + 0x34] == 0 && (u8[A1 + 0x2b] & char.bonus.INVINCIBLE) == 0)
+				{
+					TESonic.health = 0
+					A1 = A0
+					A0 = 0xffffb000
+					TESonic.ZaptheFuckerToDeath()
+					A0 = A1
+				}
 			}
 		}
 	}
+	A1 = backup
 	base.fn080fa6()
+}
+
+// teleporter shenanigans
+//# address-hook(0x0456f4) end(0x0457b8)
+function void fn0456f4()
+{
+	u32 backup = A1
+	A1 = 0xffffb000
+	if (TESonic.isTESonic(A1))
+	{
+		fn045856()
+
+		A1 = 0xffffb000
+	#if STANDALONE
+		// Check if character got hurt right while entering the beam
+		if (u8[A1 + 0x05] == base_state.HURT)
+		{
+			u8[A1 + 0x05] = base_state.NORMAL
+			objA1.velocity.x = 0
+			objA1.velocity.y = 0
+			objA1.groundspeed = 0
+		}
+	#endif
+
+		A2 = 0xffff0000 + u16[A0 + 0x3c]
+		if (s8[A2 + 0x46] >= 0x08)
+		{
+			if (u8[A2 + 0x46] == 0x08)
+			{
+				objA1.flags2a &= ~char.flag.ON_OBJECT
+				u8[0xffffeed6] = 0xff
+				objA1.position.y.u16 = objA0.position.y.u16 - 0x1e
+			}
+			else if (u8[A2 + 0x46] < 0x18)
+			{
+				objA1.render_flags |= render_flag.FLIP_Y
+				D0 = (global.framecounter & 0x02) ? 2 : 0
+				D0.u8 += u8[A1 + 0x38]
+				
+				objA1.animation.sprite = u8[0x065eb0 + D0.u16]		// Sonic/Tails' grasping sprites
+				objA1.state = char.state.HOLDING_ON
+			
+				if (level.framecounter.low & 0x01)
+				{
+					if (level.framecounter.low & 0x02)
+					{
+						D0.u16 = objA1.position.x.u16
+						if (D0.u16 != objA0.position.x.u16)
+						{
+							s16 dx = (D0.u16 >= objA0.position.x.u16) ? -1 : 1
+							objA1.position.x.u16 += dx
+						}
+					}
+				}
+			}
+			else	// if (u8[A2 + 0x46] >= 0x18)
+			{
+				objA0.update_address = 0x0457be
+				D0.u8 = objA0.subtype2c
+				if (global.zone != 0x16)
+					D0.u16 &= 0x3f
+				u8[A0 + 0x2d] = D0.u8
+
+				u8[A1 + 0x2e] = 3
+				objA1.state = char.state.RUNNING
+				u8[A1 + 0x22] = 0
+				objA1.position.y.u16 -= 0x10
+
+				if (global.zone == 0x16)
+				{
+					move_area.left = 0x0aa0 - getScreenExtend()
+				}
+				else
+				{
+					level.vertical_wrap = 0xff00
+					D0.u16 = 0x1000
+					move_area.bottom.current = D0.u16
+					move_area.bottom.target = D0.u16
+				}
+
+				u8[0xffffeed7] = 0
+				playSound(0x73)
+			#if STANDALONE
+				Input.setControllerRumble(-1, 0.0f, 0.5f, 500)
+			#endif
+
+				player1.camera_lock = 0xff
+			}
+		}
+
+		DrawObject()
+		return
+	}
+	
+	A1 = backup
+	base.fn0456f4()
+}
+
+// dez definitely not a super missile
+//# address-hook(0x04728a) end(0x0472a2)
+function void fn04728a()
+{
+	u32 backup = A1
+	A1 = 0xffffb000
+	if (TESonic.isTESonic(A1))
+	{
+		A1 = 0xffffb000
+		u16 charpos_x = objA1.position.x.u16
+		u16 charpos_y = objA1.position.y.u16
+		
+		u16 offset_x = objA0.box_size.x
+		u16 offset_y = objA0.box_size.y
+		
+		u16 blockpos_x = objA0.position.x.u16
+		u16 blockpos_y = objA0.position.y.u16
+		
+		bool inBoundLeft = (charpos_x > blockpos_x - offset_x - 16)
+		bool inBoundRight = (charpos_x < blockpos_x + offset_x + 16)
+		bool inBoundTop = (charpos_y > blockpos_y - offset_y - 16)
+		bool inBoundBottom = (charpos_y < blockpos_y + offset_y + 16)
+
+		if ((inBoundLeft && inBoundRight && inBoundTop && inBoundBottom) && (objA1.state == char.state.TEKICK || objA1.state == char.state.TEAIRSLASH) && TESonic.checkIfKickFacingObject())
+		{
+			objA0.update_address = 0x085102
+			objA0.sprite_priority = 0
+			objA0.sprite_attributes |= sprite_attribute.PRIORITY
+			playSound(0x5d)
+			
+			bool onLeft = (objA1.position.x.u16 < objA0.position.x.u16)
+			objA0.velocity.x = (onLeft ? 0x400 : -0x400)
+			objA0.velocity.y = -0x100
+			
+			u8[A1 + 0x05] = base_state.NORMAL
+			objA1.velocity.x = (onLeft ? -0x200 : 0x200)
+			objA1.velocity.y = -0x300
+			objA1.flags2a |= (char.flag.IN_AIR)
+			objA1.flags2a &= ~char.flag.ON_OBJECT
+		}
+	}
+	A1 = backup
+	base.fn04728a()
 }
 
 
