@@ -1,3 +1,4 @@
+#if GAMEAPP >= 0x25021500
 include renderhooks
 include character
 include character_graphics
@@ -682,3 +683,10 @@ function u16 getManiaInspSignpostSprAtex(string key)
 		
 	return base.getManiaInspSignpostSprAtex(key)
 }
+#else
+function void Init()
+{
+	assert(false, "Please update to Sonic 3 A.I.R. test build v25.02.15.0 or later to play Twin Eagles Sonic.")
+	base.Init()
+}
+#endif
