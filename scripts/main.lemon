@@ -384,7 +384,7 @@ function void UpdatePaletteEffects.SuperForm.moddingVersion(u8 characterVersion)
 {
 	s64 backup = A1 // backing up and restoring A1 is necessary otherwise the game may implode
 	A1 = 0xffffb000
-	if (isMainCharacter(CHARACTER_TESONIC) && u8[0xffffe654] == 0)
+	if (isMainCharacter(CHARACTER_TESONIC) && global.characters <= 1 && u8[0xffffe654] == 0)
 	{
 		A1 = backup
 		TESonic.updateHyperPalette(characterVersion) // oh jesus
