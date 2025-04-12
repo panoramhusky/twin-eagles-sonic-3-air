@@ -1,29 +1,32 @@
 //# address-hook(0x05b36c) end(0x05b426)
 function void fn05b36c()
 {
-	if (TESonic.nukedAddress != 0)
+	if (A1 == 0x05cb9e)
 	{
-		u8[A1] = 0x4C // L
-		u8[A1 + 2] = 0x4D // M
-		u8[A1 + 4] = 0x41 // A
-		u8[A1 + 6] = 0x4f // O
-		u8[A1 + 8] = 0x4f // O
-		u8[A1 + 10] = 0x4f // O
-		u8[A1 + 12] = 0x4f // O
-		u8[A1 + 14] = 0x4f // O
-		
-		TESonic.nukedAddress = 0
-	}
-	else
-	{
-		u8[A1] = 0x59 // Y
-		u8[A1 + 2] = 0x4f // O
-		u8[A1 + 4] = 0x55 // U
-		u8[A1 + 6] = 0x20 // space
-		u8[A1 + 8] = 0x53 // S
-		u8[A1 + 10] = 0x55 // U
-		u8[A1 + 12] = 0x43 // C
-		u8[A1 + 14] = 0x4b // K
+		if (TESonic.nukedAddress != 0)
+		{
+			u8[A1] = 0x4C // L
+			u8[A1 + 2] = 0x4D // M
+			u8[A1 + 4] = 0x41 // A
+			u8[A1 + 6] = 0x4f // O
+			u8[A1 + 8] = 0x4f // O
+			u8[A1 + 10] = 0x4f // O
+			u8[A1 + 12] = 0x4f // O
+			u8[A1 + 14] = 0x4f // O
+			
+			TESonic.nukedAddress = 0
+		}
+		else
+		{
+			u8[A1] = 0x59 // Y
+			u8[A1 + 2] = 0x4f // O
+			u8[A1 + 4] = 0x55 // U
+			u8[A1 + 6] = 0x20 // space
+			u8[A1 + 8] = 0x53 // S
+			u8[A1 + 10] = 0x55 // U
+			u8[A1 + 12] = 0x43 // C
+			u8[A1 + 14] = 0x4b // K
+		}
 	}
 	
 	base.fn05b36c()
